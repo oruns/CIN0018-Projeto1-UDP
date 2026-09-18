@@ -1,0 +1,186 @@
+avll@user-MS-7D48:~/Documentos/GRUPO-2-PROJ-1$ python3 client.py texto.txt
+--------------------------------------------------
+[ENVIANDO] Iniciando envio de 'texto.txt' (51 bytes em 1 pacotes)
+[ENVIANDO] Pacote 1/1 enviado para o servidor
+[SERVIDOR] Arquivo cliente_texto.txt salvo.
+--------------------------------------------------
+[SOLICITANDO] Requisitando 'cliente_texto.txt' de volta para confirmar recebimento...
+[RECEBENDO] Arquivo terá 51 bytes. Aguardando 1 pacotes...
+[RECEBENDO] Pacote 1/1 recebido e gravado
+[CONCLUÍDO] Arquivo recuperado com sucesso e salvo como 'recebido_cliente_texto.txt'
+--------------------------------------------------
+avll@user-MS-7D48:~/Documentos/GRUPO-2-PROJ-1$ ls -lh texto.txt files/cliente_texto.txt recebido_texto.txt
+ls: não foi possível acessar 'recebido_texto.txt': Arquivo ou diretório inexistente
+-rw-rw-r-- 1 avll avll 51 set 18 13:49 files/cliente_texto.txt
+-rw-rw-r-- 1 avll avll 51 set 18 13:47 texto.txt
+avll@user-MS-7D48:~/Documentos/GRUPO-2-PROJ-1$ ls -lh texto.txt files/cliente_texto.txt recebido_cliente_texto.txt
+-rw-rw-r-- 1 avll avll 51 set 18 13:49 files/cliente_texto.txt
+-rw-rw-r-- 1 avll avll 51 set 18 13:49 recebido_cliente_texto.txt
+-rw-rw-r-- 1 avll avll 51 set 18 13:47 texto.txt
+avll@user-MS-7D48:~/Documentos/GRUPO-2-PROJ-1$ md5sum texto.txt files/cliente_texto.txt recebido_cliente_texto.txt
+9bf92fc622614aa5695251057fb62cd8  texto.txt
+9bf92fc622614aa5695251057fb62cd8  files/cliente_texto.txt
+9bf92fc622614aa5695251057fb62cd8  recebido_cliente_texto.txt
+avll@user-MS-7D48:~/Documentos/GRUPO-2-PROJ-1$ wget -O foto_teste.jpeg "https://picsum.photos/800/600.jpg"
+--2026-09-18 13:58:51--  https://picsum.photos/800/600.jpg
+Resolvendo picsum.photos (picsum.photos)... 172.67.74.163, 104.26.4.30, 104.26.5.30, ...
+Conectando-se a picsum.photos (picsum.photos)|172.67.74.163|:443... conectado.
+A requisição HTTP foi enviada, aguardando resposta... 302 Found
+Localização: https://fastly.picsum.photos/id/417/800/600.jpg?hmac=Y9zo32hG0jyP9g6sP_w-H9H9NhnNuTeZC2ya-ARSAGY [redirecionando]
+--2026-09-18 13:58:52--  https://fastly.picsum.photos/id/417/800/600.jpg?hmac=Y9zo32hG0jyP9g6sP_w-H9H9NhnNuTeZC2ya-ARSAGY
+Resolvendo fastly.picsum.photos (fastly.picsum.photos)... 146.75.5.91, 2a04:4e42:71::347
+Conectando-se a fastly.picsum.photos (fastly.picsum.photos)|146.75.5.91|:443... conectado.
+A requisição HTTP foi enviada, aguardando resposta... 200 OK
+Tamanho: 63541 (62K) [image/jpeg]
+Salvando em: ‘foto_teste.jpeg’
+
+foto_teste.jpeg     100%[===================>]  62,05K  --.-KB/s    em 0,01s   
+
+2026-09-18 13:58:52 (4,07 MB/s) - ‘foto_teste.jpeg’ salvo [63541/63541]
+
+avll@user-MS-7D48:~/Documentos/GRUPO-2-PROJ-1$ python3 client.py foto_teste.jpeg
+--------------------------------------------------
+[ENVIANDO] Iniciando envio de 'foto_teste.jpeg' (63541 bytes em 63 pacotes)
+[ENVIANDO] Pacote 1/63 enviado para o servidor
+[ENVIANDO] Pacote 2/63 enviado para o servidor
+[ENVIANDO] Pacote 3/63 enviado para o servidor
+[ENVIANDO] Pacote 4/63 enviado para o servidor
+[ENVIANDO] Pacote 5/63 enviado para o servidor
+[ENVIANDO] Pacote 6/63 enviado para o servidor
+[ENVIANDO] Pacote 7/63 enviado para o servidor
+[ENVIANDO] Pacote 8/63 enviado para o servidor
+[ENVIANDO] Pacote 9/63 enviado para o servidor
+[ENVIANDO] Pacote 10/63 enviado para o servidor
+[ENVIANDO] Pacote 11/63 enviado para o servidor
+[ENVIANDO] Pacote 12/63 enviado para o servidor
+[ENVIANDO] Pacote 13/63 enviado para o servidor
+[ENVIANDO] Pacote 14/63 enviado para o servidor
+[ENVIANDO] Pacote 15/63 enviado para o servidor
+[ENVIANDO] Pacote 16/63 enviado para o servidor
+[ENVIANDO] Pacote 17/63 enviado para o servidor
+[ENVIANDO] Pacote 18/63 enviado para o servidor
+[ENVIANDO] Pacote 19/63 enviado para o servidor
+[ENVIANDO] Pacote 20/63 enviado para o servidor
+[ENVIANDO] Pacote 21/63 enviado para o servidor
+[ENVIANDO] Pacote 22/63 enviado para o servidor
+[ENVIANDO] Pacote 23/63 enviado para o servidor
+[ENVIANDO] Pacote 24/63 enviado para o servidor
+[ENVIANDO] Pacote 25/63 enviado para o servidor
+[ENVIANDO] Pacote 26/63 enviado para o servidor
+[ENVIANDO] Pacote 27/63 enviado para o servidor
+[ENVIANDO] Pacote 28/63 enviado para o servidor
+[ENVIANDO] Pacote 29/63 enviado para o servidor
+[ENVIANDO] Pacote 30/63 enviado para o servidor
+[ENVIANDO] Pacote 31/63 enviado para o servidor
+[ENVIANDO] Pacote 32/63 enviado para o servidor
+[ENVIANDO] Pacote 33/63 enviado para o servidor
+[ENVIANDO] Pacote 34/63 enviado para o servidor
+[ENVIANDO] Pacote 35/63 enviado para o servidor
+[ENVIANDO] Pacote 36/63 enviado para o servidor
+[ENVIANDO] Pacote 37/63 enviado para o servidor
+[ENVIANDO] Pacote 38/63 enviado para o servidor
+[ENVIANDO] Pacote 39/63 enviado para o servidor
+[ENVIANDO] Pacote 40/63 enviado para o servidor
+[ENVIANDO] Pacote 41/63 enviado para o servidor
+[ENVIANDO] Pacote 42/63 enviado para o servidor
+[ENVIANDO] Pacote 43/63 enviado para o servidor
+[ENVIANDO] Pacote 44/63 enviado para o servidor
+[ENVIANDO] Pacote 45/63 enviado para o servidor
+[ENVIANDO] Pacote 46/63 enviado para o servidor
+[ENVIANDO] Pacote 47/63 enviado para o servidor
+[ENVIANDO] Pacote 48/63 enviado para o servidor
+[ENVIANDO] Pacote 49/63 enviado para o servidor
+[ENVIANDO] Pacote 50/63 enviado para o servidor
+[ENVIANDO] Pacote 51/63 enviado para o servidor
+[ENVIANDO] Pacote 52/63 enviado para o servidor
+[ENVIANDO] Pacote 53/63 enviado para o servidor
+[ENVIANDO] Pacote 54/63 enviado para o servidor
+[ENVIANDO] Pacote 55/63 enviado para o servidor
+[ENVIANDO] Pacote 56/63 enviado para o servidor
+[ENVIANDO] Pacote 57/63 enviado para o servidor
+[ENVIANDO] Pacote 58/63 enviado para o servidor
+[ENVIANDO] Pacote 59/63 enviado para o servidor
+[ENVIANDO] Pacote 60/63 enviado para o servidor
+[ENVIANDO] Pacote 61/63 enviado para o servidor
+[ENVIANDO] Pacote 62/63 enviado para o servidor
+[ENVIANDO] Pacote 63/63 enviado para o servidor
+[SERVIDOR] Arquivo cliente_foto_teste.jpeg salvo.
+--------------------------------------------------
+[SOLICITANDO] Requisitando 'cliente_foto_teste.jpeg' de volta para confirmar recebimento...
+[RECEBENDO] Arquivo terá 63541 bytes. Aguardando 63 pacotes...
+[RECEBENDO] Pacote 1/63 recebido e gravado
+[RECEBENDO] Pacote 2/63 recebido e gravado
+[RECEBENDO] Pacote 3/63 recebido e gravado
+[RECEBENDO] Pacote 4/63 recebido e gravado
+[RECEBENDO] Pacote 5/63 recebido e gravado
+[RECEBENDO] Pacote 6/63 recebido e gravado
+[RECEBENDO] Pacote 7/63 recebido e gravado
+[RECEBENDO] Pacote 8/63 recebido e gravado
+[RECEBENDO] Pacote 9/63 recebido e gravado
+[RECEBENDO] Pacote 10/63 recebido e gravado
+[RECEBENDO] Pacote 11/63 recebido e gravado
+[RECEBENDO] Pacote 12/63 recebido e gravado
+[RECEBENDO] Pacote 13/63 recebido e gravado
+[RECEBENDO] Pacote 14/63 recebido e gravado
+[RECEBENDO] Pacote 15/63 recebido e gravado
+[RECEBENDO] Pacote 16/63 recebido e gravado
+[RECEBENDO] Pacote 17/63 recebido e gravado
+[RECEBENDO] Pacote 18/63 recebido e gravado
+[RECEBENDO] Pacote 19/63 recebido e gravado
+[RECEBENDO] Pacote 20/63 recebido e gravado
+[RECEBENDO] Pacote 21/63 recebido e gravado
+[RECEBENDO] Pacote 22/63 recebido e gravado
+[RECEBENDO] Pacote 23/63 recebido e gravado
+[RECEBENDO] Pacote 24/63 recebido e gravado
+[RECEBENDO] Pacote 25/63 recebido e gravado
+[RECEBENDO] Pacote 26/63 recebido e gravado
+[RECEBENDO] Pacote 27/63 recebido e gravado
+[RECEBENDO] Pacote 28/63 recebido e gravado
+[RECEBENDO] Pacote 29/63 recebido e gravado
+[RECEBENDO] Pacote 30/63 recebido e gravado
+[RECEBENDO] Pacote 31/63 recebido e gravado
+[RECEBENDO] Pacote 32/63 recebido e gravado
+[RECEBENDO] Pacote 33/63 recebido e gravado
+[RECEBENDO] Pacote 34/63 recebido e gravado
+[RECEBENDO] Pacote 35/63 recebido e gravado
+[RECEBENDO] Pacote 36/63 recebido e gravado
+[RECEBENDO] Pacote 37/63 recebido e gravado
+[RECEBENDO] Pacote 38/63 recebido e gravado
+[RECEBENDO] Pacote 39/63 recebido e gravado
+[RECEBENDO] Pacote 40/63 recebido e gravado
+[RECEBENDO] Pacote 41/63 recebido e gravado
+[RECEBENDO] Pacote 42/63 recebido e gravado
+[RECEBENDO] Pacote 43/63 recebido e gravado
+[RECEBENDO] Pacote 44/63 recebido e gravado
+[RECEBENDO] Pacote 45/63 recebido e gravado
+[RECEBENDO] Pacote 46/63 recebido e gravado
+[RECEBENDO] Pacote 47/63 recebido e gravado
+[RECEBENDO] Pacote 48/63 recebido e gravado
+[RECEBENDO] Pacote 49/63 recebido e gravado
+[RECEBENDO] Pacote 50/63 recebido e gravado
+[RECEBENDO] Pacote 51/63 recebido e gravado
+[RECEBENDO] Pacote 52/63 recebido e gravado
+[RECEBENDO] Pacote 53/63 recebido e gravado
+[RECEBENDO] Pacote 54/63 recebido e gravado
+[RECEBENDO] Pacote 55/63 recebido e gravado
+[RECEBENDO] Pacote 56/63 recebido e gravado
+[RECEBENDO] Pacote 57/63 recebido e gravado
+[RECEBENDO] Pacote 58/63 recebido e gravado
+[RECEBENDO] Pacote 59/63 recebido e gravado
+[RECEBENDO] Pacote 60/63 recebido e gravado
+[RECEBENDO] Pacote 61/63 recebido e gravado
+[RECEBENDO] Pacote 62/63 recebido e gravado
+[RECEBENDO] Pacote 63/63 recebido e gravado
+[CONCLUÍDO] Arquivo recuperado com sucesso e salvo como 'recebido_cliente_foto_teste.jpeg'
+--------------------------------------------------
+avll@user-MS-7D48:~/Documentos/GRUPO-2-PROJ-1$ xdg-open recebido_foto_teste.jpeg
+gio: file:///home/avll/Documentos/GRUPO-2-PROJ-1/recebido_foto_teste.jpeg: Erro ao obter informação para o arquivo “/home/avll/Documentos/GRUPO-2-PROJ-1/recebido_foto_teste.jpeg”: Arquivo ou diretório inexistente
+avll@user-MS-7D48:~/Documentos/GRUPO-2-PROJ-1$ xdg-open recebido_cliente_foto_teste.jpg
+gio: file:///home/avll/Documentos/GRUPO-2-PROJ-1/recebido_cliente_foto_teste.jpg: Erro ao obter informação para o arquivo “/home/avll/Documentos/GRUPO-2-PROJ-1/recebido_cliente_foto_teste.jpg”: Arquivo ou diretório inexistente
+avll@user-MS-7D48:~/Documentos/GRUPO-2-PROJ-1$ xdg-open recebido_cliente_foto_teste.jpeg
+avll@user-MS-7D48:~/Documentos/GRUPO-2-PROJ-1$ 
+(eog:34103): EOG-WARNING **: 14:01:51.666: Thumbnail creation failed
+
+(eog:34103): EOG-WARNING **: 14:02:11.875: Thumbnail creation failed
+
+

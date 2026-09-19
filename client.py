@@ -8,15 +8,19 @@ SERVER_IP = "127.0.0.1"
 SERVER_PORT = 6767
 BUFFER_SIZE = 1024 # Limite do tamanho do datagrama
 
+STORAGE_DIR = "./rcvd_files_client/"
+PREFIX = "servidor_"
+SRC_DIR = "./src/"
+
 def send_file(client_sock, filepath):
-    """Lê um arquivo local e envia ao servidor fragmentado em datagramas."""
+    """Lê um arquivo de SRC_DIR e envia ao servidor fragmentado em datagramas."""
     filename = os.path.basename(filepath)
     file_size = os.path.getsize(filepath)
 
     # Protocolo de envio: b"SAVE" + tamanho (32 bytes big-endian) + nome.extensao codificado
     command = b"SAVE" + file_size.to_bytes(32, "big") + filename.encode("utf-8")
     client_sock.sendto(command, (SERVER_IP, SERVER_PORT))
-    
+
     n_packets = math.ceil(file_size / BUFFER_SIZE)
     print(f"[ENVIANDO] Iniciando envio de '{filename}' ({file_size} bytes em {n_packets} pacotes)")
 
@@ -31,7 +35,7 @@ def send_file(client_sock, filepath):
     response, _ = client_sock.recvfrom(BUFFER_SIZE)
     resp_text = response.decode("utf-8")
     print(f"[SERVIDOR] {resp_text}")
-    
+
     return resp_text
 
 def get_file(client_sock, filename):
@@ -53,9 +57,9 @@ def get_file(client_sock, filename):
     n_packets = math.ceil(file_size / BUFFER_SIZE)
     print(f"[RECEBENDO] Arquivo terá {file_size} bytes. Aguardando {n_packets} pacotes...")
 
-    # Salva com o prefixo 'recebido_' para não sobrescrever o arquivo original do cliente
-    save_path = f"recebido_{filename}"
-    
+    # O GET pede o nome original. A cópia devolvida é gravada com o PREFIX do cliente
+    save_path = os.path.join(STORAGE_DIR, f"{PREFIX}{filename}")
+
     with open(save_path, "wb") as f:
         for i in range(n_packets):
             chunk, _ = client_sock.recvfrom(BUFFER_SIZE)
@@ -67,13 +71,18 @@ def get_file(client_sock, filename):
 if __name__ == "__main__":
     # O cliente deve aceitar o nome do arquivo como parâmetro de linha de comando
     if len(sys.argv) < 2:
-        print("Uso correto: python client.py <caminho_do_arquivo>")
+        print(f"Uso correto: python client.py <nome_do_arquivo>   (procurado em {SRC_DIR})")
         sys.exit(1)
 
-    filepath = sys.argv[1]
-    
+    os.makedirs(SRC_DIR, exist_ok=True)
+    os.makedirs(STORAGE_DIR, exist_ok=True)
+
+    # O envio deve sair sempre de SRC_DIR
+    filename = os.path.basename(sys.argv[1])
+    filepath = os.path.join(SRC_DIR, filename)
+
     if not os.path.isfile(filepath):
-        print(f"[ERRO] O arquivo '{filepath}' não foi encontrado localmente.")
+        print(f"[ERRO] O arquivo '{filename}' não foi encontrado em '{SRC_DIR}'.")
         sys.exit(1)
 
     # Criação do socket UDP
@@ -81,18 +90,16 @@ if __name__ == "__main__":
 
     try:
         print("-" * 50)
-        # 1. Envia o arquivo (o servidor salvará com o prefixo "cliente_")
+        # 1. Envia o arquivo (o servidor salva preservando o nome original)
         server_response = send_file(client_socket, filepath)
 
         # 2. Se o envio foi bem-sucedido, executa a funcionalidade obrigatória de devolução
         if not server_response.startswith("ERRO"):
             print("-" * 50)
-            original_filename = os.path.basename(filepath)
-            # O servidor sempre salva usando o prefixo "cliente_"
-            stored_filename = f"cliente_{original_filename}"
-            get_file(client_socket, stored_filename)
+            # O servidor preserva o nome original, então o GET pede o mesmo nome
+            get_file(client_socket, filename)
             print("-" * 50)
-            
+
     except Exception as e:
         print(f"[ERRO INESPERADO] {e}")
     finally:

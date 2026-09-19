@@ -1,6 +1,8 @@
 """
-Recebe arquivos do cliente, armazena em disco com o prefixo "cliente_" e
-devolve o arquivo armazenado quando solicitado. Os arquivos são fragmentados
+Recebe arquivos do cliente, armazena em STORAGE_DIR com o prefixo "cliente_"
+e devolve o arquivo armazenado quando solicitado. O prefixo é uma convenção
+interna de armazenamento e não aparece no protocolo: o cliente usa o nome
+original do arquivo tanto no SAVE quanto no GET. Os arquivos são fragmentados
 em pacotes de até 1024 bytes.
 
 Protocolo (cada comando é um datagrama próprio):
@@ -9,7 +11,7 @@ Protocolo (cada comando é um datagrama próprio):
             seguido de ceil(tamanho / 1024) datagramas com o conteúdo.
             Resposta: uma linha de texto com a confirmação ou o erro.
 
-    GET  -> b"GET " + nome.extensão
+    GET  -> b"GET " + nome.extensão (o nome original, sem o prefixo)
             Resposta: uma linha de texto com o tamanho do arquivo em bytes,
             seguida de ceil(tamanho / 1024) datagramas com o conteúdo. Em
             caso de erro, retorna uma linha de texto com o erro.
@@ -27,8 +29,8 @@ DATA_SIZE_LIM   =   2**27     # 128 MB. Tamanho máximo aceito por arquivo
 CHUNK_SIZE      =   2**16     # 64 KB.  Acumulado em memória antes de gravar
 BUFFER_SIZE     =   2**10     # 1  KB.  Tamanho máximo de cada datagrama
 
-STORAGE_DIR     =   "./files/"
-PREFIX          =   "cliente_"
+STORAGE_DIR     =   "./rcvd_files_server/"
+PREFIX          =   "cliente_"   # só no disco; o protocolo usa o nome original
 
 
 def valid_name(name_and_extension):
@@ -43,11 +45,10 @@ def valid_name(name_and_extension):
 
 
 def store(n_packets, name_and_extension, server):
-    """Recebe n_packets datagramas e grava o arquivo em STORAGE_DIR.
+    """Recebe n_packets datagramas e grava o arquivo em STORAGE_DIR com o PREFIX.
 
     O conteúdo é acumulado em memória e so vai para o disco a cada CHUNK_SIZE
     (ou no último pacote), para não fazer uma escrita por datagrama.
-    Devolve o nome com que o arquivo foi armazenado.
     """
     buffer = bytearray()
     path = f"{STORAGE_DIR}{PREFIX}{name_and_extension}"
@@ -65,12 +66,14 @@ def store(n_packets, name_and_extension, server):
                 buffer.clear()
 
     print(f"[RECEBIDO]  {path} - {os.path.getsize(path)} bytes")
-    return f"{PREFIX}{name_and_extension}"
 
 
 def send(name_and_extension, addr, server):
-    """Envia o tamanho do arquivo e, em seguida, o conteúdo fragmentado."""
-    path = f"{STORAGE_DIR}{name_and_extension}"
+    """Envia o tamanho do arquivo e, em seguida, o conteúdo fragmentado.
+
+    Recebe o nome original e reconstrói o nome de disco com o PREFIX.
+    """
+    path = f"{STORAGE_DIR}{PREFIX}{name_and_extension}"
 
     with open(path, "rb") as f:
         file_size = f.seek(0, 2)              # seek até o fim devolve o tamanho
@@ -118,8 +121,8 @@ while True:
                     server.sendto("ERRO: Arquivo muito grande.".encode(), addr)
                 else:
                     n_packets = (file_size +  BUFFER_SIZE - 1) // BUFFER_SIZE
-                    stored_name = store(n_packets, file_name_and_extension, server)
-                    server.sendto(f"Arquivo {stored_name} salvo.".encode(), addr)
+                    store(n_packets, file_name_and_extension, server)
+                    server.sendto(f"Arquivo {file_name_and_extension} salvo.".encode(), addr)
 
             case "GET":
                 file_name_and_extension = data[4:].decode("utf-8")
@@ -131,15 +134,18 @@ while True:
                     server.sendto("ERRO: Nome de arquivo inválido.".encode(), addr)
                     continue
 
+                # O pedido chega com o nome original; em disco ele tem o prefixo
+                stored_name = f"{PREFIX}{file_name_and_extension}"
+
                 flag = False
                 with os.scandir(STORAGE_DIR) as entries:
                     for entry in entries:
-                        if entry.is_file() and entry.name == file_name_and_extension:
+                        if entry.is_file() and entry.name == stored_name:
                             flag = True
                             send(file_name_and_extension, addr, server)
 
                 if(not flag):
-                    print(f"[ERRO]      Arquivo {file_name_and_extension} nao encontrado em {STORAGE_DIR}")
+                    print(f"[ERRO]      Arquivo {stored_name} nao encontrado em {STORAGE_DIR}")
                     server.sendto(f"ERRO: Arquivo não encontrado.".encode(), addr)
 
             case _:

@@ -1,39 +1,70 @@
-avll@user-MS-7D48:~$ # Cria um arquivo de texto de 1MB
-dd if=/dev/urandom of=teste.txt bs=1M count=1
-
-# Cria um arquivo simulando uma imagem/binário de 5MB
-dd if=/dev/zero of=imagem.jpeg bs=1M count=5
-1+0 records in
-1+0 records out
-1048576 bytes (1,0 MB, 1,0 MiB) copied, 0,00225014 s, 466 MB/s
-5+0 records in
-5+0 records out
-5242880 bytes (5,2 MB, 5,0 MiB) copied, 0,00194468 s, 2,7 GB/s
-avll@user-MS-7D48:~$ cd /home/avll/Documentos/GRUPO-2-PROJ-1
-avll@user-MS-7D48:~/Documentos/GRUPO-2-PROJ-1$ echo "Teste de transmissão UDP para o projeto de Redes." > texto.txt
-avll@user-MS-7D48:~/Documentos/GRUPO-2-PROJ-1$ dd if=/dev/urandom of=dado_binario.bin bs=1M count=3
-3+0 records in
-3+0 records out
-3145728 bytes (3,1 MB, 3,0 MiB) copied, 0,00976776 s, 322 MB/s
-avll@user-MS-7D48:~/Documentos/GRUPO-2-PROJ-1$ python server.py
-Comando 'python' não encontrado, você quis dizer:
-  comando 'python3' do deb python3
-  comando 'python' do deb python-is-python3
-avll@user-MS-7D48:~/Documentos/GRUPO-2-PROJ-1$ python3 server.py
-[SERVIDOR]  Escutando em 127.0.0.1:6767 - armazenando em ./files/
-[COMANDO]   SAVE de ('127.0.0.1', 41192) - texto.txt (51 bytes)
-[RECEBENDO] texto.txt -> ./files/cliente_texto.txt (1 pacotes esperados)
+sen@archlinux:~/Work/python/udp/CIN0018-Projeto1-UDP$ python3 server.py
+[SERVIDOR]  Escutando em 127.0.0.1:6767 - armazenando em ./rcvd_files_server/
+[COMANDO]   SAVE de ('127.0.0.1', 38664) - texto.txt (51 bytes)
+[RECEBENDO] texto.txt -> ./rcvd_files_server/cliente_texto.txt (1 pacotes esperados)
 [RECEBENDO] pacote 1/1 - 51 bytes gravados em disco
-[RECEBIDO]  ./files/cliente_texto.txt - 51 bytes
-[COMANDO]   GET de ('127.0.0.1', 41192) - cliente_texto.txt
-[ENVIANDO]  ./files/cliente_texto.txt - 51 bytes em 1 pacotes para ('127.0.0.1', 41192)
-[ENVIADO]   ./files/cliente_texto.txt para ('127.0.0.1', 41192)
-[COMANDO]   SAVE de ('127.0.0.1', 53946) - foto_teste.jpeg (63541 bytes)
-[RECEBENDO] foto_teste.jpeg -> ./files/cliente_foto_teste.jpeg (63 pacotes esperados)
+[RECEBIDO]  ./rcvd_files_server/cliente_texto.txt - 51 bytes
+[COMANDO]   GET de ('127.0.0.1', 38664) - texto.txt
+[ENVIANDO]  ./rcvd_files_server/cliente_texto.txt - 51 bytes em 1 pacotes para ('127.0.0.1', 38664)
+[ENVIADO]   ./rcvd_files_server/cliente_texto.txt para ('127.0.0.1', 38664)
+[COMANDO]   SAVE de ('127.0.0.1', 46609) - foto_teste.jpeg (63541 bytes)
+[RECEBENDO] foto_teste.jpeg -> ./rcvd_files_server/cliente_foto_teste.jpeg (63 pacotes esperados)
 [RECEBENDO] pacote 63/63 - 63541 bytes gravados em disco
-[RECEBIDO]  ./files/cliente_foto_teste.jpeg - 63541 bytes
-[COMANDO]   GET de ('127.0.0.1', 53946) - cliente_foto_teste.jpeg
-[ENVIANDO]  ./files/cliente_foto_teste.jpeg - 63541 bytes em 63 pacotes para ('127.0.0.1', 53946)
-[ENVIADO]   ./files/cliente_foto_teste.jpeg para ('127.0.0.1', 53946)
-
-
+[RECEBIDO]  ./rcvd_files_server/cliente_foto_teste.jpeg - 63541 bytes
+[COMANDO]   GET de ('127.0.0.1', 46609) - foto_teste.jpeg
+[ENVIANDO]  ./rcvd_files_server/cliente_foto_teste.jpeg - 63541 bytes em 63 pacotes para ('127.0.0.1', 46609)
+[ENVIADO]   ./rcvd_files_server/cliente_foto_teste.jpeg para ('127.0.0.1', 46609)
+[COMANDO]   SAVE de ('127.0.0.1', 49184) - dado_binario.bin (3145728 bytes)
+[RECEBENDO] dado_binario.bin -> ./rcvd_files_server/cliente_dado_binario.bin (3072 pacotes esperados)
+[RECEBENDO] pacote 64/3072 - 65536 bytes gravados em disco
+[RECEBENDO] pacote 128/3072 - 65536 bytes gravados em disco
+[RECEBENDO] pacote 192/3072 - 65536 bytes gravados em disco
+[RECEBENDO] pacote 256/3072 - 65536 bytes gravados em disco
+[RECEBENDO] pacote 320/3072 - 65536 bytes gravados em disco
+[RECEBENDO] pacote 384/3072 - 65536 bytes gravados em disco
+[RECEBENDO] pacote 448/3072 - 65536 bytes gravados em disco
+[RECEBENDO] pacote 512/3072 - 65536 bytes gravados em disco
+[RECEBENDO] pacote 576/3072 - 65536 bytes gravados em disco
+[RECEBENDO] pacote 640/3072 - 65536 bytes gravados em disco
+[RECEBENDO] pacote 704/3072 - 65536 bytes gravados em disco
+[RECEBENDO] pacote 768/3072 - 65536 bytes gravados em disco
+[RECEBENDO] pacote 832/3072 - 65536 bytes gravados em disco
+[RECEBENDO] pacote 896/3072 - 65536 bytes gravados em disco
+[RECEBENDO] pacote 960/3072 - 65536 bytes gravados em disco
+[RECEBENDO] pacote 1024/3072 - 65536 bytes gravados em disco
+[RECEBENDO] pacote 1088/3072 - 65536 bytes gravados em disco
+[RECEBENDO] pacote 1152/3072 - 65536 bytes gravados em disco
+[RECEBENDO] pacote 1216/3072 - 65536 bytes gravados em disco
+[RECEBENDO] pacote 1280/3072 - 65536 bytes gravados em disco
+[RECEBENDO] pacote 1344/3072 - 65536 bytes gravados em disco
+[RECEBENDO] pacote 1408/3072 - 65536 bytes gravados em disco
+[RECEBENDO] pacote 1472/3072 - 65536 bytes gravados em disco
+[RECEBENDO] pacote 1536/3072 - 65536 bytes gravados em disco
+[RECEBENDO] pacote 1600/3072 - 65536 bytes gravados em disco
+[RECEBENDO] pacote 1664/3072 - 65536 bytes gravados em disco
+[RECEBENDO] pacote 1728/3072 - 65536 bytes gravados em disco
+[RECEBENDO] pacote 1792/3072 - 65536 bytes gravados em disco
+[RECEBENDO] pacote 1856/3072 - 65536 bytes gravados em disco
+[RECEBENDO] pacote 1920/3072 - 65536 bytes gravados em disco
+[RECEBENDO] pacote 1984/3072 - 65536 bytes gravados em disco
+[RECEBENDO] pacote 2048/3072 - 65536 bytes gravados em disco
+[RECEBENDO] pacote 2112/3072 - 65536 bytes gravados em disco
+[RECEBENDO] pacote 2176/3072 - 65536 bytes gravados em disco
+[RECEBENDO] pacote 2240/3072 - 65536 bytes gravados em disco
+[RECEBENDO] pacote 2304/3072 - 65536 bytes gravados em disco
+[RECEBENDO] pacote 2368/3072 - 65536 bytes gravados em disco
+[RECEBENDO] pacote 2432/3072 - 65536 bytes gravados em disco
+[RECEBENDO] pacote 2496/3072 - 65536 bytes gravados em disco
+[RECEBENDO] pacote 2560/3072 - 65536 bytes gravados em disco
+[RECEBENDO] pacote 2624/3072 - 65536 bytes gravados em disco
+[RECEBENDO] pacote 2688/3072 - 65536 bytes gravados em disco
+[RECEBENDO] pacote 2752/3072 - 65536 bytes gravados em disco
+[RECEBENDO] pacote 2816/3072 - 65536 bytes gravados em disco
+[RECEBENDO] pacote 2880/3072 - 65536 bytes gravados em disco
+[RECEBENDO] pacote 2944/3072 - 65536 bytes gravados em disco
+[RECEBENDO] pacote 3008/3072 - 65536 bytes gravados em disco
+[RECEBENDO] pacote 3072/3072 - 65536 bytes gravados em disco
+[RECEBIDO]  ./rcvd_files_server/cliente_dado_binario.bin - 3145728 bytes
+[COMANDO]   GET de ('127.0.0.1', 49184) - dado_binario.bin
+[ENVIANDO]  ./rcvd_files_server/cliente_dado_binario.bin - 3145728 bytes em 3072 pacotes para ('127.0.0.1', 49184)
+[ENVIADO]   ./rcvd_files_server/cliente_dado_binario.bin para ('127.0.0.1', 49184)

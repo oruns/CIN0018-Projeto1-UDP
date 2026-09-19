@@ -24,7 +24,7 @@ LOCAL_HOST_IPV4 =   "127.0.0.1"
 ENTRY_PORT =        6767
 
 DATA_SIZE_LIM   =   2**27     # 128 MB. Tamanho máximo aceito por arquivo
-CHUNK_SIZE      =   2**21     # 2  MB.  Acumulado em memória antes de gravar
+CHUNK_SIZE      =   2**16     # 64 KB.  Acumulado em memória antes de gravar
 BUFFER_SIZE     =   2**10     # 1  KB.  Tamanho máximo de cada datagrama
 
 STORAGE_DIR     =   "./files/"

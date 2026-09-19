@@ -1,20 +1,21 @@
 sen@archlinux:~/Work/python/udp/CIN0018-Projeto1-UDP$ python3 server.py
-[SERVIDOR]  Escutando em 127.0.0.1:6767 - armazenando em ./rcvd_files_server/
-[COMANDO]   SAVE de ('127.0.0.1', 38664) - texto.txt (51 bytes)
+[SERVIDOR]  Escutando em 127.0.0.1:6767 - respondendo na porta 7676
+[SERVIDOR]  Armazenando em ./rcvd_files_server/
+[COMANDO]   SAVE de ('127.0.0.1', 7676) - texto.txt (51 bytes)
 [RECEBENDO] texto.txt -> ./rcvd_files_server/cliente_texto.txt (1 pacotes esperados)
 [RECEBENDO] pacote 1/1 - 51 bytes gravados em disco
 [RECEBIDO]  ./rcvd_files_server/cliente_texto.txt - 51 bytes
-[COMANDO]   GET de ('127.0.0.1', 38664) - texto.txt
-[ENVIANDO]  ./rcvd_files_server/cliente_texto.txt - 51 bytes em 1 pacotes para ('127.0.0.1', 38664)
-[ENVIADO]   ./rcvd_files_server/cliente_texto.txt para ('127.0.0.1', 38664)
-[COMANDO]   SAVE de ('127.0.0.1', 46609) - foto_teste.jpeg (63541 bytes)
+[COMANDO]   GET de ('127.0.0.1', 7676) - texto.txt
+[ENVIANDO]  ./rcvd_files_server/cliente_texto.txt - 51 bytes em 1 pacotes para ('127.0.0.1', 7676)
+[ENVIADO]   ./rcvd_files_server/cliente_texto.txt para ('127.0.0.1', 7676)
+[COMANDO]   SAVE de ('127.0.0.1', 7676) - foto_teste.jpeg (63541 bytes)
 [RECEBENDO] foto_teste.jpeg -> ./rcvd_files_server/cliente_foto_teste.jpeg (63 pacotes esperados)
 [RECEBENDO] pacote 63/63 - 63541 bytes gravados em disco
 [RECEBIDO]  ./rcvd_files_server/cliente_foto_teste.jpeg - 63541 bytes
-[COMANDO]   GET de ('127.0.0.1', 46609) - foto_teste.jpeg
-[ENVIANDO]  ./rcvd_files_server/cliente_foto_teste.jpeg - 63541 bytes em 63 pacotes para ('127.0.0.1', 46609)
-[ENVIADO]   ./rcvd_files_server/cliente_foto_teste.jpeg para ('127.0.0.1', 46609)
-[COMANDO]   SAVE de ('127.0.0.1', 49184) - dado_binario.bin (3145728 bytes)
+[COMANDO]   GET de ('127.0.0.1', 7676) - foto_teste.jpeg
+[ENVIANDO]  ./rcvd_files_server/cliente_foto_teste.jpeg - 63541 bytes em 63 pacotes para ('127.0.0.1', 7676)
+[ENVIADO]   ./rcvd_files_server/cliente_foto_teste.jpeg para ('127.0.0.1', 7676)
+[COMANDO]   SAVE de ('127.0.0.1', 7676) - dado_binario.bin (3145728 bytes)
 [RECEBENDO] dado_binario.bin -> ./rcvd_files_server/cliente_dado_binario.bin (3072 pacotes esperados)
 [RECEBENDO] pacote 64/3072 - 65536 bytes gravados em disco
 [RECEBENDO] pacote 128/3072 - 65536 bytes gravados em disco
@@ -65,6 +66,6 @@ sen@archlinux:~/Work/python/udp/CIN0018-Projeto1-UDP$ python3 server.py
 [RECEBENDO] pacote 3008/3072 - 65536 bytes gravados em disco
 [RECEBENDO] pacote 3072/3072 - 65536 bytes gravados em disco
 [RECEBIDO]  ./rcvd_files_server/cliente_dado_binario.bin - 3145728 bytes
-[COMANDO]   GET de ('127.0.0.1', 49184) - dado_binario.bin
-[ENVIANDO]  ./rcvd_files_server/cliente_dado_binario.bin - 3145728 bytes em 3072 pacotes para ('127.0.0.1', 49184)
-[ENVIADO]   ./rcvd_files_server/cliente_dado_binario.bin para ('127.0.0.1', 49184)
+[COMANDO]   GET de ('127.0.0.1', 7676) - dado_binario.bin
+[ENVIANDO]  ./rcvd_files_server/cliente_dado_binario.bin - 3145728 bytes em 3072 pacotes para ('127.0.0.1', 7676)
+[ENVIADO]   ./rcvd_files_server/cliente_dado_binario.bin para ('127.0.0.1', 7676)

@@ -5,7 +5,9 @@ import math
 
 # Configurações de rede compatíveis com o servidor
 SERVER_IP = "127.0.0.1"
-SERVER_PORT = 6767
+SERVER_PORT = 6767     # o servidor escuta aqui (cliente -> servidor)
+CLIENT_IP = "127.0.0.1"
+CLIENT_PORT = 7676     # o cliente escuta aqui  (servidor -> cliente)
 BUFFER_SIZE = 1024 # Limite do tamanho do datagrama
 
 STORAGE_DIR = "./rcvd_files_client/"
@@ -85,8 +87,17 @@ if __name__ == "__main__":
         print(f"[ERRO] O arquivo '{filename}' não foi encontrado em '{SRC_DIR}'.")
         sys.exit(1)
 
-    # Criação do socket UDP
+    # Criação do socket UDP (fixa CLIENT_PORT)
     client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+
+    try:
+        client_socket.bind((CLIENT_IP, CLIENT_PORT))
+    except OSError as e:
+        print(f"[ERRO] Não foi possível escutar em {CLIENT_IP}:{CLIENT_PORT} ({e}).")
+        print("       Outro cliente já está em execução?")
+        sys.exit(1)
+
+    print(f"[CLIENTE]   Enviando para {SERVER_IP}:{SERVER_PORT} - escutando em {CLIENT_IP}:{CLIENT_PORT}")
 
     try:
         print("-" * 50)

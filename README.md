@@ -17,21 +17,21 @@
 
 Aplicação cliente-servidor em Python para transmissão de arquivos sobre UDP, usando
 diretamente a biblioteca `socket`. Os arquivos são fragmentados em pacotes de até
-**1024 bytes** e reconstruídos no destino.
+1024 bytes e reconstruídos no destino.
 
-O cliente roda como uma **sessão interativa**: uma vez aberto, ele aceita os comandos
+O cliente roda como uma sessão interativa. Uma vez aberto, ele aceita os comandos
 `SAVE <arquivo>` e `GET <arquivo>` quantas vezes o usuário quiser, em qualquer ordem.
-`SAVE` envia um arquivo de `src/` para o servidor, que o persiste em disco; `GET`
+`SAVE` envia um arquivo de `src/` para o servidor, que o persiste em disco e `GET`
 solicita de volta um arquivo já armazenado, o que permite confirmar que a transmissão
 foi bem-sucedida.
 
-A comunicação usa **duas portas fixas**, uma para cada sentido. O cliente envia para a
+A comunicação usa duas portas fixas, uma para cada sentido. O cliente envia para a
 `6767`, onde o servidor escuta, e o servidor devolve para a `7676`, onde o cliente
 escuta.
 
-Conforme o enunciado, os arquivos são armazenados **com um novo nome**. O servidor grava
+Conforme o enunciado, os arquivos são armazenados com um novo nome. O servidor grava
 o que recebe com o prefixo `cliente_`, e o cliente grava o que recebe de volta com o
-prefixo `servidor_`. Os prefixos são convenção local de cada lado e eles **não** circulam
+prefixo `servidor_`. Os prefixos são convenção local de cada lado e eles não circulam
 no protocolo, que sempre usa o nome original do arquivo.
 
 ## Estrutura de diretórios
@@ -71,7 +71,7 @@ pode ser pedido a qualquer momento, para qualquer arquivo já armazenado no serv
 
 O servidor não responde para a porta de origem do datagrama. Ele monta o destino como
 `(ip_de_origem, CLIENT_PORT)`, de modo que o sentido servidor para cliente sempre usa
-a `7676`. Como a porta do cliente é fixa, **apenas um cliente pode executar por vez**
+a `7676`. Como a porta do cliente é fixa, apenas um cliente pode executar por vez
 na mesma máquina.
 
 ## Protocolo
@@ -102,7 +102,7 @@ Cada comando é um datagrama próprio.
 
 ## Instruções de Execução
 
-O sistema deve ser testado com **dois terminais simultâneos**.
+O sistema deve ser testado com dois terminais simultâneos.
 
 ### 1. Iniciar o servidor
 
@@ -194,7 +194,7 @@ numa mesma sessão, todos com os hashes conferidos ao final:
 
 ## Observações
 
-Conforme o enunciado, **não** foram implementados mecanismos de transferência confiável
+Conforme o enunciado, não foram implementados mecanismos de transferência confiável
 (ACKs, NAKs ou retransmissões), já que o foco desta etapa é o funcionamento básico do UDP.
 Como consequência esperada do protocolo, transferências de arquivos grandes podem perder
 datagramas quando o buffer de recepção do socket satura (o que ocorre ocasionalmente com

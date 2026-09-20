@@ -69,3 +69,5 @@ sen@archlinux:~/Work/python/udp/CIN0018-Projeto1-UDP$ python3 server.py
 [COMANDO]   GET de ('127.0.0.1', 7676) - dado_binario.bin
 [ENVIANDO]  ./rcvd_files_server/cliente_dado_binario.bin - 3145728 bytes em 3072 pacotes para ('127.0.0.1', 7676)
 [ENVIADO]   ./rcvd_files_server/cliente_dado_binario.bin para ('127.0.0.1', 7676)
+[COMANDO]   GET de ('127.0.0.1', 7676) - nao_existe.txt
+[ERRO]      Arquivo cliente_nao_existe.txt nao encontrado em ./rcvd_files_server/

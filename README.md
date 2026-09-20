@@ -14,10 +14,14 @@
 ## Descrição do Projeto
 
 Aplicação cliente-servidor em Python para transmissão de arquivos sobre UDP, usando
-diretamente a biblioteca `socket`. O cliente lê um arquivo do disco, fragmenta-o em
-pacotes de até **1024 bytes** e os envia ao servidor, que os reconstrói e persiste em
-disco. Em seguida o cliente solicita o mesmo arquivo de volta, para confirmar que a
-transmissão foi bem-sucedida.
+diretamente a biblioteca `socket`. Os arquivos são fragmentados em pacotes de até
+**1024 bytes** e reconstruídos no destino.
+
+O cliente roda como uma **sessão interativa**: uma vez aberto, ele aceita os comandos
+`SAVE <arquivo>` e `GET <arquivo>` quantas vezes o usuário quiser, em qualquer ordem.
+`SAVE` envia um arquivo de `src/` para o servidor, que o persiste em disco; `GET`
+solicita de volta um arquivo já armazenado, o que permite confirmar que a transmissão
+foi bem-sucedida.
 
 A comunicação usa **duas portas fixas**, uma para cada sentido. O cliente envia para a
 `6767`, onde o servidor escuta, e o servidor devolve para a `7676`, onde o cliente
@@ -52,6 +56,9 @@ src/texto.txt
    ── GET  "texto.txt" ──▶ :6767    (resolve internamente para cliente_texto.txt)
    :7676 ◀── conteúdo ────          grava rcvd_files_client/servidor_texto.txt
 ```
+
+`SAVE` e `GET` são comandos independentes: o `GET` acima confirma a transmissão, mas
+pode ser pedido a qualquer momento, para qualquer arquivo já armazenado no servidor.
 
 ## Portas
 
@@ -111,23 +118,48 @@ e envia:
 [SERVIDOR]  Armazenando em ./rcvd_files_server/
 ```
 
-### 2. Enviar um arquivo pelo cliente
+### 2. Abrir a sessão do cliente
 
-Coloque o arquivo a ser transmitido em `src/` e, no segundo terminal, passe **apenas o
-nome do arquivo** como parâmetro:
+Coloque os arquivos a transmitir em `src/` e, no segundo terminal:
 
 ```bash
-python3 client.py texto.txt
-python3 client.py foto_teste.jpeg
+python3 client.py
 ```
 
-Ao iniciar, o cliente informa o par de portas em uso:
+O cliente informa o par de portas em uso e abre a sessão:
 
 ```
-[CLIENTE]   Enviando para 127.0.0.1:6767 - escutando em 127.0.0.1:7676
+[CLIENTE] Enviando para 127.0.0.1:6767 - escutando em 127.0.0.1:7676
+============================================================
+Sessão iniciada. Comandos disponíveis:
+  SAVE <nome_do_arquivo>  (Envia um arquivo da pasta ./src/)
+  GET <nome_do_arquivo>   (Solicita um arquivo do servidor)
+  SAIR                    (Encerra o cliente)
+============================================================
 ```
 
-Ele envia o arquivo, pede-o de volta e grava a devolução em `rcvd_files_client/`.
+| Comando | O que faz |
+|---|---|
+| `SAVE <arquivo>` | Envia `src/<arquivo>` ao servidor, que grava em `rcvd_files_server/cliente_<arquivo>` |
+| `GET <arquivo>` | Pede ao servidor o arquivo `<arquivo>`, gravando a devolução em `rcvd_files_client/servidor_<arquivo>` |
+| `SAIR` | Encerra a sessão (`EXIT` e `Ctrl+C` também funcionam) |
+
+Os comandos podem ser dados na ordem que o usuário quiser e quantas vezes quiser, sem
+reiniciar o cliente. Uma sessão de exemplo:
+
+```
+UDP> SAVE texto.txt
+[ENVIANDO] Iniciando envio de 'texto.txt' (51 bytes em 1 pacotes)
+[SERVIDOR] Arquivo texto.txt salvo.
+
+UDP> GET texto.txt
+[SOLICITANDO] Requisitando 'texto.txt' do servidor...
+[RECEBENDO] Arquivo terá 51 bytes. Aguardando 1 pacotes...
+[CONCLUÍDO] Arquivo recuperado com sucesso e salvo como './rcvd_files_client/servidor_texto.txt'
+```
+
+A sessão completa registrada em `log_cliente.txt` inclui também um `GET` de arquivo
+inexistente, para demonstrar o tratamento de erro do servidor.
 
 ### 3. Conferir a integridade
 
@@ -136,6 +168,16 @@ md5sum src/* rcvd_files_server/* rcvd_files_client/*
 ```
 
 Os três hashes de um mesmo arquivo devem ser idênticos.
+
+## Funcionalidades obrigatórias
+
+| Requisito | Onde está implementado |
+|---|---|
+| Envio de arquivos | Comando `SAVE`, função `send_file()` em `client.py` |
+| Armazenamento | Função `store()` em `server.py`, que persiste em `rcvd_files_server/` com o prefixo `cliente_` |
+| Devolução de arquivos | Comando `GET`, funções `send()` em `server.py` e `get_file()` em `client.py` |
+| Suporte a múltiplos tipos | Testado com `.txt`, `.jpeg` e binário `.bin` (tabela abaixo) |
+| Interface do usuário | O cliente recebe o nome do arquivo como parâmetro dos comandos `SAVE`/`GET`, e o servidor registra no terminal cada arquivo que recebe e envia (ver `log_server.txt`) |
 
 ## Testes realizados
 

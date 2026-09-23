@@ -111,7 +111,9 @@ if __name__ == "__main__":
                 print("[ERRO] Formato incorreto. Especifique o nome do arquivo.")
                 continue
 
-            target_file = user_input[1]
+            # O join preserva nomes com espaço e o basename mantém o envio
+            # restrito a SRC_DIR
+            target_file = os.path.basename(" ".join(user_input[1:]))
 
             if command == "SAVE":
                 filepath = os.path.join(SRC_DIR, target_file)

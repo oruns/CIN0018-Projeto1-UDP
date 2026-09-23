@@ -20,7 +20,7 @@ UDP> SAVE texto.txt
 UDP> GET texto.txt
 [SOLICITANDO] Requisitando 'texto.txt' do servidor...
 [RECEBENDO] Arquivo terá 51 bytes. Aguardando 1 pacotes...
-[CONCLUÍDO] Arquivo recuperado com sucesso e salvo como './rcvd_files_client/servidor_texto.txt'
+[CONCLUÍDO] Arquivo recuperado com sucesso e salvo como './rcvd_files_client/cliente_texto.txt'
 
 UDP> SAVE foto_teste.jpeg
 [ENVIANDO] Iniciando envio de 'foto_teste.jpeg' (63541 bytes em 63 pacotes)
@@ -29,7 +29,7 @@ UDP> SAVE foto_teste.jpeg
 UDP> GET foto_teste.jpeg
 [SOLICITANDO] Requisitando 'foto_teste.jpeg' do servidor...
 [RECEBENDO] Arquivo terá 63541 bytes. Aguardando 63 pacotes...
-[CONCLUÍDO] Arquivo recuperado com sucesso e salvo como './rcvd_files_client/servidor_foto_teste.jpeg'
+[CONCLUÍDO] Arquivo recuperado com sucesso e salvo como './rcvd_files_client/cliente_foto_teste.jpeg'
 
 UDP> SAVE dado_binario.bin
 [ENVIANDO] Iniciando envio de 'dado_binario.bin' (3145728 bytes em 3072 pacotes)
@@ -38,7 +38,7 @@ UDP> SAVE dado_binario.bin
 UDP> GET dado_binario.bin
 [SOLICITANDO] Requisitando 'dado_binario.bin' do servidor...
 [RECEBENDO] Arquivo terá 3145728 bytes. Aguardando 3072 pacotes...
-[CONCLUÍDO] Arquivo recuperado com sucesso e salvo como './rcvd_files_client/servidor_dado_binario.bin'
+[CONCLUÍDO] Arquivo recuperado com sucesso e salvo como './rcvd_files_client/cliente_dado_binario.bin'
 
 UDP> GET nao_existe.txt
 [SOLICITANDO] Requisitando 'nao_existe.txt' do servidor...
@@ -50,15 +50,15 @@ UDP> SAIR
 sen@archlinux:~/Work/python/udp/CIN0018-Projeto1-UDP$ ls -lh src/ rcvd_files_server/ rcvd_files_client/
 rcvd_files_client/:
 total 3.1M
--rw-r--r-- 1 sen sen 3.0M Sep 20 11:05 servidor_dado_binario.bin
--rw-r--r-- 1 sen sen  63K Sep 20 11:05 servidor_foto_teste.jpeg
--rw-r--r-- 1 sen sen   51 Sep 20 11:05 servidor_texto.txt
+-rw-r--r-- 1 sen sen 3.0M Sep 23 18:25 cliente_dado_binario.bin
+-rw-r--r-- 1 sen sen  63K Sep 23 18:25 cliente_foto_teste.jpeg
+-rw-r--r-- 1 sen sen   51 Sep 23 18:25 cliente_texto.txt
 
 rcvd_files_server/:
 total 3.1M
--rw-r--r-- 1 sen sen 3.0M Sep 20 11:05 cliente_dado_binario.bin
--rw-r--r-- 1 sen sen  63K Sep 20 11:05 cliente_foto_teste.jpeg
--rw-r--r-- 1 sen sen   51 Sep 20 11:05 cliente_texto.txt
+-rw-r--r-- 1 sen sen 3.0M Sep 23 18:25 servidor_dado_binario.bin
+-rw-r--r-- 1 sen sen  63K Sep 23 18:25 servidor_foto_teste.jpeg
+-rw-r--r-- 1 sen sen   51 Sep 23 18:25 servidor_texto.txt
 
 src/:
 total 3.1M
@@ -70,9 +70,9 @@ sen@archlinux:~/Work/python/udp/CIN0018-Projeto1-UDP$ md5sum src/* rcvd_files_se
 fdf046c1b7811891001b1e87c5b8612f  src/dado_binario.bin
 9ddc2c223a2f370e70f6466cf5183cb9  src/foto_teste.jpeg
 9bf92fc622614aa5695251057fb62cd8  src/texto.txt
-fdf046c1b7811891001b1e87c5b8612f  rcvd_files_server/cliente_dado_binario.bin
-9ddc2c223a2f370e70f6466cf5183cb9  rcvd_files_server/cliente_foto_teste.jpeg
-9bf92fc622614aa5695251057fb62cd8  rcvd_files_server/cliente_texto.txt
-fdf046c1b7811891001b1e87c5b8612f  rcvd_files_client/servidor_dado_binario.bin
-9ddc2c223a2f370e70f6466cf5183cb9  rcvd_files_client/servidor_foto_teste.jpeg
-9bf92fc622614aa5695251057fb62cd8  rcvd_files_client/servidor_texto.txt
+fdf046c1b7811891001b1e87c5b8612f  rcvd_files_server/servidor_dado_binario.bin
+9ddc2c223a2f370e70f6466cf5183cb9  rcvd_files_server/servidor_foto_teste.jpeg
+9bf92fc622614aa5695251057fb62cd8  rcvd_files_server/servidor_texto.txt
+fdf046c1b7811891001b1e87c5b8612f  rcvd_files_client/cliente_dado_binario.bin
+9ddc2c223a2f370e70f6466cf5183cb9  rcvd_files_client/cliente_foto_teste.jpeg
+9bf92fc622614aa5695251057fb62cd8  rcvd_files_client/cliente_texto.txt

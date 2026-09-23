@@ -11,7 +11,7 @@ CLIENT_PORT = 7676     # o cliente escuta aqui  (servidor -> cliente)
 BUFFER_SIZE = 1024     # Limite do tamanho do datagrama
 
 STORAGE_DIR = "./rcvd_files_client/"
-PREFIX = "servidor_"
+PREFIX = "cliente_"
 SRC_DIR = "./src/"
 
 def send_file(client_sock, filepath):

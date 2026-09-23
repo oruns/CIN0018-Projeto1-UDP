@@ -1,5 +1,5 @@
 """
-Recebe arquivos do cliente, armazena em STORAGE_DIR com o prefixo "cliente_"
+Recebe arquivos do cliente, armazena em STORAGE_DIR com o prefixo "servidor_"
 e devolve o arquivo armazenado quando solicitado. O prefixo é uma convenção
 interna de armazenamento e não aparece no protocolo: o cliente usa o nome
 original do arquivo tanto no SAVE quanto no GET. Os arquivos são fragmentados
@@ -34,7 +34,7 @@ CHUNK_SIZE      =   2**16     # 64 KB.  Acumulado em memória antes de gravar
 BUFFER_SIZE     =   2**10     # 1  KB.  Tamanho máximo de cada datagrama
 
 STORAGE_DIR     =   "./rcvd_files_server/"
-PREFIX          =   "cliente_"   # só no disco; o protocolo usa o nome original
+PREFIX          =   "servidor_"  # só no disco; o protocolo usa o nome original
 
 
 def valid_name(name_and_extension):

@@ -30,8 +30,8 @@ A comunicação usa duas portas fixas, uma para cada sentido. O cliente envia pa
 escuta.
 
 Conforme o enunciado, os arquivos são armazenados com um novo nome. O servidor grava
-o que recebe com o prefixo `cliente_`, e o cliente grava o que recebe de volta com o
-prefixo `servidor_`. Os prefixos são convenção local de cada lado e eles não circulam
+o que recebe com o prefixo `servidor_`, e o cliente grava o que recebe de volta com o
+prefixo `cliente_`. Os prefixos são convenção local de cada lado e eles não circulam
 no protocolo, que sempre usa o nome original do arquivo.
 
 ## Estrutura de diretórios
@@ -41,8 +41,8 @@ no protocolo, que sempre usa o nome original do arquivo.
 ├── server.py                 # Servidor UDP
 ├── client.py                 # Cliente UDP
 ├── src/                      # Arquivos disponíveis para envio (entrada do cliente)
-├── rcvd_files_server/        # Arquivos recebidos pelo servidor  -> prefixo cliente_
-├── rcvd_files_client/        # Arquivos devolvidos ao cliente    -> prefixo servidor_
+├── rcvd_files_server/        # Arquivos recebidos pelo servidor  -> prefixo servidor_
+├── rcvd_files_client/        # Arquivos devolvidos ao cliente    -> prefixo cliente_
 ├── log_server.txt            # Log de uma execução completa (terminal do servidor)
 └── log_cliente.txt           # Log da mesma execução (terminal do cliente)
 ```
@@ -54,9 +54,9 @@ primeira execução.
 
 ```
 src/texto.txt
-   ── SAVE "texto.txt" ──▶ :6767    grava rcvd_files_server/cliente_texto.txt
-   ── GET  "texto.txt" ──▶ :6767    (resolve internamente para cliente_texto.txt)
-   :7676 ◀── conteúdo ────          grava rcvd_files_client/servidor_texto.txt
+   ── SAVE "texto.txt" ──▶ :6767    grava rcvd_files_server/servidor_texto.txt
+   ── GET  "texto.txt" ──▶ :6767    (resolve internamente para servidor_texto.txt)
+   :7676 ◀── conteúdo ────          grava rcvd_files_client/cliente_texto.txt
 ```
 
 `SAVE` e `GET` são comandos independentes: o `GET` acima confirma a transmissão, mas
@@ -142,8 +142,8 @@ Sessão iniciada. Comandos disponíveis:
 
 | Comando | O que faz |
 |---|---|
-| `SAVE <arquivo>` | Envia `src/<arquivo>` ao servidor, que grava em `rcvd_files_server/cliente_<arquivo>` |
-| `GET <arquivo>` | Pede ao servidor o arquivo `<arquivo>`, gravando a devolução em `rcvd_files_client/servidor_<arquivo>` |
+| `SAVE <arquivo>` | Envia `src/<arquivo>` ao servidor, que grava em `rcvd_files_server/servidor_<arquivo>` |
+| `GET <arquivo>` | Pede ao servidor o arquivo `<arquivo>`, gravando a devolução em `rcvd_files_client/cliente_<arquivo>` |
 | `SAIR` | Encerra a sessão (`EXIT` e `Ctrl+C` também funcionam) |
 
 Os comandos podem ser dados na ordem que o usuário quiser e quantas vezes quiser, sem
@@ -157,7 +157,7 @@ UDP> SAVE texto.txt
 UDP> GET texto.txt
 [SOLICITANDO] Requisitando 'texto.txt' do servidor...
 [RECEBENDO] Arquivo terá 51 bytes. Aguardando 1 pacotes...
-[CONCLUÍDO] Arquivo recuperado com sucesso e salvo como './rcvd_files_client/servidor_texto.txt'
+[CONCLUÍDO] Arquivo recuperado com sucesso e salvo como './rcvd_files_client/cliente_texto.txt'
 ```
 
 A sessão completa registrada em `log_cliente.txt` inclui também um `GET` de arquivo
@@ -176,7 +176,7 @@ Os três hashes de um mesmo arquivo devem ser idênticos.
 | Requisito | Onde está implementado |
 |---|---|
 | Envio de arquivos | Comando `SAVE`, função `send_file()` em `client.py` |
-| Armazenamento | Função `store()` em `server.py`, que persiste em `rcvd_files_server/` com o prefixo `cliente_` |
+| Armazenamento | Função `store()` em `server.py`, que persiste em `rcvd_files_server/` com o prefixo `servidor_` |
 | Devolução de arquivos | Comando `GET`, funções `send()` em `server.py` e `get_file()` em `client.py` |
 | Suporte a múltiplos tipos | Testado com `.txt`, `.jpeg` e binário `.bin` (tabela abaixo) |
 | Interface do usuário | O cliente recebe o nome do arquivo como parâmetro dos comandos `SAVE`/`GET`, e o servidor registra no terminal cada arquivo que recebe e envia (ver `log_server.txt`) |

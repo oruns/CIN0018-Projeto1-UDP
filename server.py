@@ -22,6 +22,7 @@ Protocolo (cada comando é um datagrama próprio):
 """
 
 import socket
+from rdt import RDTSocket
 import os
 
 
@@ -48,7 +49,7 @@ def valid_name(name_and_extension):
     return bool(name and dot and extension) and "/" not in name_and_extension
 
 
-def store(n_packets, name_and_extension, server):
+def store(n_packets, name_and_extension, rdt_server):
     """Recebe n_packets datagramas e grava o arquivo em STORAGE_DIR com o PREFIX.
 
     O conteúdo é acumulado em memória e so vai para o disco a cada CHUNK_SIZE
@@ -62,7 +63,7 @@ def store(n_packets, name_and_extension, server):
     # O arquivo é aberto uma única vez em modo "wb"
     with open(path, "wb") as f:
         for packet in range(n_packets):
-            data, _ = server.recvfrom(BUFFER_SIZE)
+            data, _ = rdt_server.rdt_recv()
             buffer.extend(data)
             if (len(buffer) >= CHUNK_SIZE) or (packet == n_packets - 1):
                 f.write(buffer)
@@ -70,9 +71,10 @@ def store(n_packets, name_and_extension, server):
                 buffer.clear()
 
     print(f"[RECEBIDO]  {path} - {os.path.getsize(path)} bytes")
+    rdt_server.print_and_clear_stats()
 
 
-def send(name_and_extension, addr, server):
+def send(name_and_extension, addr, rdt_server):
     """Envia o tamanho do arquivo e, em seguida, o conteúdo fragmentado.
 
     Recebe o nome original e reconstrói o nome de disco com o PREFIX.
@@ -82,7 +84,7 @@ def send(name_and_extension, addr, server):
 
     with open(path, "rb") as f:
         file_size = f.seek(0, 2)              # seek até o fim devolve o tamanho
-        server.sendto(f"{file_size}".encode(), addr)
+        rdt_server.rdt_send(f"{file_size}".encode(), addr)
 
         n_packets = (file_size + BUFFER_SIZE - 1) // BUFFER_SIZE
 
@@ -92,21 +94,23 @@ def send(name_and_extension, addr, server):
 
         for packet in range(n_packets):
             chunk = f.read(BUFFER_SIZE)
-            server.sendto(chunk, addr)
+            rdt_server.rdt_send(chunk, addr)
 
     print(f"[ENVIADO]   {path} para {addr}")
+    rdt_server.print_and_clear_stats()
 
 
 os.makedirs(STORAGE_DIR, exist_ok=True)
 
 server = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 server.bind((LOCAL_HOST_IPV4, ENTRY_PORT))
+rdt_server = RDTSocket(server)
 
 print(f"[SERVIDOR]  Escutando em {LOCAL_HOST_IPV4}:{ENTRY_PORT} - respondendo na porta {CLIENT_PORT}")
 print(f"[SERVIDOR]  Armazenando em {STORAGE_DIR}")
 
 while True:
-    data, addr = server.recvfrom(BUFFER_SIZE)
+    data, addr = rdt_server.rdt_recv()
 
     # O datagrama chega da porta de origem do cliente, mas toda resposta vai para
     # a porta fixa em que ele escuta (os dois sentidos usam portas distintas).
@@ -125,14 +129,14 @@ while True:
 
                 if not valid_name(file_name_and_extension):
                     print(f"[ERRO]      Nome invalido: {file_name_and_extension!r} - esperado nome.extensao")
-                    server.sendto("ERRO: Nome de arquivo inválido.".encode(), client_addr)
+                    rdt_server.rdt_send("ERRO: Nome de arquivo inválido.".encode(), client_addr)
                 elif file_size > DATA_SIZE_LIM:
                     print(f"[ERRO]      Arquivo maior que o limite de {DATA_SIZE_LIM} bytes")
-                    server.sendto("ERRO: Arquivo muito grande.".encode(), client_addr)
+                    rdt_server.rdt_send("ERRO: Arquivo muito grande.".encode(), client_addr)
                 else:
                     n_packets = (file_size +  BUFFER_SIZE - 1) // BUFFER_SIZE
-                    store(n_packets, file_name_and_extension, server)
-                    server.sendto(f"Arquivo {file_name_and_extension} salvo.".encode(), client_addr)
+                    store(n_packets, file_name_and_extension, rdt_server)
+                    rdt_server.rdt_send(f"Arquivo {file_name_and_extension} salvo.".encode(), client_addr)
 
             case "GET":
                 file_name_and_extension = data[4:].decode("utf-8")
@@ -141,7 +145,7 @@ while True:
 
                 if not valid_name(file_name_and_extension):
                     print(f"[ERRO]      Nome invalido: {file_name_and_extension!r} - esperado nome.extensao")
-                    server.sendto("ERRO: Nome de arquivo inválido.".encode(), client_addr)
+                    rdt_server.rdt_send("ERRO: Nome de arquivo inválido.".encode(), client_addr)
                     continue
 
                 # O pedido chega com o nome original; em disco ele tem o prefixo
@@ -152,16 +156,16 @@ while True:
                     for entry in entries:
                         if entry.is_file() and entry.name == stored_name:
                             flag = True
-                            send(file_name_and_extension, client_addr, server)
+                            send(file_name_and_extension, client_addr, rdt_server)
 
                 if(not flag):
                     print(f"[ERRO]      Arquivo {stored_name} nao encontrado em {STORAGE_DIR}")
-                    server.sendto(f"ERRO: Arquivo não encontrado.".encode(), client_addr)
+                    rdt_server.rdt_send(f"ERRO: Arquivo não encontrado.".encode(), client_addr)
 
             case _:
                 print(f"[ERRO]      Comando desconhecido de {addr}: {data[:4]}")
-                server.sendto("ERRO: Comando desconhecido.".encode(), client_addr)
+                rdt_server.rdt_send("ERRO: Comando desconhecido.".encode(), client_addr)
 
     except Exception as erro:
         print(f"[ERRO]      Falha ao atender {addr}: {type(erro).__name__}: {erro}")
-        server.sendto(f"ERRO: Falha ao processar o pedido ({type(erro).__name__}).".encode(), client_addr)
+        rdt_server.rdt_send(f"ERRO: Falha ao processar o pedido ({type(erro).__name__}).".encode(), client_addr)

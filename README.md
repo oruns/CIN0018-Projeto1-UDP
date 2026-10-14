@@ -1,4 +1,4 @@
-# Projeto 1 - Transmissão de Arquivos com UDP
+# Projeto 2 - Transmissão Confiável de Arquivos com RDT 3.0 sobre UDP
 
 **Disciplina:** CIN0018 - Fundamentos de Redes de Computadores
 
@@ -13,54 +13,56 @@
 * Gustavo Cravo Teixeira Filho
 * Titho Lívio Duarte Melo
 
-## Descrição do Projeto
+## Descrição do Projeto (Segunda Entrega)
 
-Aplicação cliente-servidor em Python para transmissão de arquivos sobre UDP, usando
-diretamente a biblioteca `socket`. Os arquivos são fragmentados em pacotes de até
-1024 bytes e reconstruídos no destino.
+Aplicação cliente-servidor em Python para transmissão de arquivos sobre UDP. Diferente da primeira entrega, onde os pacotes estavam sujeitos à perda da rede, esta segunda entrega implementa o protocolo de transferência confiável **RDT 3.0 (Stop-and-Wait)** na camada de aplicação.
 
-O cliente roda como uma sessão interativa. Uma vez aberto, ele aceita os comandos
-`SAVE <arquivo>` e `GET <arquivo>` quantas vezes o usuário quiser, em qualquer ordem.
-`SAVE` envia um arquivo de `src/` para o servidor, que o persiste em disco e `GET`
-solicita de volta um arquivo já armazenado, o que permite confirmar que a transmissão
-foi bem-sucedida.
+O protocolo utiliza internamente a biblioteca `socket` do Python, mas as chamadas de envio e recebimento foram encapsuladas em uma classe `RDTSocket`. Essa abstração garante que arquivos, não importa o tamanho, sejam fragmentados, numerados e reconstruídos com 100% de integridade no destino, lidando ativamente com perda de pacotes, perda de confirmações e corrupção de dados.
 
-A comunicação usa duas portas fixas, uma para cada sentido. O cliente envia para a
-`6767`, onde o servidor escuta, e o servidor devolve para a `7676`, onde o cliente
-escuta.
-
-Conforme o enunciado, os arquivos são armazenados com um novo nome. O servidor grava
-o que recebe com o prefixo `servidor_`, e o cliente grava o que recebe de volta com o
-prefixo `cliente_`. Os prefixos são convenção local de cada lado e eles não circulam
-no protocolo, que sempre usa o nome original do arquivo.
+A interface do cliente permanece a mesma: uma sessão interativa aceitando os comandos `SAVE <arquivo>` e `GET <arquivo>`. Contudo, agora toda transferência exibe um Relatório Estatístico do RDT 3.0 ao final, informando quantos erros ocorreram e foram corrigidos de forma autônoma pelo protocolo na rede.
 
 ## Estrutura de diretórios
 
-```
+```text
 .
-├── server.py                 # Servidor UDP
-├── client.py                 # Cliente UDP
+├── rdt.py                    # Máquina de estados RDT 3.0 (Timeouts, ACKs, NAKs, Perdas)
+├── server.py                 # Servidor UDP (agora utiliza RDTSocket)
+├── client.py                 # Cliente UDP (agora utiliza RDTSocket)
 ├── src/                      # Arquivos disponíveis para envio (entrada do cliente)
 ├── rcvd_files_server/        # Arquivos recebidos pelo servidor  -> prefixo servidor_
 ├── rcvd_files_client/        # Arquivos devolvidos ao cliente    -> prefixo cliente_
-├── log_server.txt            # Log de uma execução completa (terminal do servidor)
-└── log_cliente.txt           # Log da mesma execução (terminal do cliente)
+├── log_server.txt            # Log de execução (terminal do servidor)
+└── log_cliente.txt           # Log de execução (terminal do cliente)
 ```
 
 Os diretórios `rcvd_files_server/` e `rcvd_files_client/` são criados automaticamente na
 primeira execução.
 
-## Fluxo de uma transferência
+## Protocolo e Confiabilidade (RDT 3.0)
 
-```
-src/texto.txt
-   ── SAVE "texto.txt" ──▶ :6767    grava rcvd_files_server/servidor_texto.txt
-   ── GET  "texto.txt" ──▶ :6767    (resolve internamente para servidor_texto.txt)
-   :7676 ◀── conteúdo ────          grava rcvd_files_client/cliente_texto.txt
-```
+Todos os datagramas transferidos pela rede agora possuem um cabeçalho customizado de 2 bytes antes do Payload:
+`[TIPO (1 byte)] + [NÚMERO DE SEQUÊNCIA (1 byte)] + [DADOS]`
 
-`SAVE` e `GET` são comandos independentes: o `GET` acima confirma a transmissão, mas
-pode ser pedido a qualquer momento, para qualquer arquivo já armazenado no servidor.
+| Tipos de Pacote | Descrição |
+|---|---|
+| `b'D'` (Data) | Pacote contendo dados ou comandos. Requer confirmação. |
+| `b'A'` (ACK) | Confirmação de recebimento bem-sucedido. |
+| `b'N'` (NAK) | Aviso de que o pacote chegou corrompido. |
+
+**Mecanismos de Confiabilidade Implementados:**
+* **Numeração de Sequência Alternada (0 e 1):** Impede que pacotes retransmitidos atrasados sejam confundidos com novos dados.
+* **Stop-and-Wait:** O remetente envia 1 pacote e aguarda até receber o ACK correspondente antes de enviar o próximo fragmento.
+* **Temporizadores (Timeouts):** Se um pacote `D` ou seu `ACK` for perdido, o remetente retransmite automaticamente após 50ms.
+* **Detecção de Corrupção e NAKs:** Se o receptor recebe dados corrompidos, solicita o reenvio imediato através de um `NAK`, sem a necessidade de aguardar o Timeout do remetente.
+
+**Simulação de Ambiente Hostil (`rdt.py`):**
+Para provar a robustez do algoritmo localmente, inserimos variáveis que simulam um ambiente de rede caótico (injetando ruídos controlados nas funções de *socket*):
+
+| Constante | Valor | Descrição |
+|---|---|---|
+| `LOSS_PROB` | `0.15` (15%) | Probabilidade de um pacote ou ACK sumir na rede. |
+| `CORRUPT_PROB` | `0.15` (15%) | Probabilidade de um pacote chegar com bits trocados (corrompido). |
+| `TIMEOUT` | `0.05` seg | Tempo de espera do remetente antes da retransmissão. |
 
 ## Portas
 
@@ -69,37 +71,6 @@ pode ser pedido a qualquer momento, para qualquer arquivo já armazenado no serv
 | `6767` | Servidor | Cliente | Comandos `SAVE`/`GET` e os pacotes do arquivo enviado |
 | `7676` | Cliente | Servidor | Confirmações, erros e os pacotes do arquivo devolvido |
 
-O servidor não responde para a porta de origem do datagrama. Ele monta o destino como
-`(ip_de_origem, CLIENT_PORT)`, de modo que o sentido servidor para cliente sempre usa
-a `7676`. Como a porta do cliente é fixa, apenas um cliente pode executar por vez
-na mesma máquina.
-
-## Protocolo
-
-Cada comando é um datagrama próprio.
-
-| Comando | Formato | Resposta |
-|---|---|---|
-| `SAVE` | `b"SAVE"` + tamanho (32 bytes, big-endian) + `nome.extensão`, seguido de `ceil(tamanho / 1024)` datagramas com o conteúdo | Uma linha de texto com a confirmação ou o erro |
-| `GET` | `b"GET "` + `nome.extensão` (o nome original, sem prefixo) | Uma linha de texto com o tamanho em bytes, seguida de `ceil(tamanho / 1024)` datagramas com o conteúdo. Em caso de erro, uma linha de texto com o erro |
-
-**Parâmetros de configuração** (constantes no topo de cada arquivo):
-
-| Constante | Valor | Descrição |
-|---|---|---|
-| `SERVER_IP` / `LOCAL_HOST_IPV4` | `127.0.0.1` | Endereço do servidor |
-| `SERVER_PORT` / `ENTRY_PORT` | `6767` | Porta em que o servidor escuta |
-| `CLIENT_IP` | `127.0.0.1` | Endereço do cliente |
-| `CLIENT_PORT` | `7676` | Porta em que o cliente escuta |
-| `BUFFER_SIZE` | `1024` bytes | Tamanho máximo de cada datagrama |
-| `CHUNK_SIZE` | `65536` bytes | Acumulado em memória antes de cada gravação em disco |
-| `DATA_SIZE_LIM` | `134217728` bytes (128 MB) | Tamanho máximo aceito por arquivo |
-
-## Pré-requisitos
-
-* Python 3 instalado no sistema (nenhuma dependência externa).
-* Uma interface de linha de comandos (Terminal/Prompt).
-
 ## Instruções de Execução
 
 O sistema deve ser testado com dois terminais simultâneos.
@@ -107,95 +78,49 @@ O sistema deve ser testado com dois terminais simultâneos.
 ### 1. Iniciar o servidor
 
 No primeiro terminal, na pasta do projeto:
-
 ```bash
 python3 server.py
 ```
 
 O servidor passa a escutar em `127.0.0.1:6767` e registra no terminal tudo o que recebe
-e envia:
-
-```
-[SERVIDOR]  Escutando em 127.0.0.1:6767 - respondendo na porta 7676
-[SERVIDOR]  Armazenando em ./rcvd_files_server/
-```
+e envia.
 
 ### 2. Abrir a sessão do cliente
 
-Coloque os arquivos a transmitir em `src/` e, no segundo terminal:
-
+No segundo terminal:
 ```bash
 python3 client.py
 ```
 
-O cliente informa o par de portas em uso e abre a sessão:
+Você pode usar os mesmos comandos da primeira entrega:
+* `SAVE <arquivo>`
+* `GET <arquivo>`
+* `SAIR`
 
-```
-[CLIENTE] Enviando para 127.0.0.1:6767 - escutando em 127.0.0.1:7676
-============================================================
-Sessão iniciada. Comandos disponíveis:
-  SAVE <nome_do_arquivo>  (Envia um arquivo da pasta ./src/)
-  GET <nome_do_arquivo>   (Solicita um arquivo do servidor)
-  SAIR                    (Encerra o cliente)
-============================================================
-```
+**Decisão de Design: O Resumo Estatístico do RDT** 
+Durante o desenvolvimento, observamos que imprimir uma mensagem no terminal para cada pacote perdido ou corrompido tornava a aplicação inutilizável para arquivos grandes. Na transferência do binário de 3MB, a simulação agressiva de 15% de falhas gerava um volume tão massivo de logs individuais de `Timeout` e `NAK` que o terminal ficava completamente afogado e ilegível.
 
-| Comando | O que faz |
-|---|---|
-| `SAVE <arquivo>` | Envia `src/<arquivo>` ao servidor, que grava em `rcvd_files_server/servidor_<arquivo>` |
-| `GET <arquivo>` | Pede ao servidor o arquivo `<arquivo>`, gravando a devolução em `rcvd_files_client/cliente_<arquivo>` |
-| `SAIR` | Encerra a sessão (`EXIT` e `Ctrl+C` também funcionam) |
+Para manter a responsividade e a clareza da interface, projetamos a classe `RDTSocket` para contabilizar esses incidentes silenciosamente na memória. Apenas quando a transferência é finalizada, a aplicação imprime uma única linha agrupando todo o esforço que o protocolo fez nos bastidores:
+`[RDT 3.0] Resumo -> Timeouts: X | NAKs enviados: Y | NAKs recebidos: Z`
 
-Os comandos podem ser dados na ordem que o usuário quiser e quantas vezes quiser, sem
-reiniciar o cliente. Uma sessão de exemplo:
+### 3. Conferir a integridade absoluta
 
-```
-UDP> SAVE texto.txt
-[ENVIANDO] Iniciando envio de 'texto.txt' (51 bytes em 1 pacotes)
-[SERVIDOR] Arquivo texto.txt salvo.
-
-UDP> GET texto.txt
-[SOLICITANDO] Requisitando 'texto.txt' do servidor...
-[RECEBENDO] Arquivo terá 51 bytes. Aguardando 1 pacotes...
-[CONCLUÍDO] Arquivo recuperado com sucesso e salvo como './rcvd_files_client/cliente_texto.txt'
-```
-
-A sessão completa registrada em `log_cliente.txt` inclui também um `GET` de arquivo
-inexistente, para demonstrar o tratamento de erro do servidor.
-
-### 3. Conferir a integridade
-
+Mesmo com perdas e corrupções extremas simuladas no código, os arquivos chegam idênticos. Para atestar o funcionamento do RDT, execute:
 ```bash
 md5sum src/* rcvd_files_server/* rcvd_files_client/*
 ```
+Os três hashes de um mesmo arquivo serão perfeitamente idênticos, garantindo ausência total de bytes corrompidos e provando a confiabilidade do protocolo sobre um canal ruidoso.
 
-Os três hashes de um mesmo arquivo devem ser idênticos.
+## Testes e Observações Finais
 
-## Funcionalidades obrigatórias
+A execução registrada nos logs cobre três tipos de arquivos numa mesma sessão, atestando o suporte a diferentes formatos e tamanhos sem corrupção:
 
-| Requisito | Onde está implementado |
-|---|---|
-| Envio de arquivos | Comando `SAVE`, função `send_file()` em `client.py` |
-| Armazenamento | Função `store()` em `server.py`, que persiste em `rcvd_files_server/` com o prefixo `servidor_` |
-| Devolução de arquivos | Comando `GET`, funções `send()` em `server.py` e `get_file()` em `client.py` |
-| Suporte a múltiplos tipos | Testado com `.txt`, `.jpeg` e binário `.bin` (tabela abaixo) |
-| Interface do usuário | O cliente recebe o nome do arquivo como parâmetro dos comandos `SAVE`/`GET`, e o servidor registra no terminal cada arquivo que recebe e envia (ver `log_server.txt`) |
+| Arquivo | Tipo | Tamanho | Pacotes | Status da Transmissão |
+|---|---|---|---|---|
+| `texto.txt` | texto | 51 B | 1 | Sucesso Absoluto |
+| `foto_teste.jpeg` | imagem | 63.541 B | 63 | Sucesso Absoluto |
+| `dado_binario.bin` | binário | 3.145.728 B | 3072 | Sucesso Absoluto |
 
-## Testes realizados
+O mecanismo de Stop-and-Wait regula naturalmente o tráfego da rede, enviando pacotes ao ritmo exato que o recebedor suporta processar, já que o protocolo exige o `ACK` do datagrama anterior antes de prosseguir. 
 
-A execução registrada em `log_server.txt` e `log_cliente.txt` cobre três tipos de arquivo
-numa mesma sessão, todos com os hashes conferidos ao final:
-
-| Arquivo | Tipo | Tamanho | Pacotes |
-|---|---|---|---|
-| `texto.txt` | texto | 51 B | 1 |
-| `foto_teste.jpeg` | imagem | 63.541 B | 63 |
-| `dado_binario.bin` | binário | 3.145.728 B | 3072 |
-
-## Observações
-
-Conforme o enunciado, não foram implementados mecanismos de transferência confiável
-(ACKs, NAKs ou retransmissões), já que o foco desta etapa é o funcionamento básico do UDP.
-Como consequência esperada do protocolo, transferências de arquivos grandes podem perder
-datagramas quando o buffer de recepção do socket satura (o que ocorre ocasionalmente com
-o `dado_binario.bin` de 3 MB).
+Centenas de `Timeouts` e `NAKs` são registrados e ativamente resolvidos pelo algoritmo a cada transferência de arquivos grandes. Contudo, para o usuário final da aplicação (a camada superior do cliente/servidor), a transferência se concretiza de forma completamente transparente e sem erros, comprovando os ensinamentos teóricos da disciplina na prática.

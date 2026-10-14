@@ -1,4 +1,5 @@
 import socket
+from rdt import RDTSocket
 import os
 import sys
 import math
@@ -21,7 +22,7 @@ def send_file(client_sock, filepath):
 
     # Protocolo de envio: b"SAVE" + tamanho (32 bytes big-endian) + nome.extensao codificado
     command = b"SAVE" + file_size.to_bytes(32, "big") + filename.encode("utf-8")
-    client_sock.sendto(command, (SERVER_IP, SERVER_PORT))
+    client_sock.rdt_send(command, (SERVER_IP, SERVER_PORT))
 
     n_packets = math.ceil(file_size / BUFFER_SIZE)
     print(f"[ENVIANDO] Iniciando envio de '{filename}' ({file_size} bytes em {n_packets} pacotes)")
@@ -30,22 +31,23 @@ def send_file(client_sock, filepath):
     with open(filepath, "rb") as f:
         for i in range(n_packets):
             chunk = f.read(BUFFER_SIZE)
-            client_sock.sendto(chunk, (SERVER_IP, SERVER_PORT))
+            client_sock.rdt_send(chunk, (SERVER_IP, SERVER_PORT))
             
     # Aguarda a string de confirmação ou erro do servidor
-    response, _ = client_sock.recvfrom(BUFFER_SIZE)
+    response, _ = client_sock.rdt_recv()
     resp_text = response.decode("utf-8")
     print(f"[SERVIDOR] {resp_text}")
+    client_sock.print_and_clear_stats()
 
 def get_file(client_sock, filename):
     """Solicita a devolução do arquivo salvo e o reconstrói no disco."""
     # Protocolo de requisição: b"GET " + nome.extensao codificado
     command = b"GET " + filename.encode("utf-8")
-    client_sock.sendto(command, (SERVER_IP, SERVER_PORT))
+    client_sock.rdt_send(command, (SERVER_IP, SERVER_PORT))
     print(f"[SOLICITANDO] Requisitando '{filename}' do servidor...")
 
     # A primeira resposta do GET é o tamanho do arquivo em bytes (ou um erro)
-    response, _ = client_sock.recvfrom(BUFFER_SIZE)
+    response, _ = client_sock.rdt_recv()
     resp_text = response.decode("utf-8")
 
     if resp_text.startswith("ERRO"):
@@ -66,10 +68,11 @@ def get_file(client_sock, filename):
 
     with open(save_path, "wb") as f:
         for i in range(n_packets):
-            chunk, _ = client_sock.recvfrom(BUFFER_SIZE)
+            chunk, _ = client_sock.rdt_recv()
             f.write(chunk)
 
     print(f"[CONCLUÍDO] Arquivo recuperado com sucesso e salvo como '{save_path}'")
+    client_sock.print_and_clear_stats()
 
 if __name__ == "__main__":
     os.makedirs(SRC_DIR, exist_ok=True)       
@@ -77,6 +80,7 @@ if __name__ == "__main__":
 
     # Criação do socket UDP (fixa CLIENT_PORT)
     client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    client_rdt = RDTSocket(client_socket)
 
     try:
         client_socket.bind((CLIENT_IP, CLIENT_PORT)) 
@@ -120,10 +124,10 @@ if __name__ == "__main__":
                 if not os.path.isfile(filepath):
                     print(f"[ERRO LOCAL] O arquivo '{target_file}' não foi encontrado na pasta '{SRC_DIR}'.")
                     continue
-                send_file(client_socket, filepath)
+                send_file(client_rdt, filepath)
 
             elif command == "GET":
-                get_file(client_socket, target_file)
+                get_file(client_rdt, target_file)
 
             else:
                 print("[ERRO] Comando desconhecido. Use SAVE, GET ou SAIR.")

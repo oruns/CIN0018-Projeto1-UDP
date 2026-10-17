@@ -152,7 +152,7 @@ class RDTSocket:
         # A única transição que sai daqui é a chamada rdt_send vinda da camada
         # de cima. Ela monta o pacote, entrega ao canal e arma o temporizador.
         # ------------------------------------------------------------------
-        self.log(ESPERA_CHAMADA[seq], "rdt_send(data) -> udt_send(sndpkt), start_timer")
+        self.log(ESPERA_CHAMADA[seq], f"envia pacote {seq}")
         self.send_pkt(sndpkt, addr)
 
         # ------------------------------------------------------------------
@@ -169,7 +169,7 @@ class RDTSocket:
                 # timeout -> udt_send(sndpkt), start_timer
                 self.stats["timeouts"] += 1
                 self.stats["retransmissoes"] += 1
-                self.log(ESPERA_ACK[seq], "timeout -> udt_send(sndpkt), start_timer")
+                self.log(ESPERA_ACK[seq], "timeout, retransmite")
                 self.send_pkt(sndpkt, addr)
                 continue
 
@@ -179,7 +179,7 @@ class RDTSocket:
                 # rdt_rcv && corrupt(rcvpkt) -> Λ, sem ação, o temporizador
                 # é quem resolve.
                 self.stats["corrompidos_detectados"] += 1
-                self.log(ESPERA_ACK[seq], "rdt_rcv && corrupt(rcvpkt) -> Λ")
+                self.log(ESPERA_ACK[seq], "ACK corrompido, ignora")
                 continue
 
             if pkt_type == b"A":
@@ -187,21 +187,14 @@ class RDTSocket:
                     # rdt_rcv && notcorrupt && isACK(N) -> stop_timer e sai
                     # do estado.
                     self.seq_send = 1 - seq
-                    self.log(
-                        ESPERA_ACK[seq],
-                        f"rdt_rcv && notcorrupt && isACK({seq}) -> stop_timer "
-                        f"=> {ESPERA_CHAMADA[self.seq_send]}",
-                    )
+                    self.log(ESPERA_ACK[seq], f"ACK {seq} recebido")
                     return
 
                 # rdt_rcv && isACK(1-N) -> udt_send(sndpkt), start_timer. O
                 # receptor repetiu a confirmação anterior e quer este de novo.
                 self.stats["acks_duplicados"] += 1
                 self.stats["retransmissoes"] += 1
-                self.log(
-                    ESPERA_ACK[seq],
-                    f"rdt_rcv && isACK({rcv_seq}) -> udt_send(sndpkt), start_timer",
-                )
+                self.log(ESPERA_ACK[seq], f"ACK {rcv_seq} duplicado, retransmite")
                 self.send_pkt(sndpkt, addr)
 
             elif pkt_type == b"D":
@@ -246,10 +239,7 @@ class RDTSocket:
                 ultimo_aceito = 1 - esperado
                 self.stats["corrompidos_detectados"] += 1
                 self.stats["acks_repetidos"] += 1
-                self.log(
-                    estado,
-                    f"rdt_rcv && corrupt(rcvpkt) -> udt_send(ACK{ultimo_aceito})",
-                )
+                self.log(estado, f"checksum inválido, reenvia ACK {ultimo_aceito}")
                 self.send_pkt(make_pkt(b"A", ultimo_aceito), addr)
                 continue
 
@@ -257,17 +247,12 @@ class RDTSocket:
                 # rdt_rcv && notcorrupt && has_seqN -> extract, deliver_data,
                 # udt_send(ACKN) e sai do estado.
                 self.seq_recv = 1 - esperado
-                self.log(
-                    estado,
-                    f"rdt_rcv && notcorrupt && has_seq{esperado} -> extract, "
-                    f"deliver_data, udt_send(ACK{esperado}) "
-                    f"=> {ESPERAR_DE_BAIXO[self.seq_recv]}",
-                )
+                self.log(estado, f"pacote {esperado} íntegro, envia ACK {esperado}")
                 self.send_pkt(make_pkt(b"A", esperado), addr)
                 return data, addr
 
             # rdt_rcv && has_seq(1-N) -> udt_send(ACK(1-N)). Duplicata, que só
             # precisa da confirmação repetida.
             self.stats["acks_repetidos"] += 1
-            self.log(estado, f"rdt_rcv && has_seq{seq} -> udt_send(ACK{seq})")
+            self.log(estado, f"pacote {seq} duplicado, reenvia ACK {seq}")
             self.send_pkt(make_pkt(b"A", seq), addr)

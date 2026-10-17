@@ -60,18 +60,18 @@ O código segue as FSMs do rdt3.0, com os estados nomeados em `rdt.py` e registr
 | Transmissor (`rdt_send`) | `Espera chamada 0 de cima`, `Espera por ACK0`, `Espera chamada 1 de cima`, `Espera por ACK1` |
 | Receptor (`rdt_recv`) | `Esperar 0 de baixo`, `Esperar 1 de baixo` |
 
-As transições aparecem no terminal na mesma notação do diagrama:
+O log mostra o estado em que cada evento aconteceu:
 
 ```text
-[RDT]       [Espera chamada 0 de cima] rdt_send(data) -> udt_send(sndpkt), start_timer
-[RDT]       [Espera por ACK0] rdt_rcv && corrupt(rcvpkt) -> Λ
-[RDT]       [Espera por ACK0] timeout -> udt_send(sndpkt), start_timer
-[RDT]       [Espera por ACK0] rdt_rcv && notcorrupt && isACK(0) -> stop_timer => Espera chamada 1 de cima
+[RDT]       [Espera chamada 0 de cima] envia pacote 0
+[RDT]       (canal) PERDEU dados seq=0
+[RDT]       [Espera por ACK0] timeout, retransmite
+[RDT]       [Espera por ACK0] ACK 0 recebido
 ```
 
 ```text
-[RDT]       [Esperar 0 de baixo] rdt_rcv && corrupt(rcvpkt) -> udt_send(ACK1)
-[RDT]       [Esperar 0 de baixo] rdt_rcv && notcorrupt && has_seq0 -> extract, deliver_data, udt_send(ACK0) => Esperar 1 de baixo
+[RDT]       [Esperar 0 de baixo] checksum inválido, reenvia ACK 1
+[RDT]       [Esperar 0 de baixo] pacote 0 íntegro, envia ACK 0
 ```
 
 **Mecanismos de Confiabilidade Implementados:**
@@ -133,16 +133,16 @@ Você pode usar os mesmos comandos da primeira entrega:
 Cada evento do protocolo é impresso no terminal no instante em que ocorre, prefixado por `[RDT]`, de modo que dá para acompanhar a máquina de estados funcionando:
 
 ```text
-[RDT]       (canal) CORROMPEU dados seq=0
-[RDT]       [Espera por ACK0] rdt_rcv && isACK(1) -> udt_send(sndpkt), start_timer
+[RDT]       [Espera chamada 0 de cima] envia pacote 0
 [RDT]       (canal) PERDEU dados seq=0
-[RDT]       [Espera por ACK0] timeout -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK0] timeout, retransmite
+[RDT]       [Espera por ACK0] ACK 0 recebido
 ```
 
 Ao final de cada transferência, uma linha consolida o esforço total:
 
 ```text
-[RDT 3.0] Resumo -> Timeouts: 66 | Retransmissões: 74 | ACKs reenviados: 0 | ACKs duplicados recebidos: 8 | Perdas no canal: 35 | Corrupções no canal: 18 | Corrompidos detectados: 20
+[RDT 3.0] Resumo -> Timeouts: 49 | Retransmissões: 60 | ACKs reenviados: 1 | ACKs duplicados recebidos: 11 | Perdas no canal: 26 | Corrupções no canal: 18 | Corrompidos detectados: 12
 ```
 
 Em transferências muito grandes o volume de linhas individuais dificulta a leitura. Para esses casos, basta definir `VERBOSE = False` em `rdt.py`: o log por evento é suprimido e o resumo continua sendo impresso.

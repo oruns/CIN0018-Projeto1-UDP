@@ -1,0 +1,7 @@
+# Bytecode gerado pelo Python
+__pycache__/
+*.py[cod]
+
+# Arquivos grandes reconstruídos pelas execuções de teste
+rcvd_files_server/*dado_binario.bin
+rcvd_files_client/*dado_binario.bin

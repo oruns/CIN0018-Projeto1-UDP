@@ -1,4 +1,11 @@
-gfabri@FabriNitro:~/Projects/CIN0018-Projeto1-UDP$ python3 client.py
+sen@archlinux:~/Work/python/udp/CIN0018-Projeto1-UDP$ ls -lh src/
+total 3.2M
+-rw-r--r-- 1 sen sen 3.0M Oct 16 21:24 dado_binario.bin
+-rw-r--r-- 1 sen sen  63K Sep 19 10:47 foto_teste.jpeg
+-rw-r--r-- 1 sen sen  50K Oct 16 21:24 teste50k.bin
+-rw-r--r-- 1 sen sen   51 Sep 19 10:47 texto.txt
+
+sen@archlinux:~/Work/python/udp/CIN0018-Projeto1-UDP$ python3 client.py
 [CLIENTE] Enviando para 127.0.0.1:6767 - escutando em 127.0.0.1:7676
 ============================================================
 Sessão iniciada. Comandos disponíveis:
@@ -8,73 +15,714 @@ Sessão iniciada. Comandos disponíveis:
 ============================================================
 
 UDP> SAVE texto.txt
+[RDT]       ACK 0 recebido
 [ENVIANDO] Iniciando envio de 'texto.txt' (51 bytes em 1 pacotes)
+[RDT]       ACK 1 recebido
+[RDT]       pacote 0 íntegro - enviando ACK
 [SERVIDOR] Arquivo texto.txt salvo.
-[RDT 3.0] Resumo -> Timeouts: 4 | NAKs enviados: 0 | NAKs recebidos: 0
+[RDT 3.0] Resumo -> Timeouts: 0 | NAKs enviados: 0 | NAKs recebidos: 0 | Retransmissões: 0 | Perdas no canal: 0 | Corrupções no canal: 0 | Duplicados descartados: 0
 
 UDP> GET texto.txt
+[RDT]       ACK 0 recebido
 [SOLICITANDO] Requisitando 'texto.txt' do servidor...
+[RDT]       pacote 1 com checksum inválido - enviando NAK
+[RDT]       pacote 1 íntegro - enviando ACK
 [RECEBENDO] Arquivo terá 51 bytes. Aguardando 1 pacotes...
+[RDT]       pacote 0 íntegro - enviando ACK
+[RDT]       canal PERDEU ACK seq=0
 [CONCLUÍDO] Arquivo recuperado com sucesso e salvo como './rcvd_files_client/cliente_texto.txt'
-[RDT 3.0] Resumo -> Timeouts: 0 | NAKs enviados: 3 | NAKs recebidos: 0
+[RDT 3.0] Resumo -> Timeouts: 0 | NAKs enviados: 1 | NAKs recebidos: 0 | Retransmissões: 0 | Perdas no canal: 1 | Corrupções no canal: 0 | Duplicados descartados: 0
 
 UDP> SAVE foto_teste.jpeg
+[RDT]       canal CORROMPEU dados seq=1
+[RDT]       confirmação chegou corrompida - ignorada
+[RDT]       canal CORROMPEU ACK seq=0
+[RDT]       confirmação chegou corrompida - ignorada
+[RDT]       confirmação chegou corrompida - ignorada
+[RDT]       confirmação chegou corrompida - ignorada
+[RDT]       confirmação chegou corrompida - ignorada
+[RDT]       confirmação chegou corrompida - ignorada
+[RDT]       TIMEOUT esperando ACK 1 - retransmitindo
+[RDT]       confirmação chegou corrompida - ignorada
+[RDT]       TIMEOUT esperando ACK 1 - retransmitindo
+[RDT]       ACK 1 recebido
 [ENVIANDO] Iniciando envio de 'foto_teste.jpeg' (63541 bytes em 63 pacotes)
+[RDT]       canal PERDEU dados seq=0
+[RDT]       TIMEOUT esperando ACK 0 - retransmitindo
+[RDT]       ACK 0 recebido
+[RDT]       confirmação chegou corrompida - ignorada
+[RDT]       TIMEOUT esperando ACK 1 - retransmitindo
+[RDT]       ACK 1 recebido
+[RDT]       ACK 0 recebido
+[RDT]       ACK 1 recebido
+[RDT]       canal CORROMPEU dados seq=0
+[RDT]       NAK 0 recebido - retransmitindo
+[RDT]       canal CORROMPEU dados seq=0
+[RDT]       NAK 0 recebido - retransmitindo
+[RDT]       canal PERDEU dados seq=0
+[RDT]       TIMEOUT esperando ACK 0 - retransmitindo
+[RDT]       ACK 0 recebido
+[RDT]       canal PERDEU dados seq=1
+[RDT]       TIMEOUT esperando ACK 1 - retransmitindo
+[RDT]       ACK 1 recebido
+[RDT]       canal PERDEU dados seq=0
+[RDT]       TIMEOUT esperando ACK 0 - retransmitindo
+[RDT]       ACK 0 recebido
+[RDT]       ACK 1 recebido
+[RDT]       ACK 0 recebido
+[RDT]       canal CORROMPEU dados seq=1
+[RDT]       NAK 1 recebido - retransmitindo
+[RDT]       confirmação chegou corrompida - ignorada
+[RDT]       TIMEOUT esperando ACK 1 - retransmitindo
+[RDT]       canal CORROMPEU dados seq=1
+[RDT]       NAK 1 recebido - retransmitindo
+[RDT]       ACK 1 recebido
+[RDT]       TIMEOUT esperando ACK 0 - retransmitindo
+[RDT]       canal PERDEU dados seq=0
+[RDT]       TIMEOUT esperando ACK 0 - retransmitindo
+[RDT]       ACK 0 recebido
+[RDT]       TIMEOUT esperando ACK 1 - retransmitindo
+[RDT]       canal PERDEU dados seq=1
+[RDT]       TIMEOUT esperando ACK 1 - retransmitindo
+[RDT]       confirmação chegou corrompida - ignorada
+[RDT]       TIMEOUT esperando ACK 1 - retransmitindo
+[RDT]       canal CORROMPEU dados seq=1
+[RDT]       confirmação chegou corrompida - ignorada
+[RDT]       TIMEOUT esperando ACK 1 - retransmitindo
+[RDT]       ACK 1 recebido
+[RDT]       canal PERDEU dados seq=0
+[RDT]       TIMEOUT esperando ACK 0 - retransmitindo
+[RDT]       ACK 0 recebido
+[RDT]       ACK 1 recebido
+[RDT]       canal CORROMPEU dados seq=0
+[RDT]       NAK 0 recebido - retransmitindo
+[RDT]       ACK 0 recebido
+[RDT]       ACK 1 recebido
+[RDT]       canal PERDEU dados seq=0
+[RDT]       TIMEOUT esperando ACK 0 - retransmitindo
+[RDT]       canal PERDEU dados seq=0
+[RDT]       TIMEOUT esperando ACK 0 - retransmitindo
+[RDT]       canal CORROMPEU dados seq=0
+[RDT]       confirmação chegou corrompida - ignorada
+[RDT]       TIMEOUT esperando ACK 0 - retransmitindo
+[RDT]       ACK 0 recebido
+[RDT]       ACK 1 recebido
+[RDT]       ACK 0 recebido
+[RDT]       ACK 1 recebido
+[RDT]       confirmação chegou corrompida - ignorada
+[RDT]       TIMEOUT esperando ACK 0 - retransmitindo
+[RDT]       ACK 0 recebido
+[RDT]       ACK 1 recebido
+[RDT]       canal PERDEU dados seq=0
+[RDT]       TIMEOUT esperando ACK 0 - retransmitindo
+[RDT]       confirmação chegou corrompida - ignorada
+[RDT]       TIMEOUT esperando ACK 0 - retransmitindo
+[RDT]       canal CORROMPEU dados seq=0
+[RDT]       NAK 0 recebido - retransmitindo
+[RDT]       TIMEOUT esperando ACK 0 - retransmitindo
+[RDT]       TIMEOUT esperando ACK 0 - retransmitindo
+[RDT]       confirmação chegou corrompida - ignorada
+[RDT]       TIMEOUT esperando ACK 0 - retransmitindo
+[RDT]       ACK 0 recebido
+[RDT]       canal CORROMPEU dados seq=1
+[RDT]       confirmação chegou corrompida - ignorada
+[RDT]       TIMEOUT esperando ACK 1 - retransmitindo
+[RDT]       confirmação chegou corrompida - ignorada
+[RDT]       TIMEOUT esperando ACK 1 - retransmitindo
+[RDT]       canal PERDEU dados seq=1
+[RDT]       TIMEOUT esperando ACK 1 - retransmitindo
+[RDT]       confirmação chegou corrompida - ignorada
+[RDT]       TIMEOUT esperando ACK 1 - retransmitindo
+[RDT]       canal PERDEU dados seq=1
+[RDT]       TIMEOUT esperando ACK 1 - retransmitindo
+[RDT]       TIMEOUT esperando ACK 1 - retransmitindo
+[RDT]       ACK 1 recebido
+[RDT]       ACK 0 recebido
+[RDT]       ACK 1 recebido
+[RDT]       canal PERDEU dados seq=0
+[RDT]       TIMEOUT esperando ACK 0 - retransmitindo
+[RDT]       canal CORROMPEU dados seq=0
+[RDT]       NAK 0 recebido - retransmitindo
+[RDT]       canal PERDEU dados seq=0
+[RDT]       TIMEOUT esperando ACK 0 - retransmitindo
+[RDT]       canal CORROMPEU dados seq=0
+[RDT]       confirmação chegou corrompida - ignorada
+[RDT]       TIMEOUT esperando ACK 0 - retransmitindo
+[RDT]       ACK 0 recebido
+[RDT]       ACK 1 recebido
+[RDT]       canal CORROMPEU dados seq=0
+[RDT]       confirmação chegou corrompida - ignorada
+[RDT]       TIMEOUT esperando ACK 0 - retransmitindo
+[RDT]       canal PERDEU dados seq=0
+[RDT]       TIMEOUT esperando ACK 0 - retransmitindo
+[RDT]       canal CORROMPEU dados seq=0
+[RDT]       NAK 0 recebido - retransmitindo
+[RDT]       ACK 0 recebido
+[RDT]       ACK 1 recebido
+[RDT]       canal PERDEU dados seq=0
+[RDT]       TIMEOUT esperando ACK 0 - retransmitindo
+[RDT]       ACK 0 recebido
+[RDT]       ACK 1 recebido
+[RDT]       canal CORROMPEU dados seq=0
+[RDT]       NAK 0 recebido - retransmitindo
+[RDT]       canal CORROMPEU dados seq=0
+[RDT]       NAK 0 recebido - retransmitindo
+[RDT]       canal CORROMPEU dados seq=0
+[RDT]       NAK 0 recebido - retransmitindo
+[RDT]       canal CORROMPEU dados seq=0
+[RDT]       NAK 0 recebido - retransmitindo
+[RDT]       ACK 0 recebido
+[RDT]       ACK 1 recebido
+[RDT]       canal PERDEU dados seq=0
+[RDT]       TIMEOUT esperando ACK 0 - retransmitindo
+[RDT]       ACK 0 recebido
+[RDT]       ACK 1 recebido
+[RDT]       ACK 0 recebido
+[RDT]       canal PERDEU dados seq=1
+[RDT]       TIMEOUT esperando ACK 1 - retransmitindo
+[RDT]       confirmação chegou corrompida - ignorada
+[RDT]       TIMEOUT esperando ACK 1 - retransmitindo
+[RDT]       canal CORROMPEU dados seq=1
+[RDT]       NAK 1 recebido - retransmitindo
+[RDT]       canal CORROMPEU dados seq=1
+[RDT]       NAK 1 recebido - retransmitindo
+[RDT]       ACK 1 recebido
+[RDT]       ACK 0 recebido
+[RDT]       canal PERDEU dados seq=1
+[RDT]       TIMEOUT esperando ACK 1 - retransmitindo
+[RDT]       canal CORROMPEU dados seq=1
+[RDT]       NAK 1 recebido - retransmitindo
+[RDT]       TIMEOUT esperando ACK 1 - retransmitindo
+[RDT]       ACK 1 recebido
+[RDT]       ACK 0 recebido
+[RDT]       ACK 1 recebido
+[RDT]       TIMEOUT esperando ACK 0 - retransmitindo
+[RDT]       canal PERDEU dados seq=0
+[RDT]       TIMEOUT esperando ACK 0 - retransmitindo
+[RDT]       ACK 0 recebido
+[RDT]       TIMEOUT esperando ACK 1 - retransmitindo
+[RDT]       TIMEOUT esperando ACK 1 - retransmitindo
+[RDT]       ACK 1 recebido
+[RDT]       ACK 0 recebido
+[RDT]       ACK 1 recebido
+[RDT]       ACK 0 recebido
+[RDT]       TIMEOUT esperando ACK 1 - retransmitindo
+[RDT]       ACK 1 recebido
+[RDT]       canal PERDEU dados seq=0
+[RDT]       TIMEOUT esperando ACK 0 - retransmitindo
+[RDT]       ACK 0 recebido
+[RDT]       TIMEOUT esperando ACK 1 - retransmitindo
+[RDT]       ACK 1 recebido
+[RDT]       ACK 0 recebido
+[RDT]       ACK 1 recebido
+[RDT]       canal PERDEU dados seq=0
+[RDT]       TIMEOUT esperando ACK 0 - retransmitindo
+[RDT]       ACK 0 recebido
+[RDT]       ACK 1 recebido
+[RDT]       TIMEOUT esperando ACK 0 - retransmitindo
+[RDT]       ACK 0 recebido
+[RDT]       ACK 1 recebido
+[RDT]       canal PERDEU dados seq=0
+[RDT]       TIMEOUT esperando ACK 0 - retransmitindo
+[RDT]       ACK 0 recebido
+[RDT]       confirmação chegou corrompida - ignorada
+[RDT]       TIMEOUT esperando ACK 1 - retransmitindo
+[RDT]       canal PERDEU dados seq=1
+[RDT]       TIMEOUT esperando ACK 1 - retransmitindo
+[RDT]       ACK 1 recebido
+[RDT]       canal CORROMPEU dados seq=0
+[RDT]       TIMEOUT esperando ACK 0 - retransmitindo
+[RDT]       TIMEOUT esperando ACK 0 - retransmitindo
+[RDT]       ACK 0 recebido
+[RDT]       TIMEOUT esperando ACK 1 - retransmitindo
+[RDT]       ACK 1 recebido
+[RDT]       ACK 0 recebido
+[RDT]       TIMEOUT esperando ACK 1 - retransmitindo
+[RDT]       confirmação chegou corrompida - ignorada
+[RDT]       TIMEOUT esperando ACK 1 - retransmitindo
+[RDT]       ACK 1 recebido
+[RDT]       ACK 0 recebido
+[RDT]       pacote 1 com checksum inválido - enviando NAK
+[RDT]       canal CORROMPEU NAK seq=1
+[RDT]       pacote 1 íntegro - enviando ACK
 [SERVIDOR] Arquivo foto_teste.jpeg salvo.
-[RDT 3.0] Resumo -> Timeouts: 46 | NAKs enviados: 0 | NAKs recebidos: 12
+[RDT 3.0] Resumo -> Timeouts: 58 | NAKs enviados: 1 | NAKs recebidos: 15 | Retransmissões: 73 | Perdas no canal: 24 | Corrupções no canal: 24 | Duplicados descartados: 0
 
 UDP> GET foto_teste.jpeg
+[RDT]       ACK 1 recebido
 [SOLICITANDO] Requisitando 'foto_teste.jpeg' do servidor...
+[RDT]       pacote 0 íntegro - enviando ACK
 [RECEBENDO] Arquivo terá 63541 bytes. Aguardando 63 pacotes...
+[RDT]       pacote 1 íntegro - enviando ACK
+[RDT]       pacote 0 íntegro - enviando ACK
+[RDT]       canal CORROMPEU ACK seq=0
+[RDT]       pacote 0 duplicado - reenviando ACK
+[RDT]       canal PERDEU ACK seq=0
+[RDT]       pacote 0 duplicado - reenviando ACK
+[RDT]       canal CORROMPEU ACK seq=0
+[RDT]       pacote 0 duplicado - reenviando ACK
+[RDT]       pacote 1 íntegro - enviando ACK
+[RDT]       canal PERDEU ACK seq=1
+[RDT]       pacote 1 duplicado - reenviando ACK
+[RDT]       pacote 0 com checksum inválido - enviando NAK
+[RDT]       pacote 0 íntegro - enviando ACK
+[RDT]       canal CORROMPEU ACK seq=0
+[RDT]       pacote 0 com checksum inválido - enviando NAK
+[RDT]       pacote 0 duplicado - reenviando ACK
+[RDT]       pacote 1 íntegro - enviando ACK
+[RDT]       pacote 0 íntegro - enviando ACK
+[RDT]       canal PERDEU ACK seq=0
+[RDT]       pacote 0 com checksum inválido - enviando NAK
+[RDT]       canal PERDEU NAK seq=0
+[RDT]       pacote 0 duplicado - reenviando ACK
+[RDT]       pacote 1 íntegro - enviando ACK
+[RDT]       pacote 0 íntegro - enviando ACK
+[RDT]       canal CORROMPEU ACK seq=0
+[RDT]       pacote 0 com checksum inválido - enviando NAK
+[RDT]       pacote 0 duplicado - reenviando ACK
+[RDT]       canal PERDEU ACK seq=0
+[RDT]       pacote 0 duplicado - reenviando ACK
+[RDT]       pacote 1 íntegro - enviando ACK
+[RDT]       canal CORROMPEU ACK seq=1
+[RDT]       pacote 1 duplicado - reenviando ACK
+[RDT]       canal CORROMPEU ACK seq=1
+[RDT]       pacote 1 com checksum inválido - enviando NAK
+[RDT]       canal CORROMPEU NAK seq=1
+[RDT]       pacote 1 duplicado - reenviando ACK
+[RDT]       pacote 0 íntegro - enviando ACK
+[RDT]       pacote 1 íntegro - enviando ACK
+[RDT]       pacote 0 com checksum inválido - enviando NAK
+[RDT]       pacote 0 íntegro - enviando ACK
+[RDT]       canal PERDEU ACK seq=0
+[RDT]       pacote 0 duplicado - reenviando ACK
+[RDT]       pacote 1 íntegro - enviando ACK
+[RDT]       canal PERDEU ACK seq=1
+[RDT]       pacote 1 duplicado - reenviando ACK
+[RDT]       canal CORROMPEU ACK seq=1
+[RDT]       pacote 1 duplicado - reenviando ACK
+[RDT]       pacote 0 íntegro - enviando ACK
+[RDT]       pacote 1 íntegro - enviando ACK
+[RDT]       pacote 0 íntegro - enviando ACK
+[RDT]       canal CORROMPEU ACK seq=0
+[RDT]       pacote 0 duplicado - reenviando ACK
+[RDT]       pacote 1 com checksum inválido - enviando NAK
+[RDT]       pacote 1 com checksum inválido - enviando NAK
+[RDT]       pacote 1 íntegro - enviando ACK
+[RDT]       pacote 0 com checksum inválido - enviando NAK
+[RDT]       pacote 0 com checksum inválido - enviando NAK
+[RDT]       canal PERDEU NAK seq=0
+[RDT]       pacote 0 com checksum inválido - enviando NAK
+[RDT]       pacote 0 íntegro - enviando ACK
+[RDT]       pacote 1 com checksum inválido - enviando NAK
+[RDT]       canal CORROMPEU NAK seq=1
+[RDT]       pacote 1 com checksum inválido - enviando NAK
+[RDT]       pacote 1 íntegro - enviando ACK
+[RDT]       pacote 0 íntegro - enviando ACK
+[RDT]       pacote 1 com checksum inválido - enviando NAK
+[RDT]       canal PERDEU NAK seq=1
+[RDT]       pacote 1 íntegro - enviando ACK
+[RDT]       pacote 0 com checksum inválido - enviando NAK
+[RDT]       canal CORROMPEU NAK seq=0
+[RDT]       pacote 0 íntegro - enviando ACK
+[RDT]       pacote 1 íntegro - enviando ACK
+[RDT]       pacote 0 íntegro - enviando ACK
+[RDT]       pacote 1 íntegro - enviando ACK
+[RDT]       pacote 0 com checksum inválido - enviando NAK
+[RDT]       pacote 0 com checksum inválido - enviando NAK
+[RDT]       pacote 0 íntegro - enviando ACK
+[RDT]       pacote 1 íntegro - enviando ACK
+[RDT]       canal PERDEU ACK seq=1
+[RDT]       pacote 1 com checksum inválido - enviando NAK
+[RDT]       pacote 1 com checksum inválido - enviando NAK
+[RDT]       pacote 1 com checksum inválido - enviando NAK
+[RDT]       canal PERDEU NAK seq=1
+[RDT]       pacote 1 duplicado - reenviando ACK
+[RDT]       pacote 0 íntegro - enviando ACK
+[RDT]       pacote 1 íntegro - enviando ACK
+[RDT]       pacote 0 íntegro - enviando ACK
+[RDT]       pacote 1 íntegro - enviando ACK
+[RDT]       pacote 0 íntegro - enviando ACK
+[RDT]       canal CORROMPEU ACK seq=0
+[RDT]       pacote 0 duplicado - reenviando ACK
+[RDT]       pacote 1 íntegro - enviando ACK
+[RDT]       canal CORROMPEU ACK seq=1
+[RDT]       pacote 1 duplicado - reenviando ACK
+[RDT]       pacote 0 íntegro - enviando ACK
+[RDT]       pacote 1 com checksum inválido - enviando NAK
+[RDT]       pacote 1 com checksum inválido - enviando NAK
+[RDT]       pacote 1 íntegro - enviando ACK
+[RDT]       pacote 0 íntegro - enviando ACK
+[RDT]       pacote 1 com checksum inválido - enviando NAK
+[RDT]       pacote 1 íntegro - enviando ACK
+[RDT]       canal CORROMPEU ACK seq=1
+[RDT]       pacote 1 duplicado - reenviando ACK
+[RDT]       pacote 0 com checksum inválido - enviando NAK
+[RDT]       pacote 0 íntegro - enviando ACK
+[RDT]       pacote 1 íntegro - enviando ACK
+[RDT]       canal CORROMPEU ACK seq=1
+[RDT]       pacote 1 duplicado - reenviando ACK
+[RDT]       canal CORROMPEU ACK seq=1
+[RDT]       pacote 1 duplicado - reenviando ACK
+[RDT]       pacote 0 íntegro - enviando ACK
+[RDT]       pacote 1 íntegro - enviando ACK
+[RDT]       canal PERDEU ACK seq=1
+[RDT]       pacote 1 duplicado - reenviando ACK
+[RDT]       pacote 0 íntegro - enviando ACK
+[RDT]       pacote 1 íntegro - enviando ACK
+[RDT]       canal CORROMPEU ACK seq=1
+[RDT]       pacote 1 duplicado - reenviando ACK
+[RDT]       canal PERDEU ACK seq=1
+[RDT]       pacote 1 duplicado - reenviando ACK
+[RDT]       pacote 0 com checksum inválido - enviando NAK
+[RDT]       pacote 0 com checksum inválido - enviando NAK
+[RDT]       pacote 0 íntegro - enviando ACK
+[RDT]       pacote 1 íntegro - enviando ACK
+[RDT]       pacote 0 íntegro - enviando ACK
+[RDT]       pacote 1 com checksum inválido - enviando NAK
+[RDT]       pacote 1 íntegro - enviando ACK
+[RDT]       pacote 0 íntegro - enviando ACK
+[RDT]       pacote 1 íntegro - enviando ACK
+[RDT]       pacote 0 íntegro - enviando ACK
+[RDT]       canal CORROMPEU ACK seq=0
+[RDT]       pacote 0 duplicado - reenviando ACK
+[RDT]       canal PERDEU ACK seq=0
+[RDT]       pacote 0 com checksum inválido - enviando NAK
+[RDT]       canal CORROMPEU NAK seq=0
+[RDT]       pacote 0 duplicado - reenviando ACK
+[RDT]       canal PERDEU ACK seq=0
+[RDT]       pacote 0 duplicado - reenviando ACK
+[RDT]       canal CORROMPEU ACK seq=0
+[RDT]       pacote 0 duplicado - reenviando ACK
+[RDT]       pacote 1 com checksum inválido - enviando NAK
+[RDT]       pacote 1 com checksum inválido - enviando NAK
+[RDT]       pacote 1 íntegro - enviando ACK
+[RDT]       pacote 0 íntegro - enviando ACK
+[RDT]       pacote 1 íntegro - enviando ACK
+[RDT]       pacote 0 íntegro - enviando ACK
+[RDT]       canal PERDEU ACK seq=0
+[RDT]       pacote 0 duplicado - reenviando ACK
+[RDT]       canal CORROMPEU ACK seq=0
+[RDT]       pacote 0 com checksum inválido - enviando NAK
+[RDT]       pacote 0 duplicado - reenviando ACK
+[RDT]       pacote 1 íntegro - enviando ACK
+[RDT]       pacote 0 íntegro - enviando ACK
+[RDT]       pacote 1 íntegro - enviando ACK
+[RDT]       pacote 0 íntegro - enviando ACK
+[RDT]       canal CORROMPEU ACK seq=0
+[RDT]       pacote 0 duplicado - reenviando ACK
+[RDT]       canal PERDEU ACK seq=0
+[RDT]       pacote 0 duplicado - reenviando ACK
+[RDT]       pacote 1 íntegro - enviando ACK
+[RDT]       canal PERDEU ACK seq=1
+[RDT]       pacote 1 duplicado - reenviando ACK
+[RDT]       pacote 0 íntegro - enviando ACK
+[RDT]       canal PERDEU ACK seq=0
+[RDT]       pacote 0 duplicado - reenviando ACK
+[RDT]       pacote 1 íntegro - enviando ACK
+[RDT]       pacote 0 íntegro - enviando ACK
+[RDT]       pacote 1 íntegro - enviando ACK
 [CONCLUÍDO] Arquivo recuperado com sucesso e salvo como './rcvd_files_client/cliente_foto_teste.jpeg'
-[RDT 3.0] Resumo -> Timeouts: 0 | NAKs enviados: 14 | NAKs recebidos: 0
+[RDT 3.0] Resumo -> Timeouts: 0 | NAKs enviados: 31 | NAKs recebidos: 0 | Retransmissões: 0 | Perdas no canal: 19 | Corrupções no canal: 22 | Duplicados descartados: 33
 
-UDP> SAVE dado_binario.bin
-[ENVIANDO] Iniciando envio de 'dado_binario.bin' (3145728 bytes em 3072 pacotes)
-[SERVIDOR] Arquivo dado_binario.bin salvo.
-[RDT 3.0] Resumo -> Timeouts: 2761 | NAKs enviados: 0 | NAKs recebidos: 541
+UDP> SAVE teste50k.bin
+[RDT]       ACK 0 recebido
+[ENVIANDO] Iniciando envio de 'teste50k.bin' (51200 bytes em 50 pacotes)
+[RDT]       ACK 1 recebido
+[RDT]       canal CORROMPEU dados seq=0
+[RDT]       confirmação chegou corrompida - ignorada
+[RDT]       TIMEOUT esperando ACK 0 - retransmitindo
+[RDT]       TIMEOUT esperando ACK 0 - retransmitindo
+[RDT]       confirmação chegou corrompida - ignorada
+[RDT]       TIMEOUT esperando ACK 0 - retransmitindo
+[RDT]       TIMEOUT esperando ACK 0 - retransmitindo
+[RDT]       confirmação chegou corrompida - ignorada
+[RDT]       TIMEOUT esperando ACK 0 - retransmitindo
+[RDT]       TIMEOUT esperando ACK 0 - retransmitindo
+[RDT]       canal PERDEU dados seq=0
+[RDT]       TIMEOUT esperando ACK 0 - retransmitindo
+[RDT]       TIMEOUT esperando ACK 0 - retransmitindo
+[RDT]       TIMEOUT esperando ACK 0 - retransmitindo
+[RDT]       confirmação chegou corrompida - ignorada
+[RDT]       TIMEOUT esperando ACK 0 - retransmitindo
+[RDT]       canal CORROMPEU dados seq=0
+[RDT]       NAK 0 recebido - retransmitindo
+[RDT]       confirmação chegou corrompida - ignorada
+[RDT]       TIMEOUT esperando ACK 0 - retransmitindo
+[RDT]       canal PERDEU dados seq=0
+[RDT]       TIMEOUT esperando ACK 0 - retransmitindo
+[RDT]       canal PERDEU dados seq=0
+[RDT]       TIMEOUT esperando ACK 0 - retransmitindo
+[RDT]       ACK 0 recebido
+[RDT]       ACK 1 recebido
+[RDT]       ACK 0 recebido
+[RDT]       ACK 1 recebido
+[RDT]       confirmação chegou corrompida - ignorada
+[RDT]       TIMEOUT esperando ACK 0 - retransmitindo
+[RDT]       ACK 0 recebido
+[RDT]       canal PERDEU dados seq=1
+[RDT]       TIMEOUT esperando ACK 1 - retransmitindo
+[RDT]       canal CORROMPEU dados seq=1
+[RDT]       NAK 1 recebido - retransmitindo
+[RDT]       ACK 1 recebido
+[RDT]       canal PERDEU dados seq=0
+[RDT]       TIMEOUT esperando ACK 0 - retransmitindo
+[RDT]       ACK 0 recebido
+[RDT]       ACK 1 recebido
+[RDT]       canal CORROMPEU dados seq=0
+[RDT]       NAK 0 recebido - retransmitindo
+[RDT]       ACK 0 recebido
+[RDT]       confirmação chegou corrompida - ignorada
+[RDT]       TIMEOUT esperando ACK 1 - retransmitindo
+[RDT]       TIMEOUT esperando ACK 1 - retransmitindo
+[RDT]       ACK 1 recebido
+[RDT]       ACK 0 recebido
+[RDT]       canal PERDEU dados seq=1
+[RDT]       TIMEOUT esperando ACK 1 - retransmitindo
+[RDT]       TIMEOUT esperando ACK 1 - retransmitindo
+[RDT]       canal CORROMPEU dados seq=1
+[RDT]       confirmação chegou corrompida - ignorada
+[RDT]       TIMEOUT esperando ACK 1 - retransmitindo
+[RDT]       confirmação chegou corrompida - ignorada
+[RDT]       TIMEOUT esperando ACK 1 - retransmitindo
+[RDT]       ACK 1 recebido
+[RDT]       confirmação chegou corrompida - ignorada
+[RDT]       TIMEOUT esperando ACK 0 - retransmitindo
+[RDT]       canal PERDEU dados seq=0
+[RDT]       TIMEOUT esperando ACK 0 - retransmitindo
+[RDT]       ACK 0 recebido
+[RDT]       ACK 1 recebido
+[RDT]       ACK 0 recebido
+[RDT]       canal CORROMPEU dados seq=1
+[RDT]       confirmação chegou corrompida - ignorada
+[RDT]       TIMEOUT esperando ACK 1 - retransmitindo
+[RDT]       canal CORROMPEU dados seq=1
+[RDT]       NAK 1 recebido - retransmitindo
+[RDT]       confirmação chegou corrompida - ignorada
+[RDT]       TIMEOUT esperando ACK 1 - retransmitindo
+[RDT]       ACK 1 recebido
+[RDT]       ACK 0 recebido
+[RDT]       canal CORROMPEU dados seq=1
+[RDT]       NAK 1 recebido - retransmitindo
+[RDT]       canal CORROMPEU dados seq=1
+[RDT]       TIMEOUT esperando ACK 1 - retransmitindo
+[RDT]       ACK 1 recebido
+[RDT]       canal PERDEU dados seq=0
+[RDT]       TIMEOUT esperando ACK 0 - retransmitindo
+[RDT]       ACK 0 recebido
+[RDT]       confirmação chegou corrompida - ignorada
+[RDT]       TIMEOUT esperando ACK 1 - retransmitindo
+[RDT]       canal PERDEU dados seq=1
+[RDT]       TIMEOUT esperando ACK 1 - retransmitindo
+[RDT]       canal CORROMPEU dados seq=1
+[RDT]       NAK 1 recebido - retransmitindo
+[RDT]       ACK 1 recebido
+[RDT]       ACK 0 recebido
+[RDT]       canal CORROMPEU dados seq=1
+[RDT]       confirmação chegou corrompida - ignorada
+[RDT]       TIMEOUT esperando ACK 1 - retransmitindo
+[RDT]       ACK 1 recebido
+[RDT]       ACK 0 recebido
+[RDT]       canal PERDEU dados seq=1
+[RDT]       TIMEOUT esperando ACK 1 - retransmitindo
+[RDT]       canal CORROMPEU dados seq=1
+[RDT]       NAK 1 recebido - retransmitindo
+[RDT]       ACK 1 recebido
+[RDT]       ACK 0 recebido
+[RDT]       ACK 1 recebido
+[RDT]       ACK 0 recebido
+[RDT]       ACK 1 recebido
+[RDT]       TIMEOUT esperando ACK 0 - retransmitindo
+[RDT]       ACK 0 recebido
+[RDT]       TIMEOUT esperando ACK 1 - retransmitindo
+[RDT]       canal CORROMPEU dados seq=1
+[RDT]       TIMEOUT esperando ACK 1 - retransmitindo
+[RDT]       canal PERDEU dados seq=1
+[RDT]       TIMEOUT esperando ACK 1 - retransmitindo
+[RDT]       TIMEOUT esperando ACK 1 - retransmitindo
+[RDT]       confirmação chegou corrompida - ignorada
+[RDT]       TIMEOUT esperando ACK 1 - retransmitindo
+[RDT]       ACK 1 recebido
+[RDT]       ACK 0 recebido
+[RDT]       confirmação chegou corrompida - ignorada
+[RDT]       TIMEOUT esperando ACK 1 - retransmitindo
+[RDT]       canal PERDEU dados seq=1
+[RDT]       TIMEOUT esperando ACK 1 - retransmitindo
+[RDT]       ACK 1 recebido
+[RDT]       ACK 0 recebido
+[RDT]       ACK 1 recebido
+[RDT]       ACK 0 recebido
+[RDT]       ACK 1 recebido
+[RDT]       canal CORROMPEU dados seq=0
+[RDT]       NAK 0 recebido - retransmitindo
+[RDT]       canal PERDEU dados seq=0
+[RDT]       TIMEOUT esperando ACK 0 - retransmitindo
+[RDT]       canal CORROMPEU dados seq=0
+[RDT]       NAK 0 recebido - retransmitindo
+[RDT]       canal CORROMPEU dados seq=0
+[RDT]       NAK 0 recebido - retransmitindo
+[RDT]       confirmação chegou corrompida - ignorada
+[RDT]       TIMEOUT esperando ACK 0 - retransmitindo
+[RDT]       ACK 0 recebido
+[RDT]       canal CORROMPEU dados seq=1
+[RDT]       NAK 1 recebido - retransmitindo
+[RDT]       ACK 1 recebido
+[RDT]       ACK 0 recebido
+[RDT]       ACK 1 recebido
+[RDT]       ACK 0 recebido
+[RDT]       confirmação chegou corrompida - ignorada
+[RDT]       TIMEOUT esperando ACK 1 - retransmitindo
+[RDT]       canal PERDEU dados seq=1
+[RDT]       TIMEOUT esperando ACK 1 - retransmitindo
+[RDT]       ACK 1 recebido
+[RDT]       ACK 0 recebido
+[RDT]       confirmação chegou corrompida - ignorada
+[RDT]       TIMEOUT esperando ACK 1 - retransmitindo
+[RDT]       ACK 1 recebido
+[RDT]       canal CORROMPEU dados seq=0
+[RDT]       NAK 0 recebido - retransmitindo
+[RDT]       ACK 0 recebido
+[RDT]       ACK 1 recebido
+[RDT]       TIMEOUT esperando ACK 0 - retransmitindo
+[RDT]       confirmação chegou corrompida - ignorada
+[RDT]       TIMEOUT esperando ACK 0 - retransmitindo
+[RDT]       canal CORROMPEU dados seq=0
+[RDT]       NAK 0 recebido - retransmitindo
+[RDT]       canal CORROMPEU dados seq=0
+[RDT]       confirmação chegou corrompida - ignorada
+[RDT]       TIMEOUT esperando ACK 0 - retransmitindo
+[RDT]       confirmação chegou corrompida - ignorada
+[RDT]       TIMEOUT esperando ACK 0 - retransmitindo
+[RDT]       TIMEOUT esperando ACK 0 - retransmitindo
+[RDT]       TIMEOUT esperando ACK 0 - retransmitindo
+[RDT]       ACK 0 recebido
+[RDT]       ACK 1 recebido
+[RDT]       ACK 0 recebido
+[RDT]       pacote 0 íntegro - enviando ACK
+[SERVIDOR] Arquivo teste50k.bin salvo.
+[RDT 3.0] Resumo -> Timeouts: 51 | NAKs enviados: 0 | NAKs recebidos: 13 | Retransmissões: 64 | Perdas no canal: 14 | Corrupções no canal: 20 | Duplicados descartados: 0
 
-UDP> GET dado_binario.bin
-[SOLICITANDO] Requisitando 'dado_binario.bin' do servidor...
-[RECEBENDO] Arquivo terá 3145728 bytes. Aguardando 3072 pacotes...
-[CONCLUÍDO] Arquivo recuperado com sucesso e salvo como './rcvd_files_client/cliente_dado_binario.bin'
-[RDT 3.0] Resumo -> Timeouts: 0 | NAKs enviados: 736 | NAKs recebidos: 0
+UDP> GET teste50k.bin
+[RDT]       ACK 1 recebido
+[SOLICITANDO] Requisitando 'teste50k.bin' do servidor...
+[RDT]       pacote 1 íntegro - enviando ACK
+[RECEBENDO] Arquivo terá 51200 bytes. Aguardando 50 pacotes...
+[RDT]       pacote 0 com checksum inválido - enviando NAK
+[RDT]       pacote 0 com checksum inválido - enviando NAK
+[RDT]       pacote 0 com checksum inválido - enviando NAK
+[RDT]       pacote 0 íntegro - enviando ACK
+[RDT]       canal PERDEU ACK seq=0
+[RDT]       pacote 0 duplicado - reenviando ACK
+[RDT]       canal CORROMPEU ACK seq=0
+[RDT]       pacote 0 com checksum inválido - enviando NAK
+[RDT]       pacote 0 com checksum inválido - enviando NAK
+[RDT]       canal CORROMPEU NAK seq=0
+[RDT]       pacote 0 duplicado - reenviando ACK
+[RDT]       pacote 1 íntegro - enviando ACK
+[RDT]       canal PERDEU ACK seq=1
+[RDT]       pacote 1 duplicado - reenviando ACK
+[RDT]       pacote 0 íntegro - enviando ACK
+[RDT]       pacote 1 íntegro - enviando ACK
+[RDT]       canal PERDEU ACK seq=1
+[RDT]       pacote 1 duplicado - reenviando ACK
+[RDT]       pacote 0 com checksum inválido - enviando NAK
+[RDT]       canal CORROMPEU NAK seq=0
+[RDT]       pacote 0 íntegro - enviando ACK
+[RDT]       pacote 1 íntegro - enviando ACK
+[RDT]       canal PERDEU ACK seq=1
+[RDT]       pacote 1 duplicado - reenviando ACK
+[RDT]       canal PERDEU ACK seq=1
+[RDT]       pacote 1 duplicado - reenviando ACK
+[RDT]       pacote 0 íntegro - enviando ACK
+[RDT]       pacote 1 íntegro - enviando ACK
+[RDT]       pacote 0 íntegro - enviando ACK
+[RDT]       canal CORROMPEU ACK seq=0
+[RDT]       pacote 0 duplicado - reenviando ACK
+[RDT]       pacote 1 íntegro - enviando ACK
+[RDT]       pacote 0 íntegro - enviando ACK
+[RDT]       canal PERDEU ACK seq=0
+[RDT]       pacote 0 duplicado - reenviando ACK
+[RDT]       pacote 1 íntegro - enviando ACK
+[RDT]       pacote 0 íntegro - enviando ACK
+[RDT]       pacote 1 íntegro - enviando ACK
+[RDT]       pacote 0 íntegro - enviando ACK
+[RDT]       pacote 1 íntegro - enviando ACK
+[RDT]       pacote 0 íntegro - enviando ACK
+[RDT]       pacote 1 íntegro - enviando ACK
+[RDT]       pacote 0 íntegro - enviando ACK
+[RDT]       pacote 1 íntegro - enviando ACK
+[RDT]       canal CORROMPEU ACK seq=1
+[RDT]       pacote 1 duplicado - reenviando ACK
+[RDT]       pacote 0 íntegro - enviando ACK
+[RDT]       pacote 1 íntegro - enviando ACK
+[RDT]       pacote 0 íntegro - enviando ACK
+[RDT]       pacote 1 íntegro - enviando ACK
+[RDT]       pacote 0 íntegro - enviando ACK
+[RDT]       pacote 1 íntegro - enviando ACK
+[RDT]       canal PERDEU ACK seq=1
+[RDT]       pacote 1 com checksum inválido - enviando NAK
+[RDT]       pacote 1 duplicado - reenviando ACK
+[RDT]       pacote 0 íntegro - enviando ACK
+[RDT]       pacote 1 íntegro - enviando ACK
+[RDT]       pacote 0 íntegro - enviando ACK
+[RDT]       pacote 1 íntegro - enviando ACK
+[RDT]       canal CORROMPEU ACK seq=1
+[RDT]       pacote 1 duplicado - reenviando ACK
+[RDT]       pacote 0 íntegro - enviando ACK
+[RDT]       pacote 1 íntegro - enviando ACK
+[RDT]       pacote 0 íntegro - enviando ACK
+[RDT]       pacote 1 íntegro - enviando ACK
+[RDT]       pacote 0 íntegro - enviando ACK
+[RDT]       pacote 1 com checksum inválido - enviando NAK
+[RDT]       pacote 1 íntegro - enviando ACK
+[RDT]       pacote 0 íntegro - enviando ACK
+[RDT]       canal PERDEU ACK seq=0
+[RDT]       pacote 0 duplicado - reenviando ACK
+[RDT]       pacote 1 íntegro - enviando ACK
+[RDT]       pacote 0 íntegro - enviando ACK
+[RDT]       pacote 1 íntegro - enviando ACK
+[RDT]       pacote 0 com checksum inválido - enviando NAK
+[RDT]       canal CORROMPEU NAK seq=0
+[RDT]       pacote 0 íntegro - enviando ACK
+[RDT]       pacote 1 íntegro - enviando ACK
+[RDT]       pacote 0 íntegro - enviando ACK
+[RDT]       canal CORROMPEU ACK seq=0
+[RDT]       pacote 0 duplicado - reenviando ACK
+[RDT]       pacote 1 íntegro - enviando ACK
+[RDT]       pacote 0 íntegro - enviando ACK
+[RDT]       pacote 1 íntegro - enviando ACK
+[RDT]       pacote 0 íntegro - enviando ACK
+[RDT]       canal PERDEU ACK seq=0
+[RDT]       pacote 0 duplicado - reenviando ACK
+[RDT]       pacote 1 íntegro - enviando ACK
+[RDT]       pacote 0 íntegro - enviando ACK
+[RDT]       pacote 1 íntegro - enviando ACK
+[RDT]       canal PERDEU ACK seq=1
+[CONCLUÍDO] Arquivo recuperado com sucesso e salvo como './rcvd_files_client/cliente_teste50k.bin'
+[RDT 3.0] Resumo -> Timeouts: 0 | NAKs enviados: 9 | NAKs recebidos: 0 | Retransmissões: 0 | Perdas no canal: 10 | Corrupções no canal: 8 | Duplicados descartados: 14
 
 UDP> GET nao_existe.txt
+[RDT]       canal PERDEU ACK seq=1
+[RDT]       canal PERDEU ACK seq=1
+[RDT]       confirmação chegou corrompida - ignorada
+[RDT]       confirmação chegou corrompida - ignorada
+[RDT]       canal PERDEU ACK seq=1
+[RDT]       ACK 0 recebido
 [SOLICITANDO] Requisitando 'nao_existe.txt' do servidor...
+[RDT]       pacote 0 com checksum inválido - enviando NAK
+[RDT]       pacote 0 íntegro - enviando ACK
 [ERRO DO SERVIDOR] ERRO: Arquivo não encontrado.
 
 UDP> SAIR
 [SESSÃO ENCERRADA]
-gfabri@FabriNitro:~/Projects/CIN0018-Projeto1-UDP$ ls -lh src/ rcvd_files_server/ rcvd_files_client/
-rcvd_files_client/:
-rcvd_files_client/:
-total 3.1M
--rw-rw-r-- 1 gfabri gfabri 3.0M Oct 10 19:26 cliente_dado_binario.bin
--rw-rw-r-- 1 gfabri gfabri  63K Oct 10 19:21 cliente_foto_teste.jpeg
--rw-rw-r-- 1 gfabri gfabri   51 Oct 10 19:20 cliente_texto.txt
 
-rcvd_files_server/:
-total 3.1M
--rw-rw-r-- 1 gfabri gfabri 3.0M Oct 10 19:23 servidor_dado_binario.bin
--rw-rw-r-- 1 gfabri gfabri  63K Oct 10 19:21 servidor_foto_teste.jpeg
--rw-rw-r-- 1 gfabri gfabri   51 Oct 10 19:20 servidor_texto.txt
-
-src/:
-total 3.2M
--rw-rw-r-- 1 gfabri gfabri 3.0M Oct 10 18:43 dado_binario.bin
--rw-rw-r-- 1 gfabri gfabri  63K Oct  9 15:31 foto_teste.jpeg
--rw-rw-rw- 1 gfabri gfabri  50K Oct 10 18:47 teste50k.bin
--rw-rw-r-- 1 gfabri gfabri   51 Oct  9 15:31 texto.txt
-bash: rcvd_files_client/:: No such file or directory
-gfabri@FabriNitro:~/Projects/CIN0018-Projeto1-UDP$ md5sum src/* rcvd_files_server/* rcvd_files_client/*
+sen@archlinux:~/Work/python/udp/CIN0018-Projeto1-UDP$ md5sum src/* rcvd_files_server/* rcvd_files_client/*
 8ee01f78042fc1b156c3f4fe1ad02e55  src/dado_binario.bin
 9ddc2c223a2f370e70f6466cf5183cb9  src/foto_teste.jpeg
 e0c8fc17ac9206862c41849e91eca271  src/teste50k.bin
 9bf92fc622614aa5695251057fb62cd8  src/texto.txt
-8ee01f78042fc1b156c3f4fe1ad02e55  rcvd_files_server/servidor_dado_binario.bin
 9ddc2c223a2f370e70f6466cf5183cb9  rcvd_files_server/servidor_foto_teste.jpeg
+e0c8fc17ac9206862c41849e91eca271  rcvd_files_server/servidor_teste50k.bin
 9bf92fc622614aa5695251057fb62cd8  rcvd_files_server/servidor_texto.txt
-8ee01f78042fc1b156c3f4fe1ad02e55  rcvd_files_client/cliente_dado_binario.bin
 9ddc2c223a2f370e70f6466cf5183cb9  rcvd_files_client/cliente_foto_teste.jpeg
+e0c8fc17ac9206862c41849e91eca271  rcvd_files_client/cliente_teste50k.bin
 9bf92fc622614aa5695251057fb62cd8  rcvd_files_client/cliente_texto.txt

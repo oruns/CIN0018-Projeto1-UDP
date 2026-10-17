@@ -15,11 +15,11 @@
 
 ## Descrição do Projeto (Segunda Entrega)
 
-Aplicação cliente-servidor em Python para transmissão de arquivos sobre UDP. Diferente da primeira entrega, onde os pacotes estavam sujeitos à perda da rede, esta segunda entrega implementa o protocolo de transferência confiável **RDT 3.0 (Stop-and-Wait)** na camada de aplicação.
+Aplicação cliente-servidor em Python para transmissão de arquivos sobre UDP. Na primeira entrega os pacotes ficavam à mercê da rede e um datagrama perdido estragava o arquivo. Esta segunda entrega implementa o RDT 3.0 (Stop-and-Wait) na camada de aplicação, então o arquivo chega inteiro mesmo quando o canal perde ou corrompe pacotes.
 
-O protocolo utiliza internamente a biblioteca `socket` do Python, mas as chamadas de envio e recebimento foram encapsuladas em uma classe `RDTSocket`. Essa abstração garante que arquivos, não importa o tamanho, sejam fragmentados, numerados e reconstruídos com 100% de integridade no destino, lidando ativamente com perda de pacotes, perda de confirmações e corrupção de dados.
+O envio e o recebimento foram encapsulados na classe `RDTSocket`, em `rdt.py`. Cliente e servidor chamam `rdt_send` e `rdt_recv` no lugar de `sendto` e `recvfrom`, e toda a fragmentação, numeração e retransmissão acontece lá dentro.
 
-A interface do cliente permanece a mesma: uma sessão interativa aceitando os comandos `SAVE <arquivo>` e `GET <arquivo>`. Cada evento do protocolo (perda, corrupção, timeout, retransmissão, ACK duplicado) é registrado no terminal no instante em que acontece, e ao final de cada transferência um resumo consolida tudo o que o protocolo resolveu sozinho.
+A interface do cliente continua sendo a sessão interativa da primeira entrega, com os comandos `SAVE <arquivo>` e `GET <arquivo>`. O que mudou é que agora cada evento do protocolo aparece no terminal no instante em que acontece, e um resumo fecha cada transferência.
 
 ## Estrutura de diretórios
 
@@ -36,55 +36,45 @@ A interface do cliente permanece a mesma: uma sessão interativa aceitando os co
 └── .gitignore                # Ignora bytecode e os binários grandes regerados
 ```
 
-Os diretórios `rcvd_files_server/` e `rcvd_files_client/` são criados automaticamente na
-primeira execução.
+Os diretórios `rcvd_files_server/` e `rcvd_files_client/` são criados automaticamente na primeira execução.
 
 ## Protocolo e Confiabilidade (RDT 3.0)
 
-Todos os datagramas transferidos pela rede possuem um cabeçalho customizado de 4 bytes antes do payload:
-`[TIPO (1 byte)] + [NÚMERO DE SEQUÊNCIA (1 byte)] + [CHECKSUM (2 bytes)] + [DADOS]`
+Todo datagrama leva um cabeçalho de 4 bytes antes do payload.
 
-O checksum é uma soma de verificação de 16 bits em complemento de um, calculada sobre o tipo, o número de sequência e os dados. É ele que permite ao receptor **detectar** que um pacote chegou corrompido, em vez de supor.
+```text
+[TIPO (1 byte)] + [NÚMERO DE SEQUÊNCIA (1 byte)] + [CHECKSUM (2 bytes)] + [DADOS]
+```
 
 | Tipos de Pacote | Descrição |
 |---|---|
 | `b'D'` (Data) | Pacote contendo dados ou comandos. Requer confirmação. |
 | `b'A'` (ACK) | Confirmação do último pacote recebido corretamente. |
 
-**Máquinas de estado:**
+O checksum é uma soma de verificação de 16 bits em complemento de um, calculada sobre o tipo, o número de sequência e os dados. É ele que permite ao receptor **detectar** que um pacote chegou corrompido, em vez de supor.
 
-O código segue as FSMs do rdt3.0, com os estados nomeados em `rdt.py` e registrados no log a cada transição.
+### Máquinas de estado
+
+O código segue as FSMs do rdt3.0. Os estados estão nomeados em `rdt.py`, e cada bloco de código traz um comentário dizendo a qual deles pertence.
 
 | Lado | Estados |
 |---|---|
 | Transmissor (`rdt_send`) | `Espera chamada 0 de cima`, `Espera por ACK0`, `Espera chamada 1 de cima`, `Espera por ACK1` |
 | Receptor (`rdt_recv`) | `Esperar 0 de baixo`, `Esperar 1 de baixo` |
 
-O log mostra o estado em que cada evento aconteceu:
+O número de sequência alterna entre 0 e 1 para que uma retransmissão atrasada não seja confundida com um pacote novo. O transmissor manda um pacote de cada vez e só avança depois do ACK correspondente, o que também segura o ritmo do envio no que o receptor dá conta de processar.
 
-```text
-[RDT]       [Espera chamada 0 de cima] envia pacote 0
-[RDT]       (canal) PERDEU dados seq=0
-[RDT]       [Espera por ACK0] timeout, retransmite
-[RDT]       [Espera por ACK0] ACK 0 recebido
-```
+### Confirmações e retransmissões
 
-```text
-[RDT]       [Esperar 0 de baixo] checksum inválido, reenvia ACK 1
-[RDT]       [Esperar 0 de baixo] pacote 0 íntegro, envia ACK 0
-```
-
-**Mecanismos de Confiabilidade Implementados:**
-* **Numeração de Sequência Alternada (0 e 1):** Impede que pacotes retransmitidos atrasados sejam confundidos com novos dados.
-* **Stop-and-Wait:** O remetente envia 1 pacote e aguarda até receber o ACK correspondente antes de enviar o próximo fragmento.
-* **Temporizadores (Timeouts):** Se um pacote `D` ou seu `ACK` for perdido, o remetente retransmite automaticamente após 50ms.
-* **Checksum e ACK duplicado:** O receptor recalcula o checksum de todo pacote que chega. Se o valor não confere, ou se o pacote não é o esperado, ele reenvia o `ACK` do último pacote aceito, e o remetente retransmite na hora, sem esperar o temporizador estourar.
-* **Retransmissão sem desistência:** O remetente retransmite enquanto não receber o `ACK` correspondente. O protocolo nunca descarta um dado, de modo que a entrega independe da taxa de perda do canal.
+O receptor confirma sempre o último pacote que aceitou. Se o checksum falha, ou se o número de sequência não é o esperado, ele repete o ACK anterior, e o transmissor entende que precisa reenviar. Quando o pacote some por completo não chega confirmação nenhuma, e aí o temporizador de 50ms é quem dispara a retransmissão.
 
 Quando o checksum falha, o número de sequência também não é confiável, já que está dentro da área protegida. Por isso o receptor responde a partir do próprio estado, reenviando o `ACK` do último pacote que aceitou.
 
-**Simulação de Ambiente Hostil (`rdt.py`):**
-O ruído é injetado em um único ponto, a função `send_pkt`, que representa o canal. Todo pacote entregue a ela (dados ou ACK) passa por um sorteio: pode sumir, pode ter um bit invertido antes de seguir viagem, ou pode chegar intacto. Como perda e corrupção saem do mesmo sorteio, elas são mutuamente exclusivas e cada uma respeita exatamente a probabilidade configurada.
+O transmissor retransmite enquanto não receber a confirmação, sem limite de tentativas. Um canal mais ruim deixa a transferência mais lenta, mas não faz o protocolo desistir de um pacote.
+
+### Simulação de ambiente hostil
+
+O ruído é injetado num único ponto, a função `send_pkt`, que faz o papel do canal. Todo pacote entregue a ela, de dados ou de controle, passa por um sorteio e pode sumir, pode ter um bit invertido antes de seguir viagem, ou pode chegar intacto. Como perda e corrupção saem do mesmo sorteio, elas são mutuamente exclusivas e cada uma respeita a probabilidade configurada.
 
 | Constante | Valor | Descrição |
 |---|---|---|
@@ -108,29 +98,27 @@ O sistema deve ser testado com dois terminais simultâneos.
 
 ### 1. Iniciar o servidor
 
-No primeiro terminal, na pasta do projeto:
+No primeiro terminal, dentro da pasta do projeto.
+
 ```bash
 python3 server.py
 ```
 
-O servidor passa a escutar em `127.0.0.1:6767` e registra no terminal tudo o que recebe
-e envia.
+O servidor passa a escutar em `127.0.0.1:6767` e registra tudo o que recebe e envia.
 
 ### 2. Abrir a sessão do cliente
 
-No segundo terminal:
+No segundo terminal.
+
 ```bash
 python3 client.py
 ```
 
-Você pode usar os mesmos comandos da primeira entrega:
-* `SAVE <arquivo>`
-* `GET <arquivo>`
-* `SAIR`
+Valem os mesmos comandos da primeira entrega, `SAVE <arquivo>`, `GET <arquivo>` e `SAIR`.
 
-**Transparência: log em tempo real e resumo consolidado**
+### 3. Acompanhar o protocolo
 
-Cada evento do protocolo é impresso no terminal no instante em que ocorre, prefixado por `[RDT]`, de modo que dá para acompanhar a máquina de estados funcionando:
+Cada evento sai no terminal prefixado por `[RDT]`, com o estado em que aconteceu, dá para ver a máquina de estados girando.
 
 ```text
 [RDT]       [Espera chamada 0 de cima] envia pacote 0
@@ -139,25 +127,32 @@ Cada evento do protocolo é impresso no terminal no instante em que ocorre, pref
 [RDT]       [Espera por ACK0] ACK 0 recebido
 ```
 
-Ao final de cada transferência, uma linha consolida o esforço total:
+Do outro lado aparece o receptor recusando o pacote corrompido e aceitando a retransmissão.
+
+```text
+[RDT]       [Esperar 0 de baixo] checksum inválido, reenvia ACK 1
+[RDT]       [Esperar 0 de baixo] pacote 0 íntegro, envia ACK 0
+```
+
+No fim de cada transferência uma linha consolida o esforço total.
 
 ```text
 [RDT 3.0] Resumo -> Timeouts: 49 | Retransmissões: 60 | ACKs reenviados: 1 | ACKs duplicados recebidos: 11 | Perdas no canal: 26 | Corrupções no canal: 18 | Corrompidos detectados: 12
 ```
 
-Em transferências muito grandes o volume de linhas individuais dificulta a leitura. Para esses casos, basta definir `VERBOSE = False` em `rdt.py`: o log por evento é suprimido e o resumo continua sendo impresso.
+Em arquivos grandes o volume de linhas atrapalha a leitura. Nesses casos basta definir `VERBOSE = False` em `rdt.py`, que o log por evento some e o resumo continua.
 
-### 3. Conferir a integridade absoluta
+### 4. Conferir a integridade
 
-Mesmo com perdas e corrupções extremas simuladas no código, os arquivos chegam idênticos. Para atestar o funcionamento do RDT, execute:
 ```bash
 md5sum src/* rcvd_files_server/* rcvd_files_client/*
 ```
-Os três hashes de um mesmo arquivo serão perfeitamente idênticos, garantindo ausência total de bytes corrompidos e provando a confiabilidade do protocolo sobre um canal ruidoso.
 
-## Testes e Observações Finais
+Os três hashes de um mesmo arquivo devem bater, o que mostra que nenhum byte se perdeu no caminho.
 
-A sessão registrada em `log_cliente.txt` e `log_server.txt` cobre três formatos diferentes, com `VERBOSE = True`, e termina com a conferência dos hashes:
+## Testes
+
+A sessão registrada em `log_cliente.txt` e `log_server.txt` cobre três formatos diferentes, com `VERBOSE = True`, e termina com a conferência dos hashes.
 
 | Arquivo | Tipo | Tamanho | Pacotes | Resultado |
 |---|---|---|---|---|
@@ -167,10 +162,4 @@ A sessão registrada em `log_cliente.txt` e `log_server.txt` cobre três formato
 
 A mesma sessão inclui um `GET` de arquivo inexistente, demonstrando o tratamento de erro do servidor.
 
-O arquivo `src/dado_binario.bin` (3.145.728 B, 3072 pacotes) foi usado como teste de carga à parte, com `VERBOSE = False` para não afogar o terminal. A transferência completa levou cerca de 4 minutos e chegou íntegra nas duas pontas, tendo atravessado 877 perdas e 882 corrupções de canal no envio e outras 733 perdas e 692 corrupções na devolução.
-
-O mecanismo de Stop-and-Wait regula naturalmente o tráfego da rede, enviando pacotes ao ritmo exato que o recebedor suporta processar, já que o protocolo exige o `ACK` do datagrama anterior antes de prosseguir. 
-
-Centenas de `Timeouts` e retransmissões são registrados e ativamente resolvidos pelo algoritmo a cada transferência de arquivos grandes. Contudo, para o usuário final da aplicação (a camada superior do cliente/servidor), a transferência se concretiza de forma completamente transparente e sem erros, comprovando os ensinamentos teóricos da disciplina na prática.
-
-Como o remetente retransmite indefinidamente, a confiabilidade não depende de quão ruim é o canal: aumentar `LOSS_PROB` e `CORRUPT_PROB` apenas torna a transferência mais lenta. Em testes com 40% de perda e 40% de corrupção simultâneas, os arquivos continuaram chegando sem um único byte trocado.
+Para um teste de carga maior há o `src/dado_binario.bin`, com 3.145.728 bytes em 3072 pacotes. Ele leva alguns minutos e vale rodar com `VERBOSE = False`.

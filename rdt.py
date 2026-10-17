@@ -3,8 +3,12 @@ Canal de transferência confiável RDT 3.0 (Stop-and-Wait) sobre sockets UDP.
 
 Cabeçalho de 4 bytes: [TIPO (1)] [SEQ (1)] [CHECKSUM (2)] [DADOS]
 
+O transmissor percorre os quatro estados da FSM do rdt3.0 (Espera chamada 0 de
+cima, Espera por ACK0, Espera chamada 1 de cima, Espera por ACK1) e o receptor
+alterna entre Esperar 0 de baixo e Esperar 1 de baixo.
+
 O receptor confirma sempre o último pacote que aceitou, então um ACK repetido
-é o que avisa o remetente de que o pacote atual precisa ser reenviado. A perda
+é o que avisa o transmissor de que o pacote atual precisa ser reenviado. A perda
 total do pacote fica por conta do temporizador.
 
 A simulação do canal está em send_pkt: um pacote entregue a ela pode sumir ou
@@ -21,6 +25,11 @@ TIMEOUT = 0.05        # 50ms de timeout
 VERBOSE = True        # Registra cada evento do protocolo em tempo de execução
 
 HEADER_SIZE = 4
+
+# Estados das FSMs do rdt3.0, indexados pelo número de sequência.
+ESPERA_CHAMADA = ("Espera chamada 0 de cima", "Espera chamada 1 de cima")
+ESPERA_ACK = ("Espera por ACK0", "Espera por ACK1")
+ESPERAR_DE_BAIXO = ("Esperar 0 de baixo", "Esperar 1 de baixo")
 
 
 def checksum(data):
@@ -78,9 +87,14 @@ class RDTSocket:
             "corrompidos_detectados": 0,
         }
 
-    def log(self, mensagem):
+    def log(self, estado, transicao):
+        """Registra uma transição da FSM: o estado de origem e o que ela faz."""
         if VERBOSE:
-            print(f"[RDT]       {mensagem}", flush=True)
+            print(f"[RDT]       [{estado}] {transicao}", flush=True)
+
+    def log_canal(self, mensagem):
+        if VERBOSE:
+            print(f"[RDT]       (canal) {mensagem}", flush=True)
 
     def print_and_clear_stats(self):
         s = self.stats
@@ -104,12 +118,12 @@ class RDTSocket:
 
         if sorteio < LOSS_PROB:
             self.stats["perdas"] += 1
-            self.log(f"canal PERDEU {self._descrever(pkt)}")
+            self.log_canal(f"PERDEU {self._descrever(pkt)}")
             return
 
         if sorteio < LOSS_PROB + CORRUPT_PROB:
             self.stats["corrupcoes"] += 1
-            self.log(f"canal CORROMPEU {self._descrever(pkt)}")
+            self.log_canal(f"CORROMPEU {self._descrever(pkt)}")
             pkt = self._corromper(pkt)
 
         self.sock.sendto(pkt, addr)
@@ -128,69 +142,78 @@ class RDTSocket:
         return bytes(corrompido)
 
     def rdt_send(self, data, addr):
-        """Envia dados de forma confiável usando RDT 3.0 (Stop-and-Wait).
+        """FSM do transmissor: Espera chamada N de cima -> Espera por ACKN.
 
-        Retransmite até o ACK chegar, de modo que a entrega não depende da taxa
-        de perda do canal.
+        Só volta quando o ACK correspondente chega, então a entrega não depende
+        da taxa de perda do canal.
         """
-        pkt = make_pkt(b"D", self.seq_send, data)
-        primeira_tentativa = True
+        seq = self.seq_send
+        sndpkt = make_pkt(b"D", seq, data)
 
+        self.log(ESPERA_CHAMADA[seq], "rdt_send(data) -> udt_send(sndpkt), start_timer")
+        self.send_pkt(sndpkt, addr)
+
+        # Daqui em diante o estado é ESPERA_ACK[seq].
         while True:
-            if not primeira_tentativa:
+            try:
+                rcvpkt, rcv_addr = self.sock.recvfrom(65535)
+            except socket.timeout:
+                self.stats["timeouts"] += 1
                 self.stats["retransmissoes"] += 1
-            self.send_pkt(pkt, addr)
-            primeira_tentativa = False
+                self.log(ESPERA_ACK[seq], "timeout -> udt_send(sndpkt), start_timer")
+                self.send_pkt(sndpkt, addr)
+                continue
 
-            aguardando = True
-            while aguardando:
-                try:
-                    recv_pkt, recv_addr = self.sock.recvfrom(65535)
-                except socket.timeout:
-                    self.stats["timeouts"] += 1
-                    self.log(f"TIMEOUT esperando ACK {self.seq_send} - retransmitindo")
-                    aguardando = False
-                    continue
+            pkt_type, rcv_seq, _, integro = parse_pkt(rcvpkt)
 
-                pkt_type, seq, _, integro = parse_pkt(recv_pkt)
+            if not integro:
+                # corrupt(rcvpkt): nada a fazer, o temporizador resolve.
+                self.stats["corrompidos_detectados"] += 1
+                self.log(ESPERA_ACK[seq], "rdt_rcv && corrupt(rcvpkt) -> Λ")
+                continue
 
-                if not integro:
-                    # Confirmação ilegível: deixa o temporizador resolver.
-                    self.stats["corrompidos_detectados"] += 1
-                    self.log("ACK chegou corrompido - aguardando timeout")
-                    continue
+            if pkt_type == b"A":
+                if rcv_seq == seq:
+                    self.seq_send = 1 - seq
+                    self.log(
+                        ESPERA_ACK[seq],
+                        f"rdt_rcv && notcorrupt && isACK({seq}) -> stop_timer "
+                        f"=> {ESPERA_CHAMADA[self.seq_send]}",
+                    )
+                    return
 
-                if pkt_type == b"A":
-                    if seq == self.seq_send:
-                        self.log(f"ACK {seq} recebido")
-                        self.seq_send = 1 - self.seq_send
-                        return
+                # isACK do pacote anterior: o receptor está pedindo este de novo.
+                self.stats["acks_duplicados"] += 1
+                self.stats["retransmissoes"] += 1
+                self.log(
+                    ESPERA_ACK[seq],
+                    f"rdt_rcv && isACK({rcv_seq}) -> udt_send(sndpkt), start_timer",
+                )
+                self.send_pkt(sndpkt, addr)
 
-                    # Confirmação do pacote anterior: o receptor quer este de novo.
-                    self.stats["acks_duplicados"] += 1
-                    self.log(f"ACK {seq} duplicado - retransmitindo")
-                    aguardando = False
-
-                elif pkt_type == b"D":
-                    # Dados chegando enquanto esperamos o ACK, porque os dois
-                    # sentidos dividem o mesmo socket.
-                    if seq == self.seq_recv:
-                        self.recv_buffer.append((recv_pkt, recv_addr))
-                    else:
-                        self.send_pkt(make_pkt(b"A", seq), recv_addr)
+            elif pkt_type == b"D":
+                # Dados chegando enquanto esperamos o ACK, porque os dois
+                # sentidos dividem o mesmo socket.
+                if rcv_seq == self.seq_recv:
+                    self.recv_buffer.append((rcvpkt, rcv_addr))
+                else:
+                    self.send_pkt(make_pkt(b"A", rcv_seq), rcv_addr)
 
     def rdt_recv(self):
-        """Recebe dados de forma confiável usando RDT 3.0."""
+        """FSM do receptor: alterna entre Esperar 0 de baixo e Esperar 1 de baixo."""
         while True:
+            esperado = self.seq_recv
+            estado = ESPERAR_DE_BAIXO[esperado]
+
             if self.recv_buffer:
-                pkt, addr = self.recv_buffer.pop(0)
+                rcvpkt, addr = self.recv_buffer.pop(0)
             else:
                 try:
-                    pkt, addr = self.sock.recvfrom(65535)
+                    rcvpkt, addr = self.sock.recvfrom(65535)
                 except socket.timeout:
                     continue
 
-            pkt_type, seq, data, integro = parse_pkt(pkt)
+            pkt_type, seq, data, integro = parse_pkt(rcvpkt)
 
             if pkt_type != b"D":
                 continue
@@ -198,19 +221,28 @@ class RDTSocket:
             if not integro:
                 # O seq veio dentro da área protegida, então não serve de
                 # referência: a resposta sai do estado local.
-                ultimo_aceito = 1 - self.seq_recv
+                ultimo_aceito = 1 - esperado
                 self.stats["corrompidos_detectados"] += 1
                 self.stats["acks_repetidos"] += 1
-                self.log(f"pacote com checksum inválido - reenviando ACK {ultimo_aceito}")
+                self.log(
+                    estado,
+                    f"rdt_rcv && corrupt(rcvpkt) -> udt_send(ACK{ultimo_aceito})",
+                )
                 self.send_pkt(make_pkt(b"A", ultimo_aceito), addr)
                 continue
 
-            if seq == self.seq_recv:
-                self.log(f"pacote {seq} íntegro - enviando ACK {seq}")
-                self.send_pkt(make_pkt(b"A", seq), addr)
-                self.seq_recv = 1 - self.seq_recv
+            if seq == esperado:
+                self.seq_recv = 1 - esperado
+                self.log(
+                    estado,
+                    f"rdt_rcv && notcorrupt && has_seq{esperado} -> extract, "
+                    f"deliver_data, udt_send(ACK{esperado}) "
+                    f"=> {ESPERAR_DE_BAIXO[self.seq_recv]}",
+                )
+                self.send_pkt(make_pkt(b"A", esperado), addr)
                 return data, addr
 
+            # Duplicata: confirma de novo o pacote que já tinha sido aceito.
             self.stats["acks_repetidos"] += 1
-            self.log(f"pacote {seq} duplicado - reenviando ACK {seq}")
+            self.log(estado, f"rdt_rcv && has_seq{seq} -> udt_send(ACK{seq})")
             self.send_pkt(make_pkt(b"A", seq), addr)

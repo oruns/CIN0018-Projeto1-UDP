@@ -15,623 +15,790 @@ Sessão iniciada. Comandos disponíveis:
 ============================================================
 
 UDP> SAVE texto.txt
-[RDT]       ACK 0 recebido
+[RDT]       [Espera chamada 0 de cima] rdt_send(data) -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK0] rdt_rcv && notcorrupt && isACK(0) -> stop_timer => Espera chamada 1 de cima
 [ENVIANDO] Iniciando envio de 'texto.txt' (51 bytes em 1 pacotes)
-[RDT]       canal PERDEU dados seq=1
-[RDT]       TIMEOUT esperando ACK 1 - retransmitindo
-[RDT]       ACK 1 recebido
-[RDT]       pacote 0 íntegro - enviando ACK 0
+[RDT]       [Espera chamada 1 de cima] rdt_send(data) -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK1] rdt_rcv && notcorrupt && isACK(1) -> stop_timer => Espera chamada 0 de cima
+[RDT]       [Esperar 0 de baixo] rdt_rcv && notcorrupt && has_seq0 -> extract, deliver_data, udt_send(ACK0) => Esperar 1 de baixo
 [SERVIDOR] Arquivo texto.txt salvo.
-[RDT 3.0] Resumo -> Timeouts: 1 | Retransmissões: 1 | ACKs reenviados: 0 | ACKs duplicados recebidos: 0 | Perdas no canal: 1 | Corrupções no canal: 0 | Corrompidos detectados: 0
+[RDT 3.0] Resumo -> Timeouts: 0 | Retransmissões: 0 | ACKs reenviados: 0 | ACKs duplicados recebidos: 0 | Perdas no canal: 0 | Corrupções no canal: 0 | Corrompidos detectados: 0
 
 UDP> GET texto.txt
-[RDT]       ACK 0 recebido
+[RDT]       [Espera chamada 0 de cima] rdt_send(data) -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK0] rdt_rcv && corrupt(rcvpkt) -> Λ
+[RDT]       [Espera por ACK0] timeout -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK0] rdt_rcv && notcorrupt && isACK(0) -> stop_timer => Espera chamada 1 de cima
 [SOLICITANDO] Requisitando 'texto.txt' do servidor...
-[RDT]       pacote 1 íntegro - enviando ACK 1
-[RDT]       canal PERDEU ACK seq=1
+[RDT]       [Esperar 1 de baixo] rdt_rcv && notcorrupt && has_seq1 -> extract, deliver_data, udt_send(ACK1) => Esperar 0 de baixo
 [RECEBENDO] Arquivo terá 51 bytes. Aguardando 1 pacotes...
-[RDT]       pacote 1 duplicado - reenviando ACK 1
-[RDT]       pacote 0 íntegro - enviando ACK 0
-[RDT]       canal CORROMPEU ACK seq=0
+[RDT]       [Esperar 0 de baixo] rdt_rcv && has_seq1 -> udt_send(ACK1)
+[RDT]       (canal) PERDEU ACK seq=1
+[RDT]       [Esperar 0 de baixo] rdt_rcv && notcorrupt && has_seq0 -> extract, deliver_data, udt_send(ACK0) => Esperar 1 de baixo
 [CONCLUÍDO] Arquivo recuperado com sucesso e salvo como './rcvd_files_client/cliente_texto.txt'
-[RDT 3.0] Resumo -> Timeouts: 0 | Retransmissões: 0 | ACKs reenviados: 1 | ACKs duplicados recebidos: 0 | Perdas no canal: 1 | Corrupções no canal: 1 | Corrompidos detectados: 0
+[RDT 3.0] Resumo -> Timeouts: 1 | Retransmissões: 1 | ACKs reenviados: 1 | ACKs duplicados recebidos: 0 | Perdas no canal: 1 | Corrupções no canal: 0 | Corrompidos detectados: 1
 
 UDP> SAVE foto_teste.jpeg
-[RDT]       canal CORROMPEU ACK seq=0
-[RDT]       ACK chegou corrompido - aguardando timeout
-[RDT]       ACK chegou corrompido - aguardando timeout
-[RDT]       ACK chegou corrompido - aguardando timeout
-[RDT]       canal CORROMPEU ACK seq=0
-[RDT]       ACK chegou corrompido - aguardando timeout
-[RDT]       canal PERDEU ACK seq=0
-[RDT]       canal CORROMPEU ACK seq=0
-[RDT]       canal PERDEU ACK seq=0
-[RDT]       TIMEOUT esperando ACK 1 - retransmitindo
-[RDT]       canal CORROMPEU dados seq=1
-[RDT]       ACK 1 recebido
+[RDT]       [Espera chamada 1 de cima] rdt_send(data) -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK1] rdt_rcv && corrupt(rcvpkt) -> Λ
+[RDT]       [Espera por ACK1] timeout -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK1] rdt_rcv && notcorrupt && isACK(1) -> stop_timer => Espera chamada 0 de cima
 [ENVIANDO] Iniciando envio de 'foto_teste.jpeg' (63541 bytes em 63 pacotes)
-[RDT]       ACK 0 recebido
-[RDT]       ACK 1 recebido
-[RDT]       ACK 0 recebido
-[RDT]       ACK 1 recebido
-[RDT]       ACK 0 recebido
-[RDT]       ACK 1 recebido
-[RDT]       TIMEOUT esperando ACK 0 - retransmitindo
-[RDT]       canal PERDEU dados seq=0
-[RDT]       TIMEOUT esperando ACK 0 - retransmitindo
-[RDT]       ACK 0 recebido
-[RDT]       ACK 1 recebido
-[RDT]       ACK chegou corrompido - aguardando timeout
-[RDT]       TIMEOUT esperando ACK 0 - retransmitindo
-[RDT]       ACK 0 recebido
-[RDT]       ACK chegou corrompido - aguardando timeout
-[RDT]       TIMEOUT esperando ACK 1 - retransmitindo
-[RDT]       ACK chegou corrompido - aguardando timeout
-[RDT]       TIMEOUT esperando ACK 1 - retransmitindo
-[RDT]       TIMEOUT esperando ACK 1 - retransmitindo
-[RDT]       ACK 1 recebido
-[RDT]       ACK 0 recebido
-[RDT]       ACK 1 recebido
-[RDT]       ACK 0 recebido
-[RDT]       ACK 1 recebido
-[RDT]       TIMEOUT esperando ACK 0 - retransmitindo
-[RDT]       ACK 0 recebido
-[RDT]       ACK 1 recebido
-[RDT]       ACK 0 recebido
-[RDT]       canal PERDEU dados seq=1
-[RDT]       TIMEOUT esperando ACK 1 - retransmitindo
-[RDT]       canal PERDEU dados seq=1
-[RDT]       TIMEOUT esperando ACK 1 - retransmitindo
-[RDT]       TIMEOUT esperando ACK 1 - retransmitindo
-[RDT]       ACK 1 recebido
-[RDT]       ACK 0 recebido
-[RDT]       ACK 1 recebido
-[RDT]       canal CORROMPEU dados seq=0
-[RDT]       ACK 1 duplicado - retransmitindo
-[RDT]       TIMEOUT esperando ACK 0 - retransmitindo
-[RDT]       ACK 0 recebido
-[RDT]       ACK 1 recebido
-[RDT]       ACK 0 recebido
-[RDT]       ACK chegou corrompido - aguardando timeout
-[RDT]       TIMEOUT esperando ACK 1 - retransmitindo
-[RDT]       ACK 1 recebido
-[RDT]       ACK chegou corrompido - aguardando timeout
-[RDT]       TIMEOUT esperando ACK 0 - retransmitindo
-[RDT]       ACK 0 recebido
-[RDT]       ACK 1 recebido
-[RDT]       ACK 0 recebido
-[RDT]       ACK 1 recebido
-[RDT]       canal CORROMPEU dados seq=0
-[RDT]       ACK 1 duplicado - retransmitindo
-[RDT]       ACK chegou corrompido - aguardando timeout
-[RDT]       TIMEOUT esperando ACK 0 - retransmitindo
-[RDT]       TIMEOUT esperando ACK 0 - retransmitindo
-[RDT]       ACK 0 recebido
-[RDT]       canal PERDEU dados seq=1
-[RDT]       TIMEOUT esperando ACK 1 - retransmitindo
-[RDT]       ACK chegou corrompido - aguardando timeout
-[RDT]       TIMEOUT esperando ACK 1 - retransmitindo
-[RDT]       ACK 1 recebido
-[RDT]       canal PERDEU dados seq=0
-[RDT]       TIMEOUT esperando ACK 0 - retransmitindo
-[RDT]       ACK 0 recebido
-[RDT]       canal CORROMPEU dados seq=1
-[RDT]       ACK 0 duplicado - retransmitindo
-[RDT]       ACK chegou corrompido - aguardando timeout
-[RDT]       TIMEOUT esperando ACK 1 - retransmitindo
-[RDT]       ACK 1 recebido
-[RDT]       ACK chegou corrompido - aguardando timeout
-[RDT]       TIMEOUT esperando ACK 0 - retransmitindo
-[RDT]       ACK 0 recebido
-[RDT]       ACK 1 recebido
-[RDT]       ACK 0 recebido
-[RDT]       canal CORROMPEU dados seq=1
-[RDT]       TIMEOUT esperando ACK 1 - retransmitindo
-[RDT]       canal CORROMPEU dados seq=1
-[RDT]       TIMEOUT esperando ACK 1 - retransmitindo
-[RDT]       ACK 1 recebido
-[RDT]       canal CORROMPEU dados seq=0
-[RDT]       TIMEOUT esperando ACK 0 - retransmitindo
-[RDT]       ACK 0 recebido
-[RDT]       ACK 1 recebido
-[RDT]       ACK 0 recebido
-[RDT]       ACK 1 recebido
-[RDT]       TIMEOUT esperando ACK 0 - retransmitindo
-[RDT]       canal PERDEU dados seq=0
-[RDT]       TIMEOUT esperando ACK 0 - retransmitindo
-[RDT]       ACK 0 recebido
-[RDT]       ACK chegou corrompido - aguardando timeout
-[RDT]       TIMEOUT esperando ACK 1 - retransmitindo
-[RDT]       ACK 1 recebido
-[RDT]       canal CORROMPEU dados seq=0
-[RDT]       TIMEOUT esperando ACK 0 - retransmitindo
-[RDT]       ACK 0 recebido
-[RDT]       ACK 1 recebido
-[RDT]       ACK 0 recebido
-[RDT]       ACK 1 recebido
-[RDT]       TIMEOUT esperando ACK 0 - retransmitindo
-[RDT]       ACK 0 recebido
-[RDT]       canal CORROMPEU dados seq=1
-[RDT]       ACK chegou corrompido - aguardando timeout
-[RDT]       TIMEOUT esperando ACK 1 - retransmitindo
-[RDT]       ACK 1 recebido
-[RDT]       canal CORROMPEU dados seq=0
-[RDT]       TIMEOUT esperando ACK 0 - retransmitindo
-[RDT]       ACK chegou corrompido - aguardando timeout
-[RDT]       TIMEOUT esperando ACK 0 - retransmitindo
-[RDT]       ACK 0 recebido
-[RDT]       canal PERDEU dados seq=1
-[RDT]       TIMEOUT esperando ACK 1 - retransmitindo
-[RDT]       TIMEOUT esperando ACK 1 - retransmitindo
-[RDT]       canal CORROMPEU dados seq=1
-[RDT]       ACK 1 recebido
-[RDT]       canal CORROMPEU dados seq=0
-[RDT]       ACK 1 duplicado - retransmitindo
-[RDT]       ACK chegou corrompido - aguardando timeout
-[RDT]       TIMEOUT esperando ACK 0 - retransmitindo
-[RDT]       ACK 0 recebido
-[RDT]       canal CORROMPEU dados seq=1
-[RDT]       ACK 0 duplicado - retransmitindo
-[RDT]       ACK 1 recebido
-[RDT]       ACK 0 recebido
-[RDT]       TIMEOUT esperando ACK 1 - retransmitindo
-[RDT]       ACK 1 recebido
-[RDT]       canal CORROMPEU dados seq=0
-[RDT]       ACK 1 duplicado - retransmitindo
-[RDT]       ACK 0 recebido
-[RDT]       canal PERDEU dados seq=1
-[RDT]       TIMEOUT esperando ACK 1 - retransmitindo
-[RDT]       ACK chegou corrompido - aguardando timeout
-[RDT]       TIMEOUT esperando ACK 1 - retransmitindo
-[RDT]       canal CORROMPEU dados seq=1
-[RDT]       ACK 1 recebido
-[RDT]       ACK 0 recebido
-[RDT]       ACK 1 recebido
-[RDT]       canal PERDEU dados seq=0
-[RDT]       TIMEOUT esperando ACK 0 - retransmitindo
-[RDT]       ACK 0 recebido
-[RDT]       ACK 1 recebido
-[RDT]       ACK 0 recebido
-[RDT]       canal PERDEU dados seq=1
-[RDT]       TIMEOUT esperando ACK 1 - retransmitindo
-[RDT]       ACK 1 recebido
-[RDT]       ACK 0 recebido
-[RDT]       pacote com checksum inválido - reenviando ACK 0
-[RDT]       pacote 1 íntegro - enviando ACK 1
+[RDT]       [Espera chamada 0 de cima] rdt_send(data) -> udt_send(sndpkt), start_timer
+[RDT]       (canal) CORROMPEU dados seq=0
+[RDT]       [Espera por ACK0] rdt_rcv && isACK(1) -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK0] rdt_rcv && notcorrupt && isACK(0) -> stop_timer => Espera chamada 1 de cima
+[RDT]       [Espera chamada 1 de cima] rdt_send(data) -> udt_send(sndpkt), start_timer
+[RDT]       (canal) PERDEU dados seq=1
+[RDT]       [Espera por ACK1] timeout -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK1] rdt_rcv && notcorrupt && isACK(1) -> stop_timer => Espera chamada 0 de cima
+[RDT]       [Espera chamada 0 de cima] rdt_send(data) -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK0] rdt_rcv && notcorrupt && isACK(0) -> stop_timer => Espera chamada 1 de cima
+[RDT]       [Espera chamada 1 de cima] rdt_send(data) -> udt_send(sndpkt), start_timer
+[RDT]       (canal) PERDEU dados seq=1
+[RDT]       [Espera por ACK1] timeout -> udt_send(sndpkt), start_timer
+[RDT]       (canal) PERDEU dados seq=1
+[RDT]       [Espera por ACK1] timeout -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK1] rdt_rcv && notcorrupt && isACK(1) -> stop_timer => Espera chamada 0 de cima
+[RDT]       [Espera chamada 0 de cima] rdt_send(data) -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK0] timeout -> udt_send(sndpkt), start_timer
+[RDT]       (canal) PERDEU dados seq=0
+[RDT]       [Espera por ACK0] timeout -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK0] rdt_rcv && notcorrupt && isACK(0) -> stop_timer => Espera chamada 1 de cima
+[RDT]       [Espera chamada 1 de cima] rdt_send(data) -> udt_send(sndpkt), start_timer
+[RDT]       (canal) PERDEU dados seq=1
+[RDT]       [Espera por ACK1] timeout -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK1] rdt_rcv && notcorrupt && isACK(1) -> stop_timer => Espera chamada 0 de cima
+[RDT]       [Espera chamada 0 de cima] rdt_send(data) -> udt_send(sndpkt), start_timer
+[RDT]       (canal) PERDEU dados seq=0
+[RDT]       [Espera por ACK0] timeout -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK0] rdt_rcv && notcorrupt && isACK(0) -> stop_timer => Espera chamada 1 de cima
+[RDT]       [Espera chamada 1 de cima] rdt_send(data) -> udt_send(sndpkt), start_timer
+[RDT]       (canal) CORROMPEU dados seq=1
+[RDT]       [Espera por ACK1] rdt_rcv && isACK(0) -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK1] rdt_rcv && notcorrupt && isACK(1) -> stop_timer => Espera chamada 0 de cima
+[RDT]       [Espera chamada 0 de cima] rdt_send(data) -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK0] timeout -> udt_send(sndpkt), start_timer
+[RDT]       (canal) PERDEU dados seq=0
+[RDT]       [Espera por ACK0] timeout -> udt_send(sndpkt), start_timer
+[RDT]       (canal) CORROMPEU dados seq=0
+[RDT]       [Espera por ACK0] rdt_rcv && corrupt(rcvpkt) -> Λ
+[RDT]       [Espera por ACK0] timeout -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK0] rdt_rcv && notcorrupt && isACK(0) -> stop_timer => Espera chamada 1 de cima
+[RDT]       [Espera chamada 1 de cima] rdt_send(data) -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK1] rdt_rcv && notcorrupt && isACK(1) -> stop_timer => Espera chamada 0 de cima
+[RDT]       [Espera chamada 0 de cima] rdt_send(data) -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK0] rdt_rcv && notcorrupt && isACK(0) -> stop_timer => Espera chamada 1 de cima
+[RDT]       [Espera chamada 1 de cima] rdt_send(data) -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK1] rdt_rcv && notcorrupt && isACK(1) -> stop_timer => Espera chamada 0 de cima
+[RDT]       [Espera chamada 0 de cima] rdt_send(data) -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK0] rdt_rcv && notcorrupt && isACK(0) -> stop_timer => Espera chamada 1 de cima
+[RDT]       [Espera chamada 1 de cima] rdt_send(data) -> udt_send(sndpkt), start_timer
+[RDT]       (canal) PERDEU dados seq=1
+[RDT]       [Espera por ACK1] timeout -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK1] rdt_rcv && corrupt(rcvpkt) -> Λ
+[RDT]       [Espera por ACK1] timeout -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK1] rdt_rcv && corrupt(rcvpkt) -> Λ
+[RDT]       [Espera por ACK1] timeout -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK1] rdt_rcv && notcorrupt && isACK(1) -> stop_timer => Espera chamada 0 de cima
+[RDT]       [Espera chamada 0 de cima] rdt_send(data) -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK0] rdt_rcv && corrupt(rcvpkt) -> Λ
+[RDT]       [Espera por ACK0] timeout -> udt_send(sndpkt), start_timer
+[RDT]       (canal) PERDEU dados seq=0
+[RDT]       [Espera por ACK0] timeout -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK0] rdt_rcv && corrupt(rcvpkt) -> Λ
+[RDT]       [Espera por ACK0] timeout -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK0] timeout -> udt_send(sndpkt), start_timer
+[RDT]       (canal) CORROMPEU dados seq=0
+[RDT]       [Espera por ACK0] rdt_rcv && notcorrupt && isACK(0) -> stop_timer => Espera chamada 1 de cima
+[RDT]       [Espera chamada 1 de cima] rdt_send(data) -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK1] rdt_rcv && notcorrupt && isACK(1) -> stop_timer => Espera chamada 0 de cima
+[RDT]       [Espera chamada 0 de cima] rdt_send(data) -> udt_send(sndpkt), start_timer
+[RDT]       (canal) CORROMPEU dados seq=0
+[RDT]       [Espera por ACK0] rdt_rcv && isACK(1) -> udt_send(sndpkt), start_timer
+[RDT]       (canal) PERDEU dados seq=0
+[RDT]       [Espera por ACK0] timeout -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK0] rdt_rcv && notcorrupt && isACK(0) -> stop_timer => Espera chamada 1 de cima
+[RDT]       [Espera chamada 1 de cima] rdt_send(data) -> udt_send(sndpkt), start_timer
+[RDT]       (canal) PERDEU dados seq=1
+[RDT]       [Espera por ACK1] timeout -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK1] timeout -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK1] rdt_rcv && notcorrupt && isACK(1) -> stop_timer => Espera chamada 0 de cima
+[RDT]       [Espera chamada 0 de cima] rdt_send(data) -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK0] rdt_rcv && notcorrupt && isACK(0) -> stop_timer => Espera chamada 1 de cima
+[RDT]       [Espera chamada 1 de cima] rdt_send(data) -> udt_send(sndpkt), start_timer
+[RDT]       (canal) PERDEU dados seq=1
+[RDT]       [Espera por ACK1] timeout -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK1] timeout -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK1] rdt_rcv && notcorrupt && isACK(1) -> stop_timer => Espera chamada 0 de cima
+[RDT]       [Espera chamada 0 de cima] rdt_send(data) -> udt_send(sndpkt), start_timer
+[RDT]       (canal) CORROMPEU dados seq=0
+[RDT]       [Espera por ACK0] rdt_rcv && isACK(1) -> udt_send(sndpkt), start_timer
+[RDT]       (canal) CORROMPEU dados seq=0
+[RDT]       [Espera por ACK0] rdt_rcv && isACK(1) -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK0] rdt_rcv && notcorrupt && isACK(0) -> stop_timer => Espera chamada 1 de cima
+[RDT]       [Espera chamada 1 de cima] rdt_send(data) -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK1] rdt_rcv && notcorrupt && isACK(1) -> stop_timer => Espera chamada 0 de cima
+[RDT]       [Espera chamada 0 de cima] rdt_send(data) -> udt_send(sndpkt), start_timer
+[RDT]       (canal) CORROMPEU dados seq=0
+[RDT]       [Espera por ACK0] rdt_rcv && isACK(1) -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK0] rdt_rcv && notcorrupt && isACK(0) -> stop_timer => Espera chamada 1 de cima
+[RDT]       [Espera chamada 1 de cima] rdt_send(data) -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK1] rdt_rcv && corrupt(rcvpkt) -> Λ
+[RDT]       [Espera por ACK1] timeout -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK1] timeout -> udt_send(sndpkt), start_timer
+[RDT]       (canal) PERDEU dados seq=1
+[RDT]       [Espera por ACK1] timeout -> udt_send(sndpkt), start_timer
+[RDT]       (canal) CORROMPEU dados seq=1
+[RDT]       [Espera por ACK1] rdt_rcv && notcorrupt && isACK(1) -> stop_timer => Espera chamada 0 de cima
+[RDT]       [Espera chamada 0 de cima] rdt_send(data) -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK0] timeout -> udt_send(sndpkt), start_timer
+[RDT]       (canal) CORROMPEU dados seq=0
+[RDT]       [Espera por ACK0] rdt_rcv && corrupt(rcvpkt) -> Λ
+[RDT]       [Espera por ACK0] timeout -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK0] rdt_rcv && notcorrupt && isACK(0) -> stop_timer => Espera chamada 1 de cima
+[RDT]       [Espera chamada 1 de cima] rdt_send(data) -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK1] rdt_rcv && corrupt(rcvpkt) -> Λ
+[RDT]       [Espera por ACK1] timeout -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK1] rdt_rcv && notcorrupt && isACK(1) -> stop_timer => Espera chamada 0 de cima
+[RDT]       [Espera chamada 0 de cima] rdt_send(data) -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK0] rdt_rcv && notcorrupt && isACK(0) -> stop_timer => Espera chamada 1 de cima
+[RDT]       [Espera chamada 1 de cima] rdt_send(data) -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK1] rdt_rcv && notcorrupt && isACK(1) -> stop_timer => Espera chamada 0 de cima
+[RDT]       [Espera chamada 0 de cima] rdt_send(data) -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK0] rdt_rcv && notcorrupt && isACK(0) -> stop_timer => Espera chamada 1 de cima
+[RDT]       [Espera chamada 1 de cima] rdt_send(data) -> udt_send(sndpkt), start_timer
+[RDT]       (canal) PERDEU dados seq=1
+[RDT]       [Espera por ACK1] timeout -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK1] rdt_rcv && notcorrupt && isACK(1) -> stop_timer => Espera chamada 0 de cima
+[RDT]       [Espera chamada 0 de cima] rdt_send(data) -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK0] rdt_rcv && notcorrupt && isACK(0) -> stop_timer => Espera chamada 1 de cima
+[RDT]       [Espera chamada 1 de cima] rdt_send(data) -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK1] rdt_rcv && notcorrupt && isACK(1) -> stop_timer => Espera chamada 0 de cima
+[RDT]       [Espera chamada 0 de cima] rdt_send(data) -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK0] rdt_rcv && notcorrupt && isACK(0) -> stop_timer => Espera chamada 1 de cima
+[RDT]       [Espera chamada 1 de cima] rdt_send(data) -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK1] rdt_rcv && notcorrupt && isACK(1) -> stop_timer => Espera chamada 0 de cima
+[RDT]       [Espera chamada 0 de cima] rdt_send(data) -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK0] rdt_rcv && notcorrupt && isACK(0) -> stop_timer => Espera chamada 1 de cima
+[RDT]       [Espera chamada 1 de cima] rdt_send(data) -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK1] rdt_rcv && notcorrupt && isACK(1) -> stop_timer => Espera chamada 0 de cima
+[RDT]       [Espera chamada 0 de cima] rdt_send(data) -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK0] rdt_rcv && corrupt(rcvpkt) -> Λ
+[RDT]       [Espera por ACK0] timeout -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK0] rdt_rcv && notcorrupt && isACK(0) -> stop_timer => Espera chamada 1 de cima
+[RDT]       [Espera chamada 1 de cima] rdt_send(data) -> udt_send(sndpkt), start_timer
+[RDT]       (canal) PERDEU dados seq=1
+[RDT]       [Espera por ACK1] timeout -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK1] rdt_rcv && notcorrupt && isACK(1) -> stop_timer => Espera chamada 0 de cima
+[RDT]       [Espera chamada 0 de cima] rdt_send(data) -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK0] rdt_rcv && corrupt(rcvpkt) -> Λ
+[RDT]       [Espera por ACK0] timeout -> udt_send(sndpkt), start_timer
+[RDT]       (canal) CORROMPEU dados seq=0
+[RDT]       [Espera por ACK0] rdt_rcv && corrupt(rcvpkt) -> Λ
+[RDT]       [Espera por ACK0] timeout -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK0] rdt_rcv && notcorrupt && isACK(0) -> stop_timer => Espera chamada 1 de cima
+[RDT]       [Espera chamada 1 de cima] rdt_send(data) -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK1] rdt_rcv && notcorrupt && isACK(1) -> stop_timer => Espera chamada 0 de cima
+[RDT]       [Espera chamada 0 de cima] rdt_send(data) -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK0] rdt_rcv && notcorrupt && isACK(0) -> stop_timer => Espera chamada 1 de cima
+[RDT]       [Espera chamada 1 de cima] rdt_send(data) -> udt_send(sndpkt), start_timer
+[RDT]       (canal) PERDEU dados seq=1
+[RDT]       [Espera por ACK1] timeout -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK1] rdt_rcv && notcorrupt && isACK(1) -> stop_timer => Espera chamada 0 de cima
+[RDT]       [Espera chamada 0 de cima] rdt_send(data) -> udt_send(sndpkt), start_timer
+[RDT]       (canal) PERDEU dados seq=0
+[RDT]       [Espera por ACK0] timeout -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK0] rdt_rcv && notcorrupt && isACK(0) -> stop_timer => Espera chamada 1 de cima
+[RDT]       [Espera chamada 1 de cima] rdt_send(data) -> udt_send(sndpkt), start_timer
+[RDT]       (canal) PERDEU dados seq=1
+[RDT]       [Espera por ACK1] timeout -> udt_send(sndpkt), start_timer
+[RDT]       (canal) PERDEU dados seq=1
+[RDT]       [Espera por ACK1] timeout -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK1] rdt_rcv && notcorrupt && isACK(1) -> stop_timer => Espera chamada 0 de cima
+[RDT]       [Espera chamada 0 de cima] rdt_send(data) -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK0] rdt_rcv && notcorrupt && isACK(0) -> stop_timer => Espera chamada 1 de cima
+[RDT]       [Espera chamada 1 de cima] rdt_send(data) -> udt_send(sndpkt), start_timer
+[RDT]       (canal) PERDEU dados seq=1
+[RDT]       [Espera por ACK1] timeout -> udt_send(sndpkt), start_timer
+[RDT]       (canal) PERDEU dados seq=1
+[RDT]       [Espera por ACK1] timeout -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK1] rdt_rcv && corrupt(rcvpkt) -> Λ
+[RDT]       [Espera por ACK1] timeout -> udt_send(sndpkt), start_timer
+[RDT]       (canal) PERDEU dados seq=1
+[RDT]       [Espera por ACK1] timeout -> udt_send(sndpkt), start_timer
+[RDT]       (canal) PERDEU dados seq=1
+[RDT]       [Espera por ACK1] timeout -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK1] timeout -> udt_send(sndpkt), start_timer
+[RDT]       (canal) CORROMPEU dados seq=1
+[RDT]       [Espera por ACK1] rdt_rcv && corrupt(rcvpkt) -> Λ
+[RDT]       [Espera por ACK1] timeout -> udt_send(sndpkt), start_timer
+[RDT]       (canal) PERDEU dados seq=1
+[RDT]       [Espera por ACK1] timeout -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK1] rdt_rcv && corrupt(rcvpkt) -> Λ
+[RDT]       [Espera por ACK1] timeout -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK1] rdt_rcv && notcorrupt && isACK(1) -> stop_timer => Espera chamada 0 de cima
+[RDT]       [Espera chamada 0 de cima] rdt_send(data) -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK0] rdt_rcv && notcorrupt && isACK(0) -> stop_timer => Espera chamada 1 de cima
+[RDT]       [Espera chamada 1 de cima] rdt_send(data) -> udt_send(sndpkt), start_timer
+[RDT]       (canal) PERDEU dados seq=1
+[RDT]       [Espera por ACK1] timeout -> udt_send(sndpkt), start_timer
+[RDT]       (canal) PERDEU dados seq=1
+[RDT]       [Espera por ACK1] timeout -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK1] rdt_rcv && corrupt(rcvpkt) -> Λ
+[RDT]       [Espera por ACK1] timeout -> udt_send(sndpkt), start_timer
+[RDT]       (canal) PERDEU dados seq=1
+[RDT]       [Espera por ACK1] timeout -> udt_send(sndpkt), start_timer
+[RDT]       (canal) CORROMPEU dados seq=1
+[RDT]       [Espera por ACK1] rdt_rcv && notcorrupt && isACK(1) -> stop_timer => Espera chamada 0 de cima
+[RDT]       [Espera chamada 0 de cima] rdt_send(data) -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK0] rdt_rcv && notcorrupt && isACK(0) -> stop_timer => Espera chamada 1 de cima
+[RDT]       [Espera chamada 1 de cima] rdt_send(data) -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK1] rdt_rcv && notcorrupt && isACK(1) -> stop_timer => Espera chamada 0 de cima
+[RDT]       [Espera chamada 0 de cima] rdt_send(data) -> udt_send(sndpkt), start_timer
+[RDT]       (canal) CORROMPEU dados seq=0
+[RDT]       [Espera por ACK0] timeout -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK0] rdt_rcv && notcorrupt && isACK(0) -> stop_timer => Espera chamada 1 de cima
+[RDT]       [Espera chamada 1 de cima] rdt_send(data) -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK1] rdt_rcv && notcorrupt && isACK(1) -> stop_timer => Espera chamada 0 de cima
+[RDT]       [Espera chamada 0 de cima] rdt_send(data) -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK0] rdt_rcv && corrupt(rcvpkt) -> Λ
+[RDT]       [Espera por ACK0] timeout -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK0] rdt_rcv && notcorrupt && isACK(0) -> stop_timer => Espera chamada 1 de cima
+[RDT]       [Espera chamada 1 de cima] rdt_send(data) -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK1] rdt_rcv && notcorrupt && isACK(1) -> stop_timer => Espera chamada 0 de cima
+[RDT]       [Espera chamada 0 de cima] rdt_send(data) -> udt_send(sndpkt), start_timer
+[RDT]       (canal) PERDEU dados seq=0
+[RDT]       [Espera por ACK0] timeout -> udt_send(sndpkt), start_timer
+[RDT]       (canal) PERDEU dados seq=0
+[RDT]       [Espera por ACK0] timeout -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK0] rdt_rcv && corrupt(rcvpkt) -> Λ
+[RDT]       [Espera por ACK0] timeout -> udt_send(sndpkt), start_timer
+[RDT]       (canal) CORROMPEU dados seq=0
+[RDT]       [Espera por ACK0] rdt_rcv && notcorrupt && isACK(0) -> stop_timer => Espera chamada 1 de cima
+[RDT]       [Espera chamada 1 de cima] rdt_send(data) -> udt_send(sndpkt), start_timer
+[RDT]       (canal) CORROMPEU dados seq=1
+[RDT]       [Espera por ACK1] rdt_rcv && isACK(0) -> udt_send(sndpkt), start_timer
+[RDT]       (canal) PERDEU dados seq=1
+[RDT]       [Espera por ACK1] timeout -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK1] rdt_rcv && corrupt(rcvpkt) -> Λ
+[RDT]       [Espera por ACK1] timeout -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK1] timeout -> udt_send(sndpkt), start_timer
+[RDT]       (canal) CORROMPEU dados seq=1
+[RDT]       [Espera por ACK1] rdt_rcv && notcorrupt && isACK(1) -> stop_timer => Espera chamada 0 de cima
+[RDT]       [Espera chamada 0 de cima] rdt_send(data) -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK0] rdt_rcv && notcorrupt && isACK(0) -> stop_timer => Espera chamada 1 de cima
+[RDT]       [Espera chamada 1 de cima] rdt_send(data) -> udt_send(sndpkt), start_timer
+[RDT]       (canal) PERDEU dados seq=1
+[RDT]       [Espera por ACK1] timeout -> udt_send(sndpkt), start_timer
+[RDT]       (canal) PERDEU dados seq=1
+[RDT]       [Espera por ACK1] timeout -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK1] rdt_rcv && notcorrupt && isACK(1) -> stop_timer => Espera chamada 0 de cima
+[RDT]       [Espera chamada 0 de cima] rdt_send(data) -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK0] rdt_rcv && corrupt(rcvpkt) -> Λ
+[RDT]       [Espera por ACK0] timeout -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK0] rdt_rcv && notcorrupt && isACK(0) -> stop_timer => Espera chamada 1 de cima
+[RDT]       [Espera chamada 1 de cima] rdt_send(data) -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK1] rdt_rcv && notcorrupt && isACK(1) -> stop_timer => Espera chamada 0 de cima
+[RDT]       [Espera chamada 0 de cima] rdt_send(data) -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK0] rdt_rcv && notcorrupt && isACK(0) -> stop_timer => Espera chamada 1 de cima
+[RDT]       [Espera chamada 1 de cima] rdt_send(data) -> udt_send(sndpkt), start_timer
+[RDT]       (canal) PERDEU dados seq=1
+[RDT]       [Espera por ACK1] timeout -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK1] rdt_rcv && notcorrupt && isACK(1) -> stop_timer => Espera chamada 0 de cima
+[RDT]       [Espera chamada 0 de cima] rdt_send(data) -> udt_send(sndpkt), start_timer
+[RDT]       (canal) PERDEU dados seq=0
+[RDT]       [Espera por ACK0] timeout -> udt_send(sndpkt), start_timer
+[RDT]       (canal) CORROMPEU dados seq=0
+[RDT]       [Espera por ACK0] rdt_rcv && isACK(1) -> udt_send(sndpkt), start_timer
+[RDT]       (canal) PERDEU dados seq=0
+[RDT]       [Espera por ACK0] timeout -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK0] timeout -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK0] rdt_rcv && notcorrupt && isACK(0) -> stop_timer => Espera chamada 1 de cima
+[RDT]       [Esperar 1 de baixo] rdt_rcv && notcorrupt && has_seq1 -> extract, deliver_data, udt_send(ACK1) => Esperar 0 de baixo
 [SERVIDOR] Arquivo foto_teste.jpeg salvo.
-[RDT 3.0] Resumo -> Timeouts: 40 | Retransmissões: 46 | ACKs reenviados: 1 | ACKs duplicados recebidos: 6 | Perdas no canal: 12 | Corrupções no canal: 18 | Corrompidos detectados: 19
+[RDT 3.0] Resumo -> Timeouts: 66 | Retransmissões: 74 | ACKs reenviados: 0 | ACKs duplicados recebidos: 8 | Perdas no canal: 35 | Corrupções no canal: 18 | Corrompidos detectados: 20
 
 UDP> GET foto_teste.jpeg
-[RDT]       ACK 1 recebido
+[RDT]       [Espera chamada 1 de cima] rdt_send(data) -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK1] rdt_rcv && notcorrupt && isACK(1) -> stop_timer => Espera chamada 0 de cima
 [SOLICITANDO] Requisitando 'foto_teste.jpeg' do servidor...
-[RDT]       pacote com checksum inválido - reenviando ACK 1
-[RDT]       canal PERDEU ACK seq=1
-[RDT]       pacote 0 íntegro - enviando ACK 0
-[RDT]       canal CORROMPEU ACK seq=0
+[RDT]       [Esperar 0 de baixo] rdt_rcv && has_seq1 -> udt_send(ACK1)
+[RDT]       [Esperar 0 de baixo] rdt_rcv && has_seq1 -> udt_send(ACK1)
+[RDT]       [Esperar 0 de baixo] rdt_rcv && notcorrupt && has_seq0 -> extract, deliver_data, udt_send(ACK0) => Esperar 1 de baixo
+[RDT]       (canal) CORROMPEU ACK seq=0
 [RECEBENDO] Arquivo terá 63541 bytes. Aguardando 63 pacotes...
-[RDT]       pacote com checksum inválido - reenviando ACK 0
-[RDT]       pacote 1 íntegro - enviando ACK 1
-[RDT]       pacote 0 íntegro - enviando ACK 0
-[RDT]       canal CORROMPEU ACK seq=0
-[RDT]       pacote 0 duplicado - reenviando ACK 0
-[RDT]       pacote 1 íntegro - enviando ACK 1
-[RDT]       canal PERDEU ACK seq=1
-[RDT]       pacote com checksum inválido - reenviando ACK 1
-[RDT]       pacote com checksum inválido - reenviando ACK 1
-[RDT]       pacote 0 íntegro - enviando ACK 0
-[RDT]       canal PERDEU ACK seq=0
-[RDT]       pacote 0 duplicado - reenviando ACK 0
-[RDT]       pacote 1 íntegro - enviando ACK 1
-[RDT]       pacote 0 íntegro - enviando ACK 0
-[RDT]       pacote 1 íntegro - enviando ACK 1
-[RDT]       canal PERDEU ACK seq=1
-[RDT]       pacote 1 duplicado - reenviando ACK 1
-[RDT]       canal CORROMPEU ACK seq=1
-[RDT]       pacote 1 duplicado - reenviando ACK 1
-[RDT]       pacote 0 íntegro - enviando ACK 0
-[RDT]       pacote 1 íntegro - enviando ACK 1
-[RDT]       pacote 0 íntegro - enviando ACK 0
-[RDT]       pacote 1 íntegro - enviando ACK 1
-[RDT]       pacote 0 íntegro - enviando ACK 0
-[RDT]       pacote 1 íntegro - enviando ACK 1
-[RDT]       pacote 0 íntegro - enviando ACK 0
-[RDT]       pacote 1 íntegro - enviando ACK 1
-[RDT]       pacote 0 íntegro - enviando ACK 0
-[RDT]       pacote 1 íntegro - enviando ACK 1
-[RDT]       canal PERDEU ACK seq=1
-[RDT]       pacote 1 duplicado - reenviando ACK 1
-[RDT]       pacote 0 íntegro - enviando ACK 0
-[RDT]       canal CORROMPEU ACK seq=0
-[RDT]       pacote 0 duplicado - reenviando ACK 0
-[RDT]       pacote 1 íntegro - enviando ACK 1
-[RDT]       canal PERDEU ACK seq=1
-[RDT]       pacote 1 duplicado - reenviando ACK 1
-[RDT]       pacote 0 íntegro - enviando ACK 0
-[RDT]       pacote com checksum inválido - reenviando ACK 0
-[RDT]       pacote com checksum inválido - reenviando ACK 0
-[RDT]       pacote 1 íntegro - enviando ACK 1
-[RDT]       canal CORROMPEU ACK seq=1
-[RDT]       pacote 1 duplicado - reenviando ACK 1
-[RDT]       canal CORROMPEU ACK seq=1
-[RDT]       pacote 1 duplicado - reenviando ACK 1
-[RDT]       canal CORROMPEU ACK seq=1
-[RDT]       pacote 1 duplicado - reenviando ACK 1
-[RDT]       pacote com checksum inválido - reenviando ACK 1
-[RDT]       pacote 0 íntegro - enviando ACK 0
-[RDT]       pacote com checksum inválido - reenviando ACK 0
-[RDT]       pacote 1 íntegro - enviando ACK 1
-[RDT]       pacote 0 íntegro - enviando ACK 0
-[RDT]       pacote 1 íntegro - enviando ACK 1
-[RDT]       canal PERDEU ACK seq=1
-[RDT]       pacote com checksum inválido - reenviando ACK 1
-[RDT]       pacote 0 íntegro - enviando ACK 0
-[RDT]       canal CORROMPEU ACK seq=0
-[RDT]       pacote com checksum inválido - reenviando ACK 0
-[RDT]       canal PERDEU ACK seq=0
-[RDT]       pacote com checksum inválido - reenviando ACK 0
-[RDT]       canal CORROMPEU ACK seq=0
-[RDT]       pacote com checksum inválido - reenviando ACK 0
-[RDT]       pacote 1 íntegro - enviando ACK 1
-[RDT]       canal PERDEU ACK seq=1
-[RDT]       pacote 1 duplicado - reenviando ACK 1
-[RDT]       pacote 0 íntegro - enviando ACK 0
-[RDT]       pacote com checksum inválido - reenviando ACK 0
-[RDT]       canal PERDEU ACK seq=0
-[RDT]       pacote 1 íntegro - enviando ACK 1
-[RDT]       pacote 0 íntegro - enviando ACK 0
-[RDT]       pacote 1 íntegro - enviando ACK 1
-[RDT]       canal PERDEU ACK seq=1
-[RDT]       pacote 1 duplicado - reenviando ACK 1
-[RDT]       pacote 0 íntegro - enviando ACK 0
-[RDT]       canal PERDEU ACK seq=0
-[RDT]       pacote 0 duplicado - reenviando ACK 0
-[RDT]       pacote 1 íntegro - enviando ACK 1
-[RDT]       pacote com checksum inválido - reenviando ACK 1
-[RDT]       pacote com checksum inválido - reenviando ACK 1
-[RDT]       canal PERDEU ACK seq=1
-[RDT]       pacote 0 íntegro - enviando ACK 0
-[RDT]       pacote 1 íntegro - enviando ACK 1
-[RDT]       pacote 0 íntegro - enviando ACK 0
-[RDT]       pacote 1 íntegro - enviando ACK 1
-[RDT]       pacote com checksum inválido - reenviando ACK 1
-[RDT]       pacote com checksum inválido - reenviando ACK 1
-[RDT]       pacote 0 íntegro - enviando ACK 0
-[RDT]       canal PERDEU ACK seq=0
-[RDT]       pacote 0 duplicado - reenviando ACK 0
-[RDT]       pacote 1 íntegro - enviando ACK 1
-[RDT]       pacote 0 íntegro - enviando ACK 0
-[RDT]       pacote 1 íntegro - enviando ACK 1
-[RDT]       canal CORROMPEU ACK seq=1
-[RDT]       pacote 1 duplicado - reenviando ACK 1
-[RDT]       pacote 0 íntegro - enviando ACK 0
-[RDT]       pacote 1 íntegro - enviando ACK 1
-[RDT]       canal CORROMPEU ACK seq=1
-[RDT]       pacote 1 duplicado - reenviando ACK 1
-[RDT]       pacote 0 íntegro - enviando ACK 0
-[RDT]       pacote 1 íntegro - enviando ACK 1
-[RDT]       pacote 0 íntegro - enviando ACK 0
-[RDT]       pacote 1 íntegro - enviando ACK 1
-[RDT]       canal PERDEU ACK seq=1
-[RDT]       pacote 1 duplicado - reenviando ACK 1
-[RDT]       canal CORROMPEU ACK seq=1
-[RDT]       pacote 1 duplicado - reenviando ACK 1
-[RDT]       canal CORROMPEU ACK seq=1
-[RDT]       pacote 1 duplicado - reenviando ACK 1
-[RDT]       canal PERDEU ACK seq=1
-[RDT]       pacote 1 duplicado - reenviando ACK 1
-[RDT]       pacote com checksum inválido - reenviando ACK 1
-[RDT]       pacote 0 íntegro - enviando ACK 0
-[RDT]       canal PERDEU ACK seq=0
-[RDT]       pacote com checksum inválido - reenviando ACK 0
-[RDT]       pacote com checksum inválido - reenviando ACK 0
-[RDT]       pacote 1 íntegro - enviando ACK 1
-[RDT]       canal CORROMPEU ACK seq=1
-[RDT]       pacote 1 duplicado - reenviando ACK 1
-[RDT]       pacote com checksum inválido - reenviando ACK 1
-[RDT]       pacote com checksum inválido - reenviando ACK 1
-[RDT]       canal PERDEU ACK seq=1
-[RDT]       pacote 0 íntegro - enviando ACK 0
-[RDT]       pacote 1 íntegro - enviando ACK 1
-[RDT]       pacote 0 íntegro - enviando ACK 0
-[RDT]       pacote 1 íntegro - enviando ACK 1
-[RDT]       canal PERDEU ACK seq=1
-[RDT]       pacote 1 duplicado - reenviando ACK 1
-[RDT]       pacote 0 íntegro - enviando ACK 0
-[RDT]       canal PERDEU ACK seq=0
-[RDT]       pacote com checksum inválido - reenviando ACK 0
-[RDT]       pacote com checksum inválido - reenviando ACK 0
-[RDT]       pacote 1 íntegro - enviando ACK 1
-[RDT]       pacote 0 íntegro - enviando ACK 0
-[RDT]       pacote 1 íntegro - enviando ACK 1
-[RDT]       canal CORROMPEU ACK seq=1
-[RDT]       pacote 1 duplicado - reenviando ACK 1
-[RDT]       pacote 0 íntegro - enviando ACK 0
-[RDT]       pacote 1 íntegro - enviando ACK 1
-[RDT]       pacote 0 íntegro - enviando ACK 0
-[RDT]       pacote 1 íntegro - enviando ACK 1
-[RDT]       pacote 0 íntegro - enviando ACK 0
-[RDT]       pacote com checksum inválido - reenviando ACK 0
-[RDT]       pacote com checksum inválido - reenviando ACK 0
-[RDT]       canal CORROMPEU ACK seq=0
-[RDT]       pacote 1 íntegro - enviando ACK 1
+[RDT]       [Esperar 1 de baixo] rdt_rcv && has_seq0 -> udt_send(ACK0)
+[RDT]       [Esperar 1 de baixo] rdt_rcv && corrupt(rcvpkt) -> udt_send(ACK0)
+[RDT]       (canal) PERDEU ACK seq=0
+[RDT]       [Esperar 1 de baixo] rdt_rcv && notcorrupt && has_seq1 -> extract, deliver_data, udt_send(ACK1) => Esperar 0 de baixo
+[RDT]       [Esperar 0 de baixo] rdt_rcv && notcorrupt && has_seq0 -> extract, deliver_data, udt_send(ACK0) => Esperar 1 de baixo
+[RDT]       [Esperar 1 de baixo] rdt_rcv && notcorrupt && has_seq1 -> extract, deliver_data, udt_send(ACK1) => Esperar 0 de baixo
+[RDT]       [Esperar 0 de baixo] rdt_rcv && notcorrupt && has_seq0 -> extract, deliver_data, udt_send(ACK0) => Esperar 1 de baixo
+[RDT]       [Esperar 1 de baixo] rdt_rcv && corrupt(rcvpkt) -> udt_send(ACK0)
+[RDT]       (canal) PERDEU ACK seq=0
+[RDT]       [Esperar 1 de baixo] rdt_rcv && corrupt(rcvpkt) -> udt_send(ACK0)
+[RDT]       (canal) CORROMPEU ACK seq=0
+[RDT]       [Esperar 1 de baixo] rdt_rcv && notcorrupt && has_seq1 -> extract, deliver_data, udt_send(ACK1) => Esperar 0 de baixo
+[RDT]       (canal) CORROMPEU ACK seq=1
+[RDT]       [Esperar 0 de baixo] rdt_rcv && has_seq1 -> udt_send(ACK1)
+[RDT]       [Esperar 0 de baixo] rdt_rcv && notcorrupt && has_seq0 -> extract, deliver_data, udt_send(ACK0) => Esperar 1 de baixo
+[RDT]       (canal) PERDEU ACK seq=0
+[RDT]       [Esperar 1 de baixo] rdt_rcv && has_seq0 -> udt_send(ACK0)
+[RDT]       (canal) CORROMPEU ACK seq=0
+[RDT]       [Esperar 1 de baixo] rdt_rcv && has_seq0 -> udt_send(ACK0)
+[RDT]       [Esperar 1 de baixo] rdt_rcv && notcorrupt && has_seq1 -> extract, deliver_data, udt_send(ACK1) => Esperar 0 de baixo
+[RDT]       [Esperar 0 de baixo] rdt_rcv && notcorrupt && has_seq0 -> extract, deliver_data, udt_send(ACK0) => Esperar 1 de baixo
+[RDT]       [Esperar 1 de baixo] rdt_rcv && notcorrupt && has_seq1 -> extract, deliver_data, udt_send(ACK1) => Esperar 0 de baixo
+[RDT]       (canal) CORROMPEU ACK seq=1
+[RDT]       [Esperar 0 de baixo] rdt_rcv && has_seq1 -> udt_send(ACK1)
+[RDT]       [Esperar 0 de baixo] rdt_rcv && corrupt(rcvpkt) -> udt_send(ACK1)
+[RDT]       (canal) PERDEU ACK seq=1
+[RDT]       [Esperar 0 de baixo] rdt_rcv && notcorrupt && has_seq0 -> extract, deliver_data, udt_send(ACK0) => Esperar 1 de baixo
+[RDT]       [Esperar 1 de baixo] rdt_rcv && corrupt(rcvpkt) -> udt_send(ACK0)
+[RDT]       [Esperar 1 de baixo] rdt_rcv && notcorrupt && has_seq1 -> extract, deliver_data, udt_send(ACK1) => Esperar 0 de baixo
+[RDT]       [Esperar 0 de baixo] rdt_rcv && notcorrupt && has_seq0 -> extract, deliver_data, udt_send(ACK0) => Esperar 1 de baixo
+[RDT]       [Esperar 1 de baixo] rdt_rcv && notcorrupt && has_seq1 -> extract, deliver_data, udt_send(ACK1) => Esperar 0 de baixo
+[RDT]       (canal) CORROMPEU ACK seq=1
+[RDT]       [Esperar 0 de baixo] rdt_rcv && has_seq1 -> udt_send(ACK1)
+[RDT]       (canal) CORROMPEU ACK seq=1
+[RDT]       [Esperar 0 de baixo] rdt_rcv && has_seq1 -> udt_send(ACK1)
+[RDT]       [Esperar 0 de baixo] rdt_rcv && notcorrupt && has_seq0 -> extract, deliver_data, udt_send(ACK0) => Esperar 1 de baixo
+[RDT]       [Esperar 1 de baixo] rdt_rcv && corrupt(rcvpkt) -> udt_send(ACK0)
+[RDT]       [Esperar 1 de baixo] rdt_rcv && notcorrupt && has_seq1 -> extract, deliver_data, udt_send(ACK1) => Esperar 0 de baixo
+[RDT]       [Esperar 0 de baixo] rdt_rcv && notcorrupt && has_seq0 -> extract, deliver_data, udt_send(ACK0) => Esperar 1 de baixo
+[RDT]       [Esperar 1 de baixo] rdt_rcv && corrupt(rcvpkt) -> udt_send(ACK0)
+[RDT]       (canal) CORROMPEU ACK seq=0
+[RDT]       [Esperar 1 de baixo] rdt_rcv && notcorrupt && has_seq1 -> extract, deliver_data, udt_send(ACK1) => Esperar 0 de baixo
+[RDT]       [Esperar 0 de baixo] rdt_rcv && notcorrupt && has_seq0 -> extract, deliver_data, udt_send(ACK0) => Esperar 1 de baixo
+[RDT]       (canal) CORROMPEU ACK seq=0
+[RDT]       [Esperar 1 de baixo] rdt_rcv && has_seq0 -> udt_send(ACK0)
+[RDT]       [Esperar 1 de baixo] rdt_rcv && notcorrupt && has_seq1 -> extract, deliver_data, udt_send(ACK1) => Esperar 0 de baixo
+[RDT]       [Esperar 0 de baixo] rdt_rcv && notcorrupt && has_seq0 -> extract, deliver_data, udt_send(ACK0) => Esperar 1 de baixo
+[RDT]       [Esperar 1 de baixo] rdt_rcv && notcorrupt && has_seq1 -> extract, deliver_data, udt_send(ACK1) => Esperar 0 de baixo
+[RDT]       (canal) PERDEU ACK seq=1
+[RDT]       [Esperar 0 de baixo] rdt_rcv && has_seq1 -> udt_send(ACK1)
+[RDT]       (canal) PERDEU ACK seq=1
+[RDT]       [Esperar 0 de baixo] rdt_rcv && has_seq1 -> udt_send(ACK1)
+[RDT]       [Esperar 0 de baixo] rdt_rcv && corrupt(rcvpkt) -> udt_send(ACK1)
+[RDT]       [Esperar 0 de baixo] rdt_rcv && notcorrupt && has_seq0 -> extract, deliver_data, udt_send(ACK0) => Esperar 1 de baixo
+[RDT]       [Esperar 1 de baixo] rdt_rcv && notcorrupt && has_seq1 -> extract, deliver_data, udt_send(ACK1) => Esperar 0 de baixo
+[RDT]       [Esperar 0 de baixo] rdt_rcv && corrupt(rcvpkt) -> udt_send(ACK1)
+[RDT]       [Esperar 0 de baixo] rdt_rcv && notcorrupt && has_seq0 -> extract, deliver_data, udt_send(ACK0) => Esperar 1 de baixo
+[RDT]       (canal) CORROMPEU ACK seq=0
+[RDT]       [Esperar 1 de baixo] rdt_rcv && has_seq0 -> udt_send(ACK0)
+[RDT]       [Esperar 1 de baixo] rdt_rcv && notcorrupt && has_seq1 -> extract, deliver_data, udt_send(ACK1) => Esperar 0 de baixo
+[RDT]       [Esperar 0 de baixo] rdt_rcv && notcorrupt && has_seq0 -> extract, deliver_data, udt_send(ACK0) => Esperar 1 de baixo
+[RDT]       [Esperar 1 de baixo] rdt_rcv && notcorrupt && has_seq1 -> extract, deliver_data, udt_send(ACK1) => Esperar 0 de baixo
+[RDT]       (canal) PERDEU ACK seq=1
+[RDT]       [Esperar 0 de baixo] rdt_rcv && has_seq1 -> udt_send(ACK1)
+[RDT]       [Esperar 0 de baixo] rdt_rcv && notcorrupt && has_seq0 -> extract, deliver_data, udt_send(ACK0) => Esperar 1 de baixo
+[RDT]       [Esperar 1 de baixo] rdt_rcv && notcorrupt && has_seq1 -> extract, deliver_data, udt_send(ACK1) => Esperar 0 de baixo
+[RDT]       (canal) PERDEU ACK seq=1
+[RDT]       [Esperar 0 de baixo] rdt_rcv && corrupt(rcvpkt) -> udt_send(ACK1)
+[RDT]       [Esperar 0 de baixo] rdt_rcv && corrupt(rcvpkt) -> udt_send(ACK1)
+[RDT]       (canal) PERDEU ACK seq=1
+[RDT]       [Esperar 0 de baixo] rdt_rcv && notcorrupt && has_seq0 -> extract, deliver_data, udt_send(ACK0) => Esperar 1 de baixo
+[RDT]       [Esperar 1 de baixo] rdt_rcv && notcorrupt && has_seq1 -> extract, deliver_data, udt_send(ACK1) => Esperar 0 de baixo
+[RDT]       (canal) PERDEU ACK seq=1
+[RDT]       [Esperar 0 de baixo] rdt_rcv && has_seq1 -> udt_send(ACK1)
+[RDT]       [Esperar 0 de baixo] rdt_rcv && notcorrupt && has_seq0 -> extract, deliver_data, udt_send(ACK0) => Esperar 1 de baixo
+[RDT]       (canal) PERDEU ACK seq=0
+[RDT]       [Esperar 1 de baixo] rdt_rcv && has_seq0 -> udt_send(ACK0)
+[RDT]       [Esperar 1 de baixo] rdt_rcv && notcorrupt && has_seq1 -> extract, deliver_data, udt_send(ACK1) => Esperar 0 de baixo
+[RDT]       (canal) PERDEU ACK seq=1
+[RDT]       [Esperar 0 de baixo] rdt_rcv && has_seq1 -> udt_send(ACK1)
+[RDT]       [Esperar 0 de baixo] rdt_rcv && notcorrupt && has_seq0 -> extract, deliver_data, udt_send(ACK0) => Esperar 1 de baixo
+[RDT]       (canal) PERDEU ACK seq=0
+[RDT]       [Esperar 1 de baixo] rdt_rcv && has_seq0 -> udt_send(ACK0)
+[RDT]       [Esperar 1 de baixo] rdt_rcv && notcorrupt && has_seq1 -> extract, deliver_data, udt_send(ACK1) => Esperar 0 de baixo
+[RDT]       (canal) CORROMPEU ACK seq=1
+[RDT]       [Esperar 0 de baixo] rdt_rcv && has_seq1 -> udt_send(ACK1)
+[RDT]       [Esperar 0 de baixo] rdt_rcv && notcorrupt && has_seq0 -> extract, deliver_data, udt_send(ACK0) => Esperar 1 de baixo
+[RDT]       [Esperar 1 de baixo] rdt_rcv && notcorrupt && has_seq1 -> extract, deliver_data, udt_send(ACK1) => Esperar 0 de baixo
+[RDT]       [Esperar 0 de baixo] rdt_rcv && notcorrupt && has_seq0 -> extract, deliver_data, udt_send(ACK0) => Esperar 1 de baixo
+[RDT]       [Esperar 1 de baixo] rdt_rcv && notcorrupt && has_seq1 -> extract, deliver_data, udt_send(ACK1) => Esperar 0 de baixo
+[RDT]       (canal) CORROMPEU ACK seq=1
+[RDT]       [Esperar 0 de baixo] rdt_rcv && has_seq1 -> udt_send(ACK1)
+[RDT]       (canal) CORROMPEU ACK seq=1
+[RDT]       [Esperar 0 de baixo] rdt_rcv && corrupt(rcvpkt) -> udt_send(ACK1)
+[RDT]       [Esperar 0 de baixo] rdt_rcv && notcorrupt && has_seq0 -> extract, deliver_data, udt_send(ACK0) => Esperar 1 de baixo
+[RDT]       [Esperar 1 de baixo] rdt_rcv && notcorrupt && has_seq1 -> extract, deliver_data, udt_send(ACK1) => Esperar 0 de baixo
+[RDT]       (canal) PERDEU ACK seq=1
+[RDT]       [Esperar 0 de baixo] rdt_rcv && has_seq1 -> udt_send(ACK1)
+[RDT]       [Esperar 0 de baixo] rdt_rcv && notcorrupt && has_seq0 -> extract, deliver_data, udt_send(ACK0) => Esperar 1 de baixo
+[RDT]       [Esperar 1 de baixo] rdt_rcv && notcorrupt && has_seq1 -> extract, deliver_data, udt_send(ACK1) => Esperar 0 de baixo
+[RDT]       (canal) PERDEU ACK seq=1
+[RDT]       [Esperar 0 de baixo] rdt_rcv && has_seq1 -> udt_send(ACK1)
+[RDT]       [Esperar 0 de baixo] rdt_rcv && notcorrupt && has_seq0 -> extract, deliver_data, udt_send(ACK0) => Esperar 1 de baixo
+[RDT]       [Esperar 1 de baixo] rdt_rcv && notcorrupt && has_seq1 -> extract, deliver_data, udt_send(ACK1) => Esperar 0 de baixo
+[RDT]       (canal) PERDEU ACK seq=1
+[RDT]       [Esperar 0 de baixo] rdt_rcv && has_seq1 -> udt_send(ACK1)
+[RDT]       [Esperar 0 de baixo] rdt_rcv && notcorrupt && has_seq0 -> extract, deliver_data, udt_send(ACK0) => Esperar 1 de baixo
+[RDT]       [Esperar 1 de baixo] rdt_rcv && corrupt(rcvpkt) -> udt_send(ACK0)
+[RDT]       [Esperar 1 de baixo] rdt_rcv && notcorrupt && has_seq1 -> extract, deliver_data, udt_send(ACK1) => Esperar 0 de baixo
+[RDT]       [Esperar 0 de baixo] rdt_rcv && corrupt(rcvpkt) -> udt_send(ACK1)
+[RDT]       [Esperar 0 de baixo] rdt_rcv && notcorrupt && has_seq0 -> extract, deliver_data, udt_send(ACK0) => Esperar 1 de baixo
+[RDT]       [Esperar 1 de baixo] rdt_rcv && notcorrupt && has_seq1 -> extract, deliver_data, udt_send(ACK1) => Esperar 0 de baixo
+[RDT]       [Esperar 0 de baixo] rdt_rcv && notcorrupt && has_seq0 -> extract, deliver_data, udt_send(ACK0) => Esperar 1 de baixo
+[RDT]       [Esperar 1 de baixo] rdt_rcv && notcorrupt && has_seq1 -> extract, deliver_data, udt_send(ACK1) => Esperar 0 de baixo
+[RDT]       [Esperar 0 de baixo] rdt_rcv && notcorrupt && has_seq0 -> extract, deliver_data, udt_send(ACK0) => Esperar 1 de baixo
+[RDT]       (canal) CORROMPEU ACK seq=0
+[RDT]       [Esperar 1 de baixo] rdt_rcv && has_seq0 -> udt_send(ACK0)
+[RDT]       [Esperar 1 de baixo] rdt_rcv && notcorrupt && has_seq1 -> extract, deliver_data, udt_send(ACK1) => Esperar 0 de baixo
+[RDT]       [Esperar 0 de baixo] rdt_rcv && notcorrupt && has_seq0 -> extract, deliver_data, udt_send(ACK0) => Esperar 1 de baixo
+[RDT]       [Esperar 1 de baixo] rdt_rcv && corrupt(rcvpkt) -> udt_send(ACK0)
+[RDT]       [Esperar 1 de baixo] rdt_rcv && notcorrupt && has_seq1 -> extract, deliver_data, udt_send(ACK1) => Esperar 0 de baixo
+[RDT]       [Esperar 0 de baixo] rdt_rcv && notcorrupt && has_seq0 -> extract, deliver_data, udt_send(ACK0) => Esperar 1 de baixo
+[RDT]       [Esperar 1 de baixo] rdt_rcv && corrupt(rcvpkt) -> udt_send(ACK0)
+[RDT]       [Esperar 1 de baixo] rdt_rcv && notcorrupt && has_seq1 -> extract, deliver_data, udt_send(ACK1) => Esperar 0 de baixo
+[RDT]       [Esperar 0 de baixo] rdt_rcv && corrupt(rcvpkt) -> udt_send(ACK1)
+[RDT]       (canal) CORROMPEU ACK seq=1
+[RDT]       [Esperar 0 de baixo] rdt_rcv && notcorrupt && has_seq0 -> extract, deliver_data, udt_send(ACK0) => Esperar 1 de baixo
+[RDT]       [Esperar 1 de baixo] rdt_rcv && notcorrupt && has_seq1 -> extract, deliver_data, udt_send(ACK1) => Esperar 0 de baixo
+[RDT]       [Esperar 0 de baixo] rdt_rcv && notcorrupt && has_seq0 -> extract, deliver_data, udt_send(ACK0) => Esperar 1 de baixo
+[RDT]       [Esperar 1 de baixo] rdt_rcv && notcorrupt && has_seq1 -> extract, deliver_data, udt_send(ACK1) => Esperar 0 de baixo
+[RDT]       (canal) PERDEU ACK seq=1
+[RDT]       [Esperar 0 de baixo] rdt_rcv && has_seq1 -> udt_send(ACK1)
+[RDT]       (canal) CORROMPEU ACK seq=1
+[RDT]       [Esperar 0 de baixo] rdt_rcv && has_seq1 -> udt_send(ACK1)
+[RDT]       [Esperar 0 de baixo] rdt_rcv && notcorrupt && has_seq0 -> extract, deliver_data, udt_send(ACK0) => Esperar 1 de baixo
+[RDT]       [Esperar 1 de baixo] rdt_rcv && notcorrupt && has_seq1 -> extract, deliver_data, udt_send(ACK1) => Esperar 0 de baixo
 [CONCLUÍDO] Arquivo recuperado com sucesso e salvo como './rcvd_files_client/cliente_foto_teste.jpeg'
-[RDT 3.0] Resumo -> Timeouts: 0 | Retransmissões: 0 | ACKs reenviados: 49 | ACKs duplicados recebidos: 0 | Perdas no canal: 20 | Corrupções no canal: 16 | Corrompidos detectados: 26
+[RDT 3.0] Resumo -> Timeouts: 0 | Retransmissões: 0 | ACKs reenviados: 43 | ACKs duplicados recebidos: 0 | Perdas no canal: 17 | Corrupções no canal: 16 | Corrompidos detectados: 17
 
 UDP> SAVE teste50k.bin
-[RDT]       canal PERDEU dados seq=0
-[RDT]       TIMEOUT esperando ACK 0 - retransmitindo
-[RDT]       canal PERDEU dados seq=0
-[RDT]       TIMEOUT esperando ACK 0 - retransmitindo
-[RDT]       ACK 0 recebido
+[RDT]       [Espera chamada 0 de cima] rdt_send(data) -> udt_send(sndpkt), start_timer
+[RDT]       (canal) CORROMPEU dados seq=0
+[RDT]       [Espera por ACK0] rdt_rcv && isACK(1) -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK0] rdt_rcv && notcorrupt && isACK(0) -> stop_timer => Espera chamada 1 de cima
 [ENVIANDO] Iniciando envio de 'teste50k.bin' (51200 bytes em 50 pacotes)
-[RDT]       ACK 1 recebido
-[RDT]       ACK 0 recebido
-[RDT]       TIMEOUT esperando ACK 1 - retransmitindo
-[RDT]       ACK 1 recebido
-[RDT]       TIMEOUT esperando ACK 0 - retransmitindo
-[RDT]       canal PERDEU dados seq=0
-[RDT]       TIMEOUT esperando ACK 0 - retransmitindo
-[RDT]       ACK 0 recebido
-[RDT]       ACK 1 recebido
-[RDT]       ACK 0 recebido
-[RDT]       TIMEOUT esperando ACK 1 - retransmitindo
-[RDT]       canal CORROMPEU dados seq=1
-[RDT]       ACK chegou corrompido - aguardando timeout
-[RDT]       TIMEOUT esperando ACK 1 - retransmitindo
-[RDT]       canal CORROMPEU dados seq=1
-[RDT]       ACK 1 recebido
-[RDT]       ACK 0 recebido
-[RDT]       ACK 1 recebido
-[RDT]       ACK 0 recebido
-[RDT]       canal CORROMPEU dados seq=1
-[RDT]       TIMEOUT esperando ACK 1 - retransmitindo
-[RDT]       canal CORROMPEU dados seq=1
-[RDT]       ACK 0 duplicado - retransmitindo
-[RDT]       ACK 1 recebido
-[RDT]       ACK chegou corrompido - aguardando timeout
-[RDT]       TIMEOUT esperando ACK 0 - retransmitindo
-[RDT]       ACK 0 recebido
-[RDT]       canal CORROMPEU dados seq=1
-[RDT]       TIMEOUT esperando ACK 1 - retransmitindo
-[RDT]       ACK chegou corrompido - aguardando timeout
-[RDT]       TIMEOUT esperando ACK 1 - retransmitindo
-[RDT]       ACK 1 recebido
-[RDT]       canal CORROMPEU dados seq=0
-[RDT]       ACK chegou corrompido - aguardando timeout
-[RDT]       TIMEOUT esperando ACK 0 - retransmitindo
-[RDT]       ACK 0 recebido
-[RDT]       ACK 1 recebido
-[RDT]       TIMEOUT esperando ACK 0 - retransmitindo
-[RDT]       ACK 0 recebido
-[RDT]       ACK 1 recebido
-[RDT]       TIMEOUT esperando ACK 0 - retransmitindo
-[RDT]       TIMEOUT esperando ACK 0 - retransmitindo
-[RDT]       TIMEOUT esperando ACK 0 - retransmitindo
-[RDT]       canal CORROMPEU dados seq=0
-[RDT]       ACK chegou corrompido - aguardando timeout
-[RDT]       TIMEOUT esperando ACK 0 - retransmitindo
-[RDT]       TIMEOUT esperando ACK 0 - retransmitindo
-[RDT]       TIMEOUT esperando ACK 0 - retransmitindo
-[RDT]       canal CORROMPEU dados seq=0
-[RDT]       ACK 0 recebido
-[RDT]       canal PERDEU dados seq=1
-[RDT]       TIMEOUT esperando ACK 1 - retransmitindo
-[RDT]       ACK 1 recebido
-[RDT]       ACK 0 recebido
-[RDT]       ACK 1 recebido
-[RDT]       TIMEOUT esperando ACK 0 - retransmitindo
-[RDT]       ACK chegou corrompido - aguardando timeout
-[RDT]       TIMEOUT esperando ACK 0 - retransmitindo
-[RDT]       ACK 0 recebido
-[RDT]       canal CORROMPEU dados seq=1
-[RDT]       ACK chegou corrompido - aguardando timeout
-[RDT]       TIMEOUT esperando ACK 1 - retransmitindo
-[RDT]       ACK 1 recebido
-[RDT]       canal CORROMPEU dados seq=0
-[RDT]       ACK 1 duplicado - retransmitindo
-[RDT]       ACK 0 recebido
-[RDT]       canal PERDEU dados seq=1
-[RDT]       TIMEOUT esperando ACK 1 - retransmitindo
-[RDT]       canal CORROMPEU dados seq=1
-[RDT]       ACK 0 duplicado - retransmitindo
-[RDT]       ACK 1 recebido
-[RDT]       ACK chegou corrompido - aguardando timeout
-[RDT]       TIMEOUT esperando ACK 0 - retransmitindo
-[RDT]       canal PERDEU dados seq=0
-[RDT]       TIMEOUT esperando ACK 0 - retransmitindo
-[RDT]       canal CORROMPEU dados seq=0
-[RDT]       ACK 0 recebido
-[RDT]       ACK 1 recebido
-[RDT]       canal CORROMPEU dados seq=0
-[RDT]       ACK 1 duplicado - retransmitindo
-[RDT]       ACK 0 recebido
-[RDT]       ACK 1 recebido
-[RDT]       ACK 0 recebido
-[RDT]       ACK 1 recebido
-[RDT]       canal PERDEU dados seq=0
-[RDT]       TIMEOUT esperando ACK 0 - retransmitindo
-[RDT]       ACK 0 recebido
-[RDT]       ACK 1 recebido
-[RDT]       ACK 0 recebido
-[RDT]       canal PERDEU dados seq=1
-[RDT]       TIMEOUT esperando ACK 1 - retransmitindo
-[RDT]       canal PERDEU dados seq=1
-[RDT]       TIMEOUT esperando ACK 1 - retransmitindo
-[RDT]       ACK 1 recebido
-[RDT]       canal CORROMPEU dados seq=0
-[RDT]       ACK 1 duplicado - retransmitindo
-[RDT]       ACK 0 recebido
-[RDT]       ACK chegou corrompido - aguardando timeout
-[RDT]       TIMEOUT esperando ACK 1 - retransmitindo
-[RDT]       canal CORROMPEU dados seq=1
-[RDT]       ACK chegou corrompido - aguardando timeout
-[RDT]       TIMEOUT esperando ACK 1 - retransmitindo
-[RDT]       canal PERDEU dados seq=1
-[RDT]       TIMEOUT esperando ACK 1 - retransmitindo
-[RDT]       canal CORROMPEU dados seq=1
-[RDT]       ACK 1 recebido
-[RDT]       ACK 0 recebido
-[RDT]       canal CORROMPEU dados seq=1
-[RDT]       ACK chegou corrompido - aguardando timeout
-[RDT]       TIMEOUT esperando ACK 1 - retransmitindo
-[RDT]       ACK 1 recebido
-[RDT]       ACK 0 recebido
-[RDT]       canal PERDEU dados seq=1
-[RDT]       TIMEOUT esperando ACK 1 - retransmitindo
-[RDT]       ACK 1 recebido
-[RDT]       ACK 0 recebido
-[RDT]       TIMEOUT esperando ACK 1 - retransmitindo
-[RDT]       ACK chegou corrompido - aguardando timeout
-[RDT]       TIMEOUT esperando ACK 1 - retransmitindo
-[RDT]       ACK 1 recebido
-[RDT]       ACK 0 recebido
-[RDT]       TIMEOUT esperando ACK 1 - retransmitindo
-[RDT]       ACK 1 recebido
-[RDT]       ACK 0 recebido
-[RDT]       ACK 1 recebido
-[RDT]       TIMEOUT esperando ACK 0 - retransmitindo
-[RDT]       ACK 0 recebido
-[RDT]       TIMEOUT esperando ACK 1 - retransmitindo
-[RDT]       ACK 1 recebido
-[RDT]       ACK chegou corrompido - aguardando timeout
-[RDT]       TIMEOUT esperando ACK 0 - retransmitindo
-[RDT]       ACK chegou corrompido - aguardando timeout
-[RDT]       TIMEOUT esperando ACK 0 - retransmitindo
-[RDT]       canal PERDEU dados seq=0
-[RDT]       TIMEOUT esperando ACK 0 - retransmitindo
-[RDT]       ACK 0 recebido
-[RDT]       pacote 0 íntegro - enviando ACK 0
+[RDT]       [Espera chamada 1 de cima] rdt_send(data) -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK1] rdt_rcv && notcorrupt && isACK(1) -> stop_timer => Espera chamada 0 de cima
+[RDT]       [Espera chamada 0 de cima] rdt_send(data) -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK0] rdt_rcv && notcorrupt && isACK(0) -> stop_timer => Espera chamada 1 de cima
+[RDT]       [Espera chamada 1 de cima] rdt_send(data) -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK1] rdt_rcv && notcorrupt && isACK(1) -> stop_timer => Espera chamada 0 de cima
+[RDT]       [Espera chamada 0 de cima] rdt_send(data) -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK0] rdt_rcv && corrupt(rcvpkt) -> Λ
+[RDT]       [Espera por ACK0] timeout -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK0] rdt_rcv && notcorrupt && isACK(0) -> stop_timer => Espera chamada 1 de cima
+[RDT]       [Espera chamada 1 de cima] rdt_send(data) -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK1] rdt_rcv && notcorrupt && isACK(1) -> stop_timer => Espera chamada 0 de cima
+[RDT]       [Espera chamada 0 de cima] rdt_send(data) -> udt_send(sndpkt), start_timer
+[RDT]       (canal) PERDEU dados seq=0
+[RDT]       [Espera por ACK0] timeout -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK0] timeout -> udt_send(sndpkt), start_timer
+[RDT]       (canal) CORROMPEU dados seq=0
+[RDT]       [Espera por ACK0] rdt_rcv && corrupt(rcvpkt) -> Λ
+[RDT]       [Espera por ACK0] timeout -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK0] rdt_rcv && notcorrupt && isACK(0) -> stop_timer => Espera chamada 1 de cima
+[RDT]       [Espera chamada 1 de cima] rdt_send(data) -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK1] rdt_rcv && notcorrupt && isACK(1) -> stop_timer => Espera chamada 0 de cima
+[RDT]       [Espera chamada 0 de cima] rdt_send(data) -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK0] rdt_rcv && notcorrupt && isACK(0) -> stop_timer => Espera chamada 1 de cima
+[RDT]       [Espera chamada 1 de cima] rdt_send(data) -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK1] rdt_rcv && notcorrupt && isACK(1) -> stop_timer => Espera chamada 0 de cima
+[RDT]       [Espera chamada 0 de cima] rdt_send(data) -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK0] rdt_rcv && corrupt(rcvpkt) -> Λ
+[RDT]       [Espera por ACK0] timeout -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK0] timeout -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK0] rdt_rcv && notcorrupt && isACK(0) -> stop_timer => Espera chamada 1 de cima
+[RDT]       [Espera chamada 1 de cima] rdt_send(data) -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK1] timeout -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK1] rdt_rcv && notcorrupt && isACK(1) -> stop_timer => Espera chamada 0 de cima
+[RDT]       [Espera chamada 0 de cima] rdt_send(data) -> udt_send(sndpkt), start_timer
+[RDT]       (canal) PERDEU dados seq=0
+[RDT]       [Espera por ACK0] timeout -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK0] timeout -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK0] rdt_rcv && notcorrupt && isACK(0) -> stop_timer => Espera chamada 1 de cima
+[RDT]       [Espera chamada 1 de cima] rdt_send(data) -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK1] rdt_rcv && notcorrupt && isACK(1) -> stop_timer => Espera chamada 0 de cima
+[RDT]       [Espera chamada 0 de cima] rdt_send(data) -> udt_send(sndpkt), start_timer
+[RDT]       (canal) CORROMPEU dados seq=0
+[RDT]       [Espera por ACK0] rdt_rcv && isACK(1) -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK0] timeout -> udt_send(sndpkt), start_timer
+[RDT]       (canal) PERDEU dados seq=0
+[RDT]       [Espera por ACK0] timeout -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK0] rdt_rcv && corrupt(rcvpkt) -> Λ
+[RDT]       [Espera por ACK0] timeout -> udt_send(sndpkt), start_timer
+[RDT]       (canal) PERDEU dados seq=0
+[RDT]       [Espera por ACK0] timeout -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK0] rdt_rcv && corrupt(rcvpkt) -> Λ
+[RDT]       [Espera por ACK0] timeout -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK0] rdt_rcv && corrupt(rcvpkt) -> Λ
+[RDT]       [Espera por ACK0] timeout -> udt_send(sndpkt), start_timer
+[RDT]       (canal) PERDEU dados seq=0
+[RDT]       [Espera por ACK0] timeout -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK0] timeout -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK0] rdt_rcv && notcorrupt && isACK(0) -> stop_timer => Espera chamada 1 de cima
+[RDT]       [Espera chamada 1 de cima] rdt_send(data) -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK1] rdt_rcv && corrupt(rcvpkt) -> Λ
+[RDT]       [Espera por ACK1] timeout -> udt_send(sndpkt), start_timer
+[RDT]       (canal) PERDEU dados seq=1
+[RDT]       [Espera por ACK1] timeout -> udt_send(sndpkt), start_timer
+[RDT]       (canal) CORROMPEU dados seq=1
+[RDT]       [Espera por ACK1] rdt_rcv && notcorrupt && isACK(1) -> stop_timer => Espera chamada 0 de cima
+[RDT]       [Espera chamada 0 de cima] rdt_send(data) -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK0] rdt_rcv && notcorrupt && isACK(0) -> stop_timer => Espera chamada 1 de cima
+[RDT]       [Espera chamada 1 de cima] rdt_send(data) -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK1] rdt_rcv && notcorrupt && isACK(1) -> stop_timer => Espera chamada 0 de cima
+[RDT]       [Espera chamada 0 de cima] rdt_send(data) -> udt_send(sndpkt), start_timer
+[RDT]       (canal) PERDEU dados seq=0
+[RDT]       [Espera por ACK0] timeout -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK0] timeout -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK0] rdt_rcv && notcorrupt && isACK(0) -> stop_timer => Espera chamada 1 de cima
+[RDT]       [Espera chamada 1 de cima] rdt_send(data) -> udt_send(sndpkt), start_timer
+[RDT]       (canal) PERDEU dados seq=1
+[RDT]       [Espera por ACK1] timeout -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK1] rdt_rcv && notcorrupt && isACK(1) -> stop_timer => Espera chamada 0 de cima
+[RDT]       [Espera chamada 0 de cima] rdt_send(data) -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK0] rdt_rcv && notcorrupt && isACK(0) -> stop_timer => Espera chamada 1 de cima
+[RDT]       [Espera chamada 1 de cima] rdt_send(data) -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK1] rdt_rcv && notcorrupt && isACK(1) -> stop_timer => Espera chamada 0 de cima
+[RDT]       [Espera chamada 0 de cima] rdt_send(data) -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK0] rdt_rcv && notcorrupt && isACK(0) -> stop_timer => Espera chamada 1 de cima
+[RDT]       [Espera chamada 1 de cima] rdt_send(data) -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK1] rdt_rcv && corrupt(rcvpkt) -> Λ
+[RDT]       [Espera por ACK1] timeout -> udt_send(sndpkt), start_timer
+[RDT]       (canal) CORROMPEU dados seq=1
+[RDT]       [Espera por ACK1] rdt_rcv && notcorrupt && isACK(1) -> stop_timer => Espera chamada 0 de cima
+[RDT]       [Espera chamada 0 de cima] rdt_send(data) -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK0] rdt_rcv && notcorrupt && isACK(0) -> stop_timer => Espera chamada 1 de cima
+[RDT]       [Espera chamada 1 de cima] rdt_send(data) -> udt_send(sndpkt), start_timer
+[RDT]       (canal) PERDEU dados seq=1
+[RDT]       [Espera por ACK1] timeout -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK1] rdt_rcv && notcorrupt && isACK(1) -> stop_timer => Espera chamada 0 de cima
+[RDT]       [Espera chamada 0 de cima] rdt_send(data) -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK0] rdt_rcv && notcorrupt && isACK(0) -> stop_timer => Espera chamada 1 de cima
+[RDT]       [Espera chamada 1 de cima] rdt_send(data) -> udt_send(sndpkt), start_timer
+[RDT]       (canal) CORROMPEU dados seq=1
+[RDT]       [Espera por ACK1] rdt_rcv && isACK(0) -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK1] rdt_rcv && corrupt(rcvpkt) -> Λ
+[RDT]       [Espera por ACK1] timeout -> udt_send(sndpkt), start_timer
+[RDT]       (canal) CORROMPEU dados seq=1
+[RDT]       [Espera por ACK1] rdt_rcv && notcorrupt && isACK(1) -> stop_timer => Espera chamada 0 de cima
+[RDT]       [Espera chamada 0 de cima] rdt_send(data) -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK0] rdt_rcv && notcorrupt && isACK(0) -> stop_timer => Espera chamada 1 de cima
+[RDT]       [Espera chamada 1 de cima] rdt_send(data) -> udt_send(sndpkt), start_timer
+[RDT]       (canal) PERDEU dados seq=1
+[RDT]       [Espera por ACK1] timeout -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK1] rdt_rcv && notcorrupt && isACK(1) -> stop_timer => Espera chamada 0 de cima
+[RDT]       [Espera chamada 0 de cima] rdt_send(data) -> udt_send(sndpkt), start_timer
+[RDT]       (canal) CORROMPEU dados seq=0
+[RDT]       [Espera por ACK0] rdt_rcv && isACK(1) -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK0] rdt_rcv && notcorrupt && isACK(0) -> stop_timer => Espera chamada 1 de cima
+[RDT]       [Espera chamada 1 de cima] rdt_send(data) -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK1] rdt_rcv && corrupt(rcvpkt) -> Λ
+[RDT]       [Espera por ACK1] timeout -> udt_send(sndpkt), start_timer
+[RDT]       (canal) PERDEU dados seq=1
+[RDT]       [Espera por ACK1] timeout -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK1] rdt_rcv && notcorrupt && isACK(1) -> stop_timer => Espera chamada 0 de cima
+[RDT]       [Espera chamada 0 de cima] rdt_send(data) -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK0] rdt_rcv && notcorrupt && isACK(0) -> stop_timer => Espera chamada 1 de cima
+[RDT]       [Espera chamada 1 de cima] rdt_send(data) -> udt_send(sndpkt), start_timer
+[RDT]       (canal) CORROMPEU dados seq=1
+[RDT]       [Espera por ACK1] rdt_rcv && isACK(0) -> udt_send(sndpkt), start_timer
+[RDT]       (canal) CORROMPEU dados seq=1
+[RDT]       [Espera por ACK1] rdt_rcv && corrupt(rcvpkt) -> Λ
+[RDT]       [Espera por ACK1] timeout -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK1] rdt_rcv && notcorrupt && isACK(1) -> stop_timer => Espera chamada 0 de cima
+[RDT]       [Espera chamada 0 de cima] rdt_send(data) -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK0] rdt_rcv && notcorrupt && isACK(0) -> stop_timer => Espera chamada 1 de cima
+[RDT]       [Espera chamada 1 de cima] rdt_send(data) -> udt_send(sndpkt), start_timer
+[RDT]       (canal) PERDEU dados seq=1
+[RDT]       [Espera por ACK1] timeout -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK1] rdt_rcv && notcorrupt && isACK(1) -> stop_timer => Espera chamada 0 de cima
+[RDT]       [Espera chamada 0 de cima] rdt_send(data) -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK0] rdt_rcv && notcorrupt && isACK(0) -> stop_timer => Espera chamada 1 de cima
+[RDT]       [Espera chamada 1 de cima] rdt_send(data) -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK1] rdt_rcv && notcorrupt && isACK(1) -> stop_timer => Espera chamada 0 de cima
+[RDT]       [Espera chamada 0 de cima] rdt_send(data) -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK0] rdt_rcv && notcorrupt && isACK(0) -> stop_timer => Espera chamada 1 de cima
+[RDT]       [Espera chamada 1 de cima] rdt_send(data) -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK1] rdt_rcv && notcorrupt && isACK(1) -> stop_timer => Espera chamada 0 de cima
+[RDT]       [Espera chamada 0 de cima] rdt_send(data) -> udt_send(sndpkt), start_timer
+[RDT]       (canal) PERDEU dados seq=0
+[RDT]       [Espera por ACK0] timeout -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK0] rdt_rcv && notcorrupt && isACK(0) -> stop_timer => Espera chamada 1 de cima
+[RDT]       [Espera chamada 1 de cima] rdt_send(data) -> udt_send(sndpkt), start_timer
+[RDT]       (canal) PERDEU dados seq=1
+[RDT]       [Espera por ACK1] timeout -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK1] rdt_rcv && corrupt(rcvpkt) -> Λ
+[RDT]       [Espera por ACK1] timeout -> udt_send(sndpkt), start_timer
+[RDT]       (canal) PERDEU dados seq=1
+[RDT]       [Espera por ACK1] timeout -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK1] rdt_rcv && notcorrupt && isACK(1) -> stop_timer => Espera chamada 0 de cima
+[RDT]       [Espera chamada 0 de cima] rdt_send(data) -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK0] rdt_rcv && notcorrupt && isACK(0) -> stop_timer => Espera chamada 1 de cima
+[RDT]       [Espera chamada 1 de cima] rdt_send(data) -> udt_send(sndpkt), start_timer
+[RDT]       (canal) CORROMPEU dados seq=1
+[RDT]       [Espera por ACK1] rdt_rcv && isACK(0) -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK1] rdt_rcv && notcorrupt && isACK(1) -> stop_timer => Espera chamada 0 de cima
+[RDT]       [Espera chamada 0 de cima] rdt_send(data) -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK0] rdt_rcv && notcorrupt && isACK(0) -> stop_timer => Espera chamada 1 de cima
+[RDT]       [Espera chamada 1 de cima] rdt_send(data) -> udt_send(sndpkt), start_timer
+[RDT]       (canal) PERDEU dados seq=1
+[RDT]       [Espera por ACK1] timeout -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK1] rdt_rcv && notcorrupt && isACK(1) -> stop_timer => Espera chamada 0 de cima
+[RDT]       [Espera chamada 0 de cima] rdt_send(data) -> udt_send(sndpkt), start_timer
+[RDT]       (canal) PERDEU dados seq=0
+[RDT]       [Espera por ACK0] timeout -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK0] rdt_rcv && notcorrupt && isACK(0) -> stop_timer => Espera chamada 1 de cima
+[RDT]       [Espera chamada 1 de cima] rdt_send(data) -> udt_send(sndpkt), start_timer
+[RDT]       (canal) CORROMPEU dados seq=1
+[RDT]       [Espera por ACK1] rdt_rcv && isACK(0) -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK1] timeout -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK1] rdt_rcv && notcorrupt && isACK(1) -> stop_timer => Espera chamada 0 de cima
+[RDT]       [Espera chamada 0 de cima] rdt_send(data) -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK0] rdt_rcv && notcorrupt && isACK(0) -> stop_timer => Espera chamada 1 de cima
+[RDT]       [Espera chamada 1 de cima] rdt_send(data) -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK1] rdt_rcv && notcorrupt && isACK(1) -> stop_timer => Espera chamada 0 de cima
+[RDT]       [Espera chamada 0 de cima] rdt_send(data) -> udt_send(sndpkt), start_timer
+[RDT]       (canal) PERDEU dados seq=0
+[RDT]       [Espera por ACK0] timeout -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK0] rdt_rcv && notcorrupt && isACK(0) -> stop_timer => Espera chamada 1 de cima
+[RDT]       [Esperar 0 de baixo] rdt_rcv && notcorrupt && has_seq0 -> extract, deliver_data, udt_send(ACK0) => Esperar 1 de baixo
 [SERVIDOR] Arquivo teste50k.bin salvo.
-[RDT 3.0] Resumo -> Timeouts: 42 | Retransmissões: 47 | ACKs reenviados: 0 | ACKs duplicados recebidos: 5 | Perdas no canal: 12 | Corrupções no canal: 17 | Corrompidos detectados: 14
+[RDT 3.0] Resumo -> Timeouts: 38 | Retransmissões: 45 | ACKs reenviados: 0 | ACKs duplicados recebidos: 7 | Perdas no canal: 18 | Corrupções no canal: 12 | Corrompidos detectados: 12
 
 UDP> GET teste50k.bin
-[RDT]       ACK 1 recebido
+[RDT]       [Espera chamada 1 de cima] rdt_send(data) -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK1] rdt_rcv && notcorrupt && isACK(1) -> stop_timer => Espera chamada 0 de cima
 [SOLICITANDO] Requisitando 'teste50k.bin' do servidor...
-[RDT]       pacote 0 duplicado - reenviando ACK 0
-[RDT]       pacote 0 duplicado - reenviando ACK 0
-[RDT]       pacote 1 íntegro - enviando ACK 1
-[RDT]       canal PERDEU ACK seq=1
+[RDT]       [Esperar 1 de baixo] rdt_rcv && corrupt(rcvpkt) -> udt_send(ACK0)
+[RDT]       [Esperar 1 de baixo] rdt_rcv && notcorrupt && has_seq1 -> extract, deliver_data, udt_send(ACK1) => Esperar 0 de baixo
 [RECEBENDO] Arquivo terá 51200 bytes. Aguardando 50 pacotes...
-[RDT]       pacote 1 duplicado - reenviando ACK 1
-[RDT]       canal PERDEU ACK seq=1
-[RDT]       pacote 1 duplicado - reenviando ACK 1
-[RDT]       pacote 0 íntegro - enviando ACK 0
-[RDT]       pacote com checksum inválido - reenviando ACK 0
-[RDT]       pacote 1 íntegro - enviando ACK 1
-[RDT]       canal CORROMPEU ACK seq=1
-[RDT]       pacote 1 duplicado - reenviando ACK 1
-[RDT]       pacote 0 íntegro - enviando ACK 0
-[RDT]       pacote 1 íntegro - enviando ACK 1
-[RDT]       pacote 0 íntegro - enviando ACK 0
-[RDT]       canal PERDEU ACK seq=0
-[RDT]       pacote com checksum inválido - reenviando ACK 0
-[RDT]       canal CORROMPEU ACK seq=0
-[RDT]       pacote com checksum inválido - reenviando ACK 0
-[RDT]       pacote 1 íntegro - enviando ACK 1
-[RDT]       pacote 0 íntegro - enviando ACK 0
-[RDT]       canal PERDEU ACK seq=0
-[RDT]       pacote 0 duplicado - reenviando ACK 0
-[RDT]       canal CORROMPEU ACK seq=0
-[RDT]       pacote 0 duplicado - reenviando ACK 0
-[RDT]       pacote 1 íntegro - enviando ACK 1
-[RDT]       pacote com checksum inválido - reenviando ACK 1
-[RDT]       canal CORROMPEU ACK seq=1
-[RDT]       pacote com checksum inválido - reenviando ACK 1
-[RDT]       pacote com checksum inválido - reenviando ACK 1
-[RDT]       canal CORROMPEU ACK seq=1
-[RDT]       pacote 0 íntegro - enviando ACK 0
-[RDT]       canal CORROMPEU ACK seq=0
-[RDT]       pacote 0 duplicado - reenviando ACK 0
-[RDT]       canal CORROMPEU ACK seq=0
-[RDT]       pacote 0 duplicado - reenviando ACK 0
-[RDT]       canal PERDEU ACK seq=0
-[RDT]       pacote 0 duplicado - reenviando ACK 0
-[RDT]       pacote 1 íntegro - enviando ACK 1
-[RDT]       pacote 0 íntegro - enviando ACK 0
-[RDT]       pacote 1 íntegro - enviando ACK 1
-[RDT]       pacote 0 íntegro - enviando ACK 0
-[RDT]       pacote com checksum inválido - reenviando ACK 0
-[RDT]       pacote 1 íntegro - enviando ACK 1
-[RDT]       canal PERDEU ACK seq=1
-[RDT]       pacote 1 duplicado - reenviando ACK 1
-[RDT]       pacote 0 íntegro - enviando ACK 0
-[RDT]       pacote 1 íntegro - enviando ACK 1
-[RDT]       canal PERDEU ACK seq=1
-[RDT]       pacote 1 duplicado - reenviando ACK 1
-[RDT]       pacote 0 íntegro - enviando ACK 0
-[RDT]       pacote 1 íntegro - enviando ACK 1
-[RDT]       pacote com checksum inválido - reenviando ACK 1
-[RDT]       pacote com checksum inválido - reenviando ACK 1
-[RDT]       pacote 0 íntegro - enviando ACK 0
-[RDT]       canal CORROMPEU ACK seq=0
-[RDT]       pacote 0 duplicado - reenviando ACK 0
-[RDT]       pacote 1 íntegro - enviando ACK 1
-[RDT]       canal CORROMPEU ACK seq=1
-[RDT]       pacote 1 duplicado - reenviando ACK 1
-[RDT]       pacote 0 íntegro - enviando ACK 0
-[RDT]       pacote 1 íntegro - enviando ACK 1
-[RDT]       pacote 0 íntegro - enviando ACK 0
-[RDT]       pacote com checksum inválido - reenviando ACK 0
-[RDT]       pacote 1 íntegro - enviando ACK 1
-[RDT]       pacote 0 íntegro - enviando ACK 0
-[RDT]       pacote com checksum inválido - reenviando ACK 0
-[RDT]       pacote 1 íntegro - enviando ACK 1
-[RDT]       pacote 0 íntegro - enviando ACK 0
-[RDT]       pacote 1 íntegro - enviando ACK 1
-[RDT]       pacote 0 íntegro - enviando ACK 0
-[RDT]       pacote 1 íntegro - enviando ACK 1
-[RDT]       pacote 0 íntegro - enviando ACK 0
-[RDT]       pacote 1 íntegro - enviando ACK 1
-[RDT]       canal CORROMPEU ACK seq=1
-[RDT]       pacote 1 duplicado - reenviando ACK 1
-[RDT]       pacote 0 íntegro - enviando ACK 0
-[RDT]       pacote 1 íntegro - enviando ACK 1
-[RDT]       canal CORROMPEU ACK seq=1
-[RDT]       pacote com checksum inválido - reenviando ACK 1
-[RDT]       canal CORROMPEU ACK seq=1
-[RDT]       pacote com checksum inválido - reenviando ACK 1
-[RDT]       pacote 0 íntegro - enviando ACK 0
-[RDT]       pacote 1 íntegro - enviando ACK 1
-[RDT]       canal CORROMPEU ACK seq=1
-[RDT]       pacote 1 duplicado - reenviando ACK 1
-[RDT]       pacote 0 íntegro - enviando ACK 0
-[RDT]       canal PERDEU ACK seq=0
-[RDT]       pacote com checksum inválido - reenviando ACK 0
-[RDT]       pacote 1 íntegro - enviando ACK 1
-[RDT]       pacote 0 íntegro - enviando ACK 0
-[RDT]       pacote 1 íntegro - enviando ACK 1
-[RDT]       canal PERDEU ACK seq=1
-[RDT]       pacote 1 duplicado - reenviando ACK 1
-[RDT]       pacote 0 íntegro - enviando ACK 0
-[RDT]       pacote 1 íntegro - enviando ACK 1
-[RDT]       canal PERDEU ACK seq=1
-[RDT]       pacote 1 duplicado - reenviando ACK 1
-[RDT]       pacote 0 íntegro - enviando ACK 0
-[RDT]       pacote 1 íntegro - enviando ACK 1
-[RDT]       pacote com checksum inválido - reenviando ACK 1
-[RDT]       canal PERDEU ACK seq=1
-[RDT]       pacote com checksum inválido - reenviando ACK 1
-[RDT]       canal PERDEU ACK seq=1
-[RDT]       pacote com checksum inválido - reenviando ACK 1
-[RDT]       canal PERDEU ACK seq=1
-[RDT]       pacote 0 íntegro - enviando ACK 0
-[RDT]       pacote com checksum inválido - reenviando ACK 0
-[RDT]       pacote 1 íntegro - enviando ACK 1
-[RDT]       pacote 0 íntegro - enviando ACK 0
-[RDT]       pacote 1 íntegro - enviando ACK 1
-[RDT]       canal CORROMPEU ACK seq=1
-[RDT]       pacote 1 duplicado - reenviando ACK 1
-[RDT]       pacote 0 íntegro - enviando ACK 0
-[RDT]       pacote 1 íntegro - enviando ACK 1
+[RDT]       [Esperar 0 de baixo] rdt_rcv && notcorrupt && has_seq0 -> extract, deliver_data, udt_send(ACK0) => Esperar 1 de baixo
+[RDT]       [Esperar 1 de baixo] rdt_rcv && notcorrupt && has_seq1 -> extract, deliver_data, udt_send(ACK1) => Esperar 0 de baixo
+[RDT]       [Esperar 0 de baixo] rdt_rcv && notcorrupt && has_seq0 -> extract, deliver_data, udt_send(ACK0) => Esperar 1 de baixo
+[RDT]       [Esperar 1 de baixo] rdt_rcv && notcorrupt && has_seq1 -> extract, deliver_data, udt_send(ACK1) => Esperar 0 de baixo
+[RDT]       (canal) CORROMPEU ACK seq=1
+[RDT]       [Esperar 0 de baixo] rdt_rcv && has_seq1 -> udt_send(ACK1)
+[RDT]       [Esperar 0 de baixo] rdt_rcv && corrupt(rcvpkt) -> udt_send(ACK1)
+[RDT]       [Esperar 0 de baixo] rdt_rcv && notcorrupt && has_seq0 -> extract, deliver_data, udt_send(ACK0) => Esperar 1 de baixo
+[RDT]       [Esperar 1 de baixo] rdt_rcv && notcorrupt && has_seq1 -> extract, deliver_data, udt_send(ACK1) => Esperar 0 de baixo
+[RDT]       [Esperar 0 de baixo] rdt_rcv && notcorrupt && has_seq0 -> extract, deliver_data, udt_send(ACK0) => Esperar 1 de baixo
+[RDT]       (canal) PERDEU ACK seq=0
+[RDT]       [Esperar 1 de baixo] rdt_rcv && corrupt(rcvpkt) -> udt_send(ACK0)
+[RDT]       (canal) CORROMPEU ACK seq=0
+[RDT]       [Esperar 1 de baixo] rdt_rcv && has_seq0 -> udt_send(ACK0)
+[RDT]       [Esperar 1 de baixo] rdt_rcv && notcorrupt && has_seq1 -> extract, deliver_data, udt_send(ACK1) => Esperar 0 de baixo
+[RDT]       [Esperar 0 de baixo] rdt_rcv && notcorrupt && has_seq0 -> extract, deliver_data, udt_send(ACK0) => Esperar 1 de baixo
+[RDT]       (canal) PERDEU ACK seq=0
+[RDT]       [Esperar 1 de baixo] rdt_rcv && has_seq0 -> udt_send(ACK0)
+[RDT]       [Esperar 1 de baixo] rdt_rcv && corrupt(rcvpkt) -> udt_send(ACK0)
+[RDT]       [Esperar 1 de baixo] rdt_rcv && corrupt(rcvpkt) -> udt_send(ACK0)
+[RDT]       (canal) CORROMPEU ACK seq=0
+[RDT]       [Esperar 1 de baixo] rdt_rcv && notcorrupt && has_seq1 -> extract, deliver_data, udt_send(ACK1) => Esperar 0 de baixo
+[RDT]       [Esperar 0 de baixo] rdt_rcv && corrupt(rcvpkt) -> udt_send(ACK1)
+[RDT]       [Esperar 0 de baixo] rdt_rcv && corrupt(rcvpkt) -> udt_send(ACK1)
+[RDT]       [Esperar 0 de baixo] rdt_rcv && notcorrupt && has_seq0 -> extract, deliver_data, udt_send(ACK0) => Esperar 1 de baixo
+[RDT]       [Esperar 1 de baixo] rdt_rcv && notcorrupt && has_seq1 -> extract, deliver_data, udt_send(ACK1) => Esperar 0 de baixo
+[RDT]       [Esperar 0 de baixo] rdt_rcv && notcorrupt && has_seq0 -> extract, deliver_data, udt_send(ACK0) => Esperar 1 de baixo
+[RDT]       (canal) PERDEU ACK seq=0
+[RDT]       [Esperar 1 de baixo] rdt_rcv && has_seq0 -> udt_send(ACK0)
+[RDT]       [Esperar 1 de baixo] rdt_rcv && notcorrupt && has_seq1 -> extract, deliver_data, udt_send(ACK1) => Esperar 0 de baixo
+[RDT]       (canal) PERDEU ACK seq=1
+[RDT]       [Esperar 0 de baixo] rdt_rcv && corrupt(rcvpkt) -> udt_send(ACK1)
+[RDT]       [Esperar 0 de baixo] rdt_rcv && notcorrupt && has_seq0 -> extract, deliver_data, udt_send(ACK0) => Esperar 1 de baixo
+[RDT]       (canal) PERDEU ACK seq=0
+[RDT]       [Esperar 1 de baixo] rdt_rcv && has_seq0 -> udt_send(ACK0)
+[RDT]       [Esperar 1 de baixo] rdt_rcv && corrupt(rcvpkt) -> udt_send(ACK0)
+[RDT]       (canal) CORROMPEU ACK seq=0
+[RDT]       [Esperar 1 de baixo] rdt_rcv && notcorrupt && has_seq1 -> extract, deliver_data, udt_send(ACK1) => Esperar 0 de baixo
+[RDT]       [Esperar 0 de baixo] rdt_rcv && corrupt(rcvpkt) -> udt_send(ACK1)
+[RDT]       [Esperar 0 de baixo] rdt_rcv && notcorrupt && has_seq0 -> extract, deliver_data, udt_send(ACK0) => Esperar 1 de baixo
+[RDT]       [Esperar 1 de baixo] rdt_rcv && notcorrupt && has_seq1 -> extract, deliver_data, udt_send(ACK1) => Esperar 0 de baixo
+[RDT]       [Esperar 0 de baixo] rdt_rcv && notcorrupt && has_seq0 -> extract, deliver_data, udt_send(ACK0) => Esperar 1 de baixo
+[RDT]       [Esperar 1 de baixo] rdt_rcv && notcorrupt && has_seq1 -> extract, deliver_data, udt_send(ACK1) => Esperar 0 de baixo
+[RDT]       [Esperar 0 de baixo] rdt_rcv && notcorrupt && has_seq0 -> extract, deliver_data, udt_send(ACK0) => Esperar 1 de baixo
+[RDT]       [Esperar 1 de baixo] rdt_rcv && notcorrupt && has_seq1 -> extract, deliver_data, udt_send(ACK1) => Esperar 0 de baixo
+[RDT]       (canal) CORROMPEU ACK seq=1
+[RDT]       [Esperar 0 de baixo] rdt_rcv && has_seq1 -> udt_send(ACK1)
+[RDT]       [Esperar 0 de baixo] rdt_rcv && notcorrupt && has_seq0 -> extract, deliver_data, udt_send(ACK0) => Esperar 1 de baixo
+[RDT]       (canal) PERDEU ACK seq=0
+[RDT]       [Esperar 1 de baixo] rdt_rcv && has_seq0 -> udt_send(ACK0)
+[RDT]       (canal) CORROMPEU ACK seq=0
+[RDT]       [Esperar 1 de baixo] rdt_rcv && has_seq0 -> udt_send(ACK0)
+[RDT]       (canal) PERDEU ACK seq=0
+[RDT]       [Esperar 1 de baixo] rdt_rcv && has_seq0 -> udt_send(ACK0)
+[RDT]       [Esperar 1 de baixo] rdt_rcv && corrupt(rcvpkt) -> udt_send(ACK0)
+[RDT]       [Esperar 1 de baixo] rdt_rcv && notcorrupt && has_seq1 -> extract, deliver_data, udt_send(ACK1) => Esperar 0 de baixo
+[RDT]       (canal) CORROMPEU ACK seq=1
+[RDT]       [Esperar 0 de baixo] rdt_rcv && has_seq1 -> udt_send(ACK1)
+[RDT]       (canal) PERDEU ACK seq=1
+[RDT]       [Esperar 0 de baixo] rdt_rcv && has_seq1 -> udt_send(ACK1)
+[RDT]       (canal) PERDEU ACK seq=1
+[RDT]       [Esperar 0 de baixo] rdt_rcv && has_seq1 -> udt_send(ACK1)
+[RDT]       [Esperar 0 de baixo] rdt_rcv && notcorrupt && has_seq0 -> extract, deliver_data, udt_send(ACK0) => Esperar 1 de baixo
+[RDT]       (canal) CORROMPEU ACK seq=0
+[RDT]       [Esperar 1 de baixo] rdt_rcv && has_seq0 -> udt_send(ACK0)
+[RDT]       [Esperar 1 de baixo] rdt_rcv && notcorrupt && has_seq1 -> extract, deliver_data, udt_send(ACK1) => Esperar 0 de baixo
+[RDT]       [Esperar 0 de baixo] rdt_rcv && corrupt(rcvpkt) -> udt_send(ACK1)
+[RDT]       [Esperar 0 de baixo] rdt_rcv && notcorrupt && has_seq0 -> extract, deliver_data, udt_send(ACK0) => Esperar 1 de baixo
+[RDT]       [Esperar 1 de baixo] rdt_rcv && notcorrupt && has_seq1 -> extract, deliver_data, udt_send(ACK1) => Esperar 0 de baixo
+[RDT]       (canal) PERDEU ACK seq=1
+[RDT]       [Esperar 0 de baixo] rdt_rcv && has_seq1 -> udt_send(ACK1)
+[RDT]       [Esperar 0 de baixo] rdt_rcv && corrupt(rcvpkt) -> udt_send(ACK1)
+[RDT]       (canal) CORROMPEU ACK seq=1
+[RDT]       [Esperar 0 de baixo] rdt_rcv && notcorrupt && has_seq0 -> extract, deliver_data, udt_send(ACK0) => Esperar 1 de baixo
+[RDT]       [Esperar 1 de baixo] rdt_rcv && notcorrupt && has_seq1 -> extract, deliver_data, udt_send(ACK1) => Esperar 0 de baixo
+[RDT]       [Esperar 0 de baixo] rdt_rcv && corrupt(rcvpkt) -> udt_send(ACK1)
+[RDT]       [Esperar 0 de baixo] rdt_rcv && notcorrupt && has_seq0 -> extract, deliver_data, udt_send(ACK0) => Esperar 1 de baixo
+[RDT]       (canal) PERDEU ACK seq=0
+[RDT]       [Esperar 1 de baixo] rdt_rcv && has_seq0 -> udt_send(ACK0)
+[RDT]       [Esperar 1 de baixo] rdt_rcv && corrupt(rcvpkt) -> udt_send(ACK0)
+[RDT]       [Esperar 1 de baixo] rdt_rcv && notcorrupt && has_seq1 -> extract, deliver_data, udt_send(ACK1) => Esperar 0 de baixo
+[RDT]       [Esperar 0 de baixo] rdt_rcv && corrupt(rcvpkt) -> udt_send(ACK1)
+[RDT]       [Esperar 0 de baixo] rdt_rcv && notcorrupt && has_seq0 -> extract, deliver_data, udt_send(ACK0) => Esperar 1 de baixo
+[RDT]       [Esperar 1 de baixo] rdt_rcv && notcorrupt && has_seq1 -> extract, deliver_data, udt_send(ACK1) => Esperar 0 de baixo
+[RDT]       [Esperar 0 de baixo] rdt_rcv && corrupt(rcvpkt) -> udt_send(ACK1)
+[RDT]       (canal) PERDEU ACK seq=1
+[RDT]       [Esperar 0 de baixo] rdt_rcv && notcorrupt && has_seq0 -> extract, deliver_data, udt_send(ACK0) => Esperar 1 de baixo
+[RDT]       [Esperar 1 de baixo] rdt_rcv && corrupt(rcvpkt) -> udt_send(ACK0)
+[RDT]       (canal) PERDEU ACK seq=0
+[RDT]       [Esperar 1 de baixo] rdt_rcv && notcorrupt && has_seq1 -> extract, deliver_data, udt_send(ACK1) => Esperar 0 de baixo
+[RDT]       [Esperar 0 de baixo] rdt_rcv && notcorrupt && has_seq0 -> extract, deliver_data, udt_send(ACK0) => Esperar 1 de baixo
+[RDT]       [Esperar 1 de baixo] rdt_rcv && notcorrupt && has_seq1 -> extract, deliver_data, udt_send(ACK1) => Esperar 0 de baixo
+[RDT]       [Esperar 0 de baixo] rdt_rcv && notcorrupt && has_seq0 -> extract, deliver_data, udt_send(ACK0) => Esperar 1 de baixo
+[RDT]       [Esperar 1 de baixo] rdt_rcv && notcorrupt && has_seq1 -> extract, deliver_data, udt_send(ACK1) => Esperar 0 de baixo
+[RDT]       [Esperar 0 de baixo] rdt_rcv && notcorrupt && has_seq0 -> extract, deliver_data, udt_send(ACK0) => Esperar 1 de baixo
+[RDT]       [Esperar 1 de baixo] rdt_rcv && notcorrupt && has_seq1 -> extract, deliver_data, udt_send(ACK1) => Esperar 0 de baixo
+[RDT]       [Esperar 0 de baixo] rdt_rcv && notcorrupt && has_seq0 -> extract, deliver_data, udt_send(ACK0) => Esperar 1 de baixo
+[RDT]       (canal) CORROMPEU ACK seq=0
+[RDT]       [Esperar 1 de baixo] rdt_rcv && has_seq0 -> udt_send(ACK0)
+[RDT]       (canal) PERDEU ACK seq=0
+[RDT]       [Esperar 1 de baixo] rdt_rcv && has_seq0 -> udt_send(ACK0)
+[RDT]       [Esperar 1 de baixo] rdt_rcv && notcorrupt && has_seq1 -> extract, deliver_data, udt_send(ACK1) => Esperar 0 de baixo
+[RDT]       [Esperar 0 de baixo] rdt_rcv && notcorrupt && has_seq0 -> extract, deliver_data, udt_send(ACK0) => Esperar 1 de baixo
+[RDT]       [Esperar 1 de baixo] rdt_rcv && notcorrupt && has_seq1 -> extract, deliver_data, udt_send(ACK1) => Esperar 0 de baixo
+[RDT]       [Esperar 0 de baixo] rdt_rcv && corrupt(rcvpkt) -> udt_send(ACK1)
+[RDT]       [Esperar 0 de baixo] rdt_rcv && notcorrupt && has_seq0 -> extract, deliver_data, udt_send(ACK0) => Esperar 1 de baixo
+[RDT]       [Esperar 1 de baixo] rdt_rcv && notcorrupt && has_seq1 -> extract, deliver_data, udt_send(ACK1) => Esperar 0 de baixo
+[RDT]       [Esperar 0 de baixo] rdt_rcv && notcorrupt && has_seq0 -> extract, deliver_data, udt_send(ACK0) => Esperar 1 de baixo
+[RDT]       [Esperar 1 de baixo] rdt_rcv && notcorrupt && has_seq1 -> extract, deliver_data, udt_send(ACK1) => Esperar 0 de baixo
 [CONCLUÍDO] Arquivo recuperado com sucesso e salvo como './rcvd_files_client/cliente_teste50k.bin'
-[RDT 3.0] Resumo -> Timeouts: 0 | Retransmissões: 0 | ACKs reenviados: 37 | ACKs duplicados recebidos: 0 | Perdas no canal: 13 | Corrupções no canal: 14 | Corrompidos detectados: 18
+[RDT 3.0] Resumo -> Timeouts: 0 | Retransmissões: 0 | ACKs reenviados: 36 | ACKs duplicados recebidos: 0 | Perdas no canal: 14 | Corrupções no canal: 10 | Corrompidos detectados: 19
 
 UDP> GET nao_existe.txt
-[RDT]       canal CORROMPEU dados seq=0
-[RDT]       ACK 1 duplicado - retransmitindo
-[RDT]       ACK 0 recebido
+[RDT]       [Espera chamada 0 de cima] rdt_send(data) -> udt_send(sndpkt), start_timer
+[RDT]       (canal) PERDEU dados seq=0
+[RDT]       [Espera por ACK0] timeout -> udt_send(sndpkt), start_timer
+[RDT]       (canal) PERDEU dados seq=0
+[RDT]       [Espera por ACK0] timeout -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK0] rdt_rcv && corrupt(rcvpkt) -> Λ
+[RDT]       [Espera por ACK0] timeout -> udt_send(sndpkt), start_timer
+[RDT]       (canal) PERDEU dados seq=0
+[RDT]       [Espera por ACK0] timeout -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK0] rdt_rcv && corrupt(rcvpkt) -> Λ
+[RDT]       [Espera por ACK0] timeout -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK0] rdt_rcv && corrupt(rcvpkt) -> Λ
+[RDT]       [Espera por ACK0] timeout -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK0] timeout -> udt_send(sndpkt), start_timer
+[RDT]       [Espera por ACK0] rdt_rcv && notcorrupt && isACK(0) -> stop_timer => Espera chamada 1 de cima
 [SOLICITANDO] Requisitando 'nao_existe.txt' do servidor...
-[RDT]       pacote 0 íntegro - enviando ACK 0
+[RDT]       [Esperar 0 de baixo] rdt_rcv && notcorrupt && has_seq0 -> extract, deliver_data, udt_send(ACK0) => Esperar 1 de baixo
 [ERRO DO SERVIDOR] ERRO: Arquivo não encontrado.
 
 UDP> SAIR

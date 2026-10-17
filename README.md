@@ -55,13 +55,10 @@ O checksum é uma soma de verificação de 16 bits em complemento de um, calcula
 * **Numeração de Sequência Alternada (0 e 1):** Impede que pacotes retransmitidos atrasados sejam confundidos com novos dados.
 * **Stop-and-Wait:** O remetente envia 1 pacote e aguarda até receber o ACK correspondente antes de enviar o próximo fragmento.
 * **Temporizadores (Timeouts):** Se um pacote `D` ou seu `ACK` for perdido, o remetente retransmite automaticamente após 50ms.
-* **Checksum e ACK duplicado (protocolo sem NAK):** O receptor recalcula o checksum de todo pacote que chega. Se o valor não confere, ou se o pacote não é o esperado, ele reenvia o `ACK` do último pacote aceito. O remetente lê esse ACK duplicado como pedido de retransmissão e reenvia na hora, sem esperar o temporizador estourar.
+* **Checksum e ACK duplicado:** O receptor recalcula o checksum de todo pacote que chega. Se o valor não confere, ou se o pacote não é o esperado, ele reenvia o `ACK` do último pacote aceito, e o remetente retransmite na hora, sem esperar o temporizador estourar.
 * **Retransmissão sem desistência:** O remetente retransmite enquanto não receber o `ACK` correspondente. O protocolo nunca descarta um dado, de modo que a entrega independe da taxa de perda do canal.
 
-**Por que não há NAK:**
-O RDT 3.0 do Kurose é construído sobre o RDT 2.2, que existe justamente para eliminar o NAK. Em vez de uma mensagem dedicada dizendo "chegou corrompido", o receptor reenvia o `ACK` do último pacote que aceitou; para o remetente, receber de novo a confirmação do pacote anterior significa que o atual precisa ser reenviado. Um único tipo de mensagem de controle resolve corrupção, perda e duplicata, e é isso que o protocolo implementa.
-
-Quando o checksum falha, o número de sequência do pacote também não é confiável, já que ele está dentro da área protegida. Por isso o receptor não responde com base no que leu: ele responde a partir do próprio estado, reenviando o `ACK` do último pacote que aceitou de verdade.
+Quando o checksum falha, o número de sequência também não é confiável, já que está dentro da área protegida. Por isso o receptor responde a partir do próprio estado, reenviando o `ACK` do último pacote que aceitou.
 
 **Simulação de Ambiente Hostil (`rdt.py`):**
 O ruído é injetado em um único ponto, a função `send_pkt`, que representa o canal. Todo pacote entregue a ela (dados ou ACK) passa por um sorteio: pode sumir, pode ter um bit invertido antes de seguir viagem, ou pode chegar intacto. Como perda e corrupção saem do mesmo sorteio, elas são mutuamente exclusivas e cada uma respeita exatamente a probabilidade configurada.

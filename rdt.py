@@ -6,10 +6,14 @@ Cada pacote carrega um cabeçalho de 4 bytes:
 
     [TIPO (1 byte)] [SEQ (1 byte)] [CHECKSUM (2 bytes)] [DADOS]
 
+O protocolo não usa NAK. Quando um pacote chega corrompido ou fora de ordem,
+o receptor responde reenviando o ACK do último pacote que recebeu corretamente;
+o remetente lê esse ACK duplicado como pedido de retransmissão. É assim que o
+RDT 2.2 dispensa o NAK, e o RDT 3.0 herda esse desenho acrescentando o
+temporizador que cobre a perda total do pacote.
+
 O canal (send_pkt) é quem simula o ambiente hostil: um pacote entregue a ele
-pode sumir ou ter bits trocados antes de chegar ao destino. O receptor detecta
-a corrupção pelo checksum e responde com NAK; a ausência do pacote só é
-percebida pelo temporizador do remetente, que retransmite.
+pode sumir ou ter bits trocados antes de chegar ao destino.
 """
 
 import socket
@@ -76,12 +80,12 @@ class RDTSocket:
     def _zerar_stats():
         return {
             "timeouts": 0,
-            "naks_recv": 0,
-            "naks_sent": 0,
+            "acks_repetidos": 0,    # ACKs que o receptor reenviou
+            "acks_duplicados": 0,   # ACKs duplicados que o remetente leu
             "retransmissoes": 0,
             "perdas": 0,
             "corrupcoes": 0,
-            "duplicados": 0,
+            "corrompidos_detectados": 0,
         }
 
     def log(self, mensagem):
@@ -93,10 +97,11 @@ class RDTSocket:
         s = self.stats
         print(
             f"[RDT 3.0] Resumo -> Timeouts: {s['timeouts']} | "
-            f"NAKs enviados: {s['naks_sent']} | NAKs recebidos: {s['naks_recv']} | "
             f"Retransmissões: {s['retransmissoes']} | "
+            f"ACKs reenviados: {s['acks_repetidos']} | "
+            f"ACKs duplicados recebidos: {s['acks_duplicados']} | "
             f"Perdas no canal: {s['perdas']} | Corrupções no canal: {s['corrupcoes']} | "
-            f"Duplicados descartados: {s['duplicados']}"
+            f"Corrompidos detectados: {s['corrompidos_detectados']}"
         )
         self.stats = self._zerar_stats()
 
@@ -122,18 +127,19 @@ class RDTSocket:
 
     @staticmethod
     def _descrever(pkt):
-        rotulo = {b"D": "dados", b"A": "ACK", b"N": "NAK"}.get(pkt[0:1], "pacote")
+        rotulo = {b"D": "dados", b"A": "ACK"}.get(pkt[0:1], "pacote")
         return f"{rotulo} seq={pkt[1]}"
 
     @staticmethod
     def _corromper(pkt):
-        """Inverte um bit a partir do checksum, deixando tipo e seq legíveis.
+        """Inverte um bit do pacote, preservando apenas o byte de tipo.
 
-        O receptor precisa saber a qual número de sequência o NAK se refere,
-        então a corrupção atinge apenas o checksum e o payload.
+        O número de sequência entra na área corrompível porque o receptor não
+        confia nele quando o checksum falha: a resposta é sempre o ACK do
+        último pacote aceito, que ele conhece pelo próprio estado.
         """
         corrompido = bytearray(pkt)
-        posicao = random.randrange(2, len(corrompido))
+        posicao = random.randrange(1, len(corrompido))
         corrompido[posicao] ^= 1 << random.randrange(8)
         return bytes(corrompido)
 
@@ -152,8 +158,7 @@ class RDTSocket:
             self.send_pkt(pkt, addr)
             primeira_tentativa = False
 
-            # Aguarda a confirmação dentro da janela do temporizador. Só o
-            # estouro do temporizador provoca retransmissão.
+            # Aguarda a confirmação dentro da janela do temporizador.
             aguardando = True
             while aguardando:
                 try:
@@ -167,7 +172,9 @@ class RDTSocket:
                 pkt_type, seq, _, integro = parse_pkt(recv_pkt)
 
                 if not integro:
-                    self.log("confirmação chegou corrompida - ignorada")
+                    # ACK ilegível: aguarda o temporizador, como no modelo.
+                    self.stats["corrompidos_detectados"] += 1
+                    self.log("ACK chegou corrompido - aguardando timeout")
                     continue
 
                 if pkt_type == b"A":
@@ -175,13 +182,10 @@ class RDTSocket:
                         self.log(f"ACK {seq} recebido")
                         self.seq_send = 1 - self.seq_send
                         return
-                    self.log(f"ACK {seq} fora de ordem - ignorado")
-
-                elif pkt_type == b"N":
-                    if seq == self.seq_send:
-                        self.stats["naks_recv"] += 1
-                        self.log(f"NAK {seq} recebido - retransmitindo")
-                        aguardando = False
+                    # ACK do pacote anterior: o receptor está pedindo de novo.
+                    self.stats["acks_duplicados"] += 1
+                    self.log(f"ACK {seq} duplicado - retransmitindo")
+                    aguardando = False
 
                 elif pkt_type == b"D":
                     # Chegou um pacote de dados enquanto esperávamos a
@@ -194,7 +198,11 @@ class RDTSocket:
                         self.send_pkt(make_pkt(b"A", seq), recv_addr)
 
     def rdt_recv(self):
-        """Recebe dados de forma confiável usando RDT 3.0."""
+        """Recebe dados de forma confiável usando RDT 3.0.
+
+        Todo pacote que não seja o esperado e íntegro provoca o reenvio do ACK
+        do último pacote aceito, que é o que substitui o NAK.
+        """
         while True:
             if self.recv_buffer:
                 pkt, addr = self.recv_buffer.pop(0)
@@ -207,22 +215,28 @@ class RDTSocket:
             pkt_type, seq, data, integro = parse_pkt(pkt)
 
             if pkt_type != b"D":
-                # ACKs e NAKs atrasados não interessam a quem espera dados.
+                # ACKs atrasados não interessam a quem espera dados.
                 continue
 
             if not integro:
-                self.stats["naks_sent"] += 1
-                self.log(f"pacote {seq} com checksum inválido - enviando NAK")
-                self.send_pkt(make_pkt(b"N", seq), addr)
+                # O seq do pacote corrompido não é confiável, então a resposta
+                # vem do estado local: o ACK do último pacote aceito.
+                ultimo_aceito = 1 - self.seq_recv
+                self.stats["corrompidos_detectados"] += 1
+                self.stats["acks_repetidos"] += 1
+                self.log(
+                    f"pacote com checksum inválido - reenviando ACK {ultimo_aceito}"
+                )
+                self.send_pkt(make_pkt(b"A", ultimo_aceito), addr)
                 continue
 
             if seq == self.seq_recv:
-                self.log(f"pacote {seq} íntegro - enviando ACK")
+                self.log(f"pacote {seq} íntegro - enviando ACK {seq}")
                 self.send_pkt(make_pkt(b"A", seq), addr)
                 self.seq_recv = 1 - self.seq_recv
                 return data, addr
 
             # Duplicado: o ACK anterior se perdeu, então confirma de novo.
-            self.stats["duplicados"] += 1
-            self.log(f"pacote {seq} duplicado - reenviando ACK")
+            self.stats["acks_repetidos"] += 1
+            self.log(f"pacote {seq} duplicado - reenviando ACK {seq}")
             self.send_pkt(make_pkt(b"A", seq), addr)

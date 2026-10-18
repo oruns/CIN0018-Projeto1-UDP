@@ -40,13 +40,14 @@ Os diretórios `rcvd_files_server/` e `rcvd_files_client/` são criados automati
 
 ## Protocolo e Confiabilidade (RDT 3.0)
 
-Todo datagrama leva um cabeçalho de 3 bytes antes do payload, que vai até 1024 bytes.
+Os dois tipos de pacote seguem o formato que o livro escreve, `make_pkt(seq, data, checksum)` para os dados e `make_pkt(ACK, seq, checksum)` para a confirmação.
 
 ```text
-[NÚMERO DE SEQUÊNCIA (1 byte)] + [CHECKSUM (2 bytes)] + [DADOS]
+dados        [NÚMERO DE SEQUÊNCIA (1 byte)] + [CHECKSUM (2 bytes)] + [DADOS até 1024 bytes]
+confirmação  [ACK (1 byte)] + [NÚMERO DE SEQUÊNCIA (1 byte)] + [CHECKSUM (2 bytes)]
 ```
 
-Não há campo dizendo se o datagrama é dado ou confirmação, porque o canal por onde ele chega já define isso.
+O pacote de dados não precisa de campo dizendo o que é, porque o canal por onde ele chega já define isso.
 
 O checksum é uma soma de verificação de 16 bits em complemento de um, calculada sobre o número de sequência e os dados. É ele que permite ao receptor **detectar** que um pacote chegou corrompido, em vez de supor.
 
@@ -101,6 +102,16 @@ A corrupção pode cair em qualquer byte, cabeçalho incluído. O receptor confe
 
 As duas portas acima são o canal de dados de cada lado. O canal de confirmação usa um socket em porta efêmera, e o ACK volta sempre para a origem do datagrama que o provocou.
 
+### O que difere do modelo do livro
+
+As figuras do Kurose descrevem a transferência num sentido só, entre duas máquinas que não fazem mais nada. Três pontos do projeto não cabem nesse desenho e vale deixá-los declarados.
+
+A perda e a corrupção moram no emissor, dentro da `send_pkt`, e não num canal de verdade. Como não existe uma rede ruim entre dois processos na mesma máquina, é o emissor que sorteia e às vezes deixa de enviar, que é o gerador aleatório de perdas que o enunciado pede.
+
+A entrega para a camada de cima passa por uma fila. No livro o `deliver_data(data)` entrega e acabou, porque a camada de cima está sempre pronta. Aqui o dado pode chegar enquanto a aplicação ainda está dentro de um `rdt_send`, então ele espera até ela chamar `rdt_recv`. Medindo uma sessão inteira, a fila chegou a guardar dois pacotes.
+
+As chamadas carregam o endereço do parceiro. O livro tem `rdt_send(data)` e `deliver_data(data)`, enquanto aqui são `rdt_send(data, addr)` e um retorno com o endereço de origem, porque em UDP é preciso dizer para quem se envia e saber de quem veio.
+
 ## Instruções de Execução
 
 O sistema deve ser testado com dois terminais simultâneos.
@@ -130,10 +141,10 @@ Valem os mesmos comandos da primeira entrega, `SAVE <arquivo>`, `GET <arquivo>` 
 Cada evento sai no terminal prefixado por `[RDT]`, no instante em que acontece.
 
 ```text
-[RDT]       pacote 0 íntegro, envia ACK 0
-[RDT]       (canal) CORROMPEU ACK seq=0
+[RDT]       (canal) CORROMPEU dados seq=0
+[RDT]       ACK 1 fora de ordem, ignora
 [RDT]       timeout, retransmite
-[RDT]       ACK 1 recebido
+[RDT]       ACK 0 recebido
 ```
 
 Do outro lado aparece o receptor recusando o pacote corrompido e aceitando a retransmissão.
@@ -146,7 +157,7 @@ Do outro lado aparece o receptor recusando o pacote corrompido e aceitando a ret
 No fim de cada transferência uma linha consolida o esforço total.
 
 ```text
-[RDT 3.0] Resumo -> Timeouts: 72 | Retransmissões: 72 | ACKs reenviados: 3 | ACKs ignorados: 17 | Perdas no canal: 15 | Corrupções no canal: 14 | Corrompidos detectados: 17
+[RDT 3.0] Resumo -> Timeouts: 88 | Retransmissões: 88 | ACKs reenviados: 1 | ACKs ignorados: 14 | Perdas no canal: 26 | Corrupções no canal: 20 | Corrompidos detectados: 28
 ```
 
 Em arquivos grandes o volume de linhas atrapalha a leitura. Nesses casos basta definir `VERBOSE = False` em `rdt.py`, que o log por evento some e o resumo continua.

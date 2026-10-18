@@ -27,7 +27,10 @@ CORRUPT_PROB = 0.15   # 15% de probabilidade de corrupção no canal
 TIMEOUT = 0.05        # 50ms de timeout
 VERBOSE = True        # Registra cada evento do protocolo em tempo de execução
 
+ACK = b"A"            # identificador que o livro escreve em make_pkt(ACK, seq, checksum)
+
 HEADER_SIZE = 3
+ACK_SIZE = 4
 PAYLOAD_MAX = 2**10   # maior payload que a camada de cima entrega de uma vez
 RECV_SIZE = HEADER_SIZE + PAYLOAD_MAX
 ESPERA_CURTA = 0.05   # quanto esperar nos canais quando nenhum prazo corre
@@ -46,14 +49,33 @@ def checksum(data):
 
 
 def make_pkt(seq, data=b""):
-    """Monta o pacote com o checksum do número de sequência e dos dados."""
+    """Monta o pacote de dados, o make_pkt(seq, data, checksum) do livro."""
     return bytes([seq]) + checksum(bytes([seq]) + data).to_bytes(2, "big") + data
+
+
+def make_ack(seq):
+    """Monta o pacote de confirmação, o make_pkt(ACK, seq, checksum) do livro."""
+    protegido = ACK + bytes([seq])
+    return protegido + checksum(protegido).to_bytes(2, "big")
+
+
+def parse_ack(pkt):
+    """Desmonta uma confirmação e confere o identificador e o checksum.
+
+    Devolve (seq, integro). Um pacote que não traga o identificador ACK conta
+    como corrompido, porque é o que ele seria num canal que troca bits.
+    """
+    if len(pkt) != ACK_SIZE or pkt[0:1] != ACK:
+        return None, False
+
+    seq = pkt[1]
+    return seq, checksum(ACK + bytes([seq])) == int.from_bytes(pkt[2:4], "big")
 
 
 def parse_pkt(pkt):
     """Desmonta o pacote e confere o checksum.
 
-    Devolve (seq, dados, integro); seq é None se vier menor que o cabeçalho.
+    Devolve (seq, dados, integro), com seq None se vier menor que o cabeçalho.
     """
     if len(pkt) < HEADER_SIZE:
         return None, b"", False
@@ -106,7 +128,7 @@ class RDTSocket:
         )
         self.stats = self._zerar_stats()
 
-    def send_pkt(self, pkt, sock, addr, rotulo):
+    def send_pkt(self, pkt, sock, addr, rotulo, seq):
         """Entrega o pacote ao canal, que pode perdê-lo ou corrompê-lo.
 
         O mesmo sorteio decide as duas coisas, então elas são exclusivas e cada
@@ -116,12 +138,12 @@ class RDTSocket:
 
         if sorteio < LOSS_PROB:
             self.stats["perdas"] += 1
-            self.log_canal(f"PERDEU {rotulo} seq={pkt[0]}")
+            self.log_canal(f"PERDEU {rotulo} seq={seq}")
             return
 
         if sorteio < LOSS_PROB + CORRUPT_PROB:
             self.stats["corrupcoes"] += 1
-            self.log_canal(f"CORROMPEU {rotulo} seq={pkt[0]}")
+            self.log_canal(f"CORROMPEU {rotulo} seq={seq}")
             pkt = self._corromper(pkt)
 
         sock.sendto(pkt, addr)
@@ -153,8 +175,7 @@ class RDTSocket:
         for canal in pronto:
             if canal is self.sock_transmissor:
                 rcvpkt, _ = canal.recvfrom(RECV_SIZE)
-                seq, _, integro = parse_pkt(rcvpkt)
-                ack = (seq, integro)
+                ack = parse_ack(rcvpkt)
             else:
                 rcvpkt, addr = canal.recvfrom(RECV_SIZE)
                 seq, data, integro = parse_pkt(rcvpkt)
@@ -181,7 +202,7 @@ class RDTSocket:
             else:
                 self.log(f"pacote {seq} duplicado, reenvia ACK {anterior}")
             self.stats["acks_repetidos"] += 1
-            self.send_pkt(make_pkt(anterior), self.sock_receptor, addr, "ACK")
+            self.send_pkt(make_ack(anterior), self.sock_receptor, addr, "ACK", anterior)
             return
 
         # ------------------------------------------------------------------
@@ -191,12 +212,12 @@ class RDTSocket:
         #     sndpkt = make_pkt(ACK, N, checksum)
         #     udt_send(sndpkt)
         #
-        # Vai para "Esperar 1-N de baixo".
+        # Vai para "Esperar 1-N de baixo"
         # ------------------------------------------------------------------
         self.seq_recv = 1 - esperado
         self.log(f"pacote {esperado} íntegro, envia ACK {esperado}")
         self.entregues.append((data, addr))
-        self.send_pkt(make_pkt(esperado), self.sock_receptor, addr, "ACK")
+        self.send_pkt(make_ack(esperado), self.sock_receptor, addr, "ACK", esperado)
 
     def rdt_send(self, data, addr):
         """Máquina do transmissor."""
@@ -212,14 +233,14 @@ class RDTSocket:
         #     start_timer
         # ------------------------------------------------------------------
         self.log(f"envia pacote {seq}")
-        self.send_pkt(sndpkt, self.sock_transmissor, addr, "dados")
+        self.send_pkt(sndpkt, self.sock_transmissor, addr, "dados", seq)
         prazo = time.monotonic() + TIMEOUT
 
         # ------------------------------------------------------------------
         # Estado "Esperar ACK N"
         #
         # O temporizador é armado no envio e rearmado só quando dispara, então
-        # nada que chegue no meio do caminho estica o prazo.
+        # nada que chegue no meio do caminho estica o prazo
         # ------------------------------------------------------------------
         while True:
             ack = self._espera(prazo)
@@ -234,7 +255,7 @@ class RDTSocket:
                     self.stats["timeouts"] += 1
                     self.stats["retransmissoes"] += 1
                     self.log("timeout, retransmite")
-                    self.send_pkt(sndpkt, self.sock_transmissor, addr, "dados")
+                    self.send_pkt(sndpkt, self.sock_transmissor, addr, "dados", seq)
                     prazo = time.monotonic() + TIMEOUT
                 continue
 
@@ -257,7 +278,7 @@ class RDTSocket:
             #   rdt_rcv(rcvpkt) && notcorrupt(rcvpkt) && isACK(rcvpkt, N)
             #     stop_timer
             #
-            # Vai para "Esperar chamada 1-N de cima".
+            # Vai para "Esperar chamada 1-N de cima"
             # ------------------------------------------------------------
             self.seq_send = 1 - seq
             self.log(f"ACK {seq} recebido")
@@ -273,7 +294,7 @@ class RDTSocket:
             #     Λ
             #
             # Nenhum envio está em curso, então um ACK atrasado que chegue
-            # pelo canal de confirmação é descartado.
+            # pelo canal de confirmação é descartado
             # ------------------------------------------------------------
             if self._espera(None) is not None:
                 self.stats["acks_ignorados"] += 1

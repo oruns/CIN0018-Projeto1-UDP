@@ -35,7 +35,7 @@ CHUNK_SIZE      =   2**16     # 64 KB.  Acumulado em memória antes de gravar
 BUFFER_SIZE     =   PAYLOAD_MAX  # a fragmentação segue o limite de payload do RDT
 
 STORAGE_DIR     =   "./rcvd_files_server/"
-PREFIX          =   "servidor_"  # só no disco; o protocolo usa o nome original
+PREFIX          =   "servidor_"  # só no disco, o protocolo usa o nome original
 
 
 def valid_name(name_and_extension):
@@ -103,7 +103,7 @@ def send(name_and_extension, addr, rdt_server):
 os.makedirs(STORAGE_DIR, exist_ok=True)
 
 # Um socket por canal. O de dados fica na porta anunciada e é onde o receptor
-# escuta; o de confirmação leva os dados que saem e recolhe os ACKs deles.
+# escuta, e o de confirmação leva os dados que saem e recolhe os ACKs deles
 server = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 server.bind((LOCAL_HOST_IPV4, ENTRY_PORT))
 
@@ -153,7 +153,7 @@ while True:
                     rdt_server.rdt_send("ERRO: Nome de arquivo inválido.".encode(), client_addr)
                     continue
 
-                # O pedido chega com o nome original; em disco ele tem o prefixo
+                # O pedido chega com o nome original, em disco ele tem o prefixo
                 stored_name = f"{PREFIX}{file_name_and_extension}"
 
                 flag = False

@@ -1,13 +1,16 @@
 """
 Canal de transferência confiável RDT 3.0 (Stop-and-Wait) sobre sockets UDP.
 
-Cabeçalho de 3 bytes: [SEQ (1)] [CHECKSUM (2)] [DADOS]
+Os dois formatos de pacote seguem a notação do livro.
+
+    dados        [SEQ (1)] [CHECKSUM (2)] [DADOS]
+    confirmação  [ACK (1)] [SEQ (1)] [CHECKSUM (2)]
 
 O transmissor e o receptor são máquinas separadas, e cada uma tem o seu canal,
 como no modelo. O canal de dados leva os pacotes do transmissor de um lado até
-o receptor do outro, e o canal de confirmação leva os ACKs de volta. Nenhum
-pacote precisa dizer o que é, porque o canal por onde ele chegou já determina
-a qual máquina pertence.
+o receptor do outro, e o canal de confirmação leva os ACKs de volta. O pacote
+de dados não precisa de campo dizendo o que é, porque o canal por onde ele
+chegou já determina a qual máquina pertence.
 
 Cada lado abre um socket por canal e usa select para esperar nos dois ao mesmo
 tempo. É o que permite ao lado que está transmitindo continuar atendendo os
@@ -29,10 +32,10 @@ VERBOSE = True        # Registra cada evento do protocolo em tempo de execução
 
 ACK = b"A"            # identificador que o livro escreve em make_pkt(ACK, seq, checksum)
 
-HEADER_SIZE = 3
-ACK_SIZE = 4
+HEADER_SIZE = 3       # cabeçalho do pacote de dados
+ACK_SIZE = 4          # a confirmação inteira, que não leva payload
 PAYLOAD_MAX = 2**10   # maior payload que a camada de cima entrega de uma vez
-RECV_SIZE = HEADER_SIZE + PAYLOAD_MAX
+RECV_SIZE = HEADER_SIZE + PAYLOAD_MAX   # maior datagrama que chega pelos canais
 ESPERA_CURTA = 0.05   # quanto esperar nos canais quando nenhum prazo corre
 
 
@@ -73,7 +76,7 @@ def parse_ack(pkt):
 
 
 def parse_pkt(pkt):
-    """Desmonta o pacote e confere o checksum.
+    """Desmonta um pacote de dados e confere o checksum.
 
     Devolve (seq, dados, integro), com seq None se vier menor que o cabeçalho.
     """
@@ -93,7 +96,7 @@ class RDTSocket:
         self.sock_transmissor = sock_transmissor  # emite no canal de dados, escuta os ACKs
         self.seq_send = 0              # estado da máquina do transmissor
         self.seq_recv = 0              # estado da máquina do receptor
-        self.entregues = []
+        self.entregues = []            # o que o receptor aceitou e a camada de cima ainda não pegou
         self.stats = self._zerar_stats()
 
     @staticmethod
@@ -162,8 +165,9 @@ class RDTSocket:
         Devolve (seq, integro) quando veio um ACK pelo canal de confirmação, que
         é o que interessa ao transmissor. Um pacote que chegue pelo canal de
         dados é tratado na hora pelo receptor, e aí o retorno é None, assim como
-        quando nada chega. O prazo é o instante em que o temporizador dispara,
-        ou None quando nenhum envio está em curso.
+        quando nada chega. Se os dois canais tiverem algo no mesmo giro, ambos
+        são atendidos. O prazo é o instante em que o temporizador dispara, ou
+        None quando nenhum envio está em curso.
         """
         restante = (prazo - time.monotonic()) if prazo else ESPERA_CURTA
         if restante <= 0:
@@ -198,7 +202,7 @@ class RDTSocket:
             anterior = 1 - esperado
             if not integro:
                 self.stats["corrompidos_detectados"] += 1
-                self.log(f"checksum inválido, reenvia ACK {anterior}")
+                self.log(f"pacote ilegível, reenvia ACK {anterior}")
             else:
                 self.log(f"pacote {seq} duplicado, reenvia ACK {anterior}")
             self.stats["acks_repetidos"] += 1

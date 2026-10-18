@@ -49,7 +49,7 @@ confirmação  [ACK (1 byte)] + [NÚMERO DE SEQUÊNCIA (1 byte)] + [CHECKSUM (2 
 
 O pacote de dados não precisa de campo dizendo o que é, porque o canal por onde ele chega já define isso.
 
-O checksum é uma soma de verificação de 16 bits em complemento de um, calculada sobre o número de sequência e os dados. É ele que permite ao receptor **detectar** que um pacote chegou corrompido, em vez de supor.
+O checksum é uma soma de verificação de 16 bits em complemento de um, calculada sobre tudo o que vem antes dele no pacote. É ele que permite **detectar** que um pacote chegou corrompido, em vez de supor.
 
 ### Máquinas de estado
 
@@ -74,7 +74,7 @@ O transmissor retransmite enquanto não receber a confirmação, sem limite de t
 
 ### Os dois canais
 
-O transmissor e o receptor são máquinas separadas e cada uma tem o seu canal, como no modelo. O canal de dados leva os pacotes do transmissor de um lado até o receptor do outro, e o canal de confirmação traz os ACKs de volta. Cada lado abre um socket por canal, então nenhum pacote precisa dizer o que é, o canal por onde chegou já determina a qual máquina pertence.
+O transmissor e o receptor são máquinas separadas e cada uma tem o seu canal, como no modelo. O canal de dados leva os pacotes do transmissor de um lado até o receptor do outro, e o canal de confirmação traz os ACKs de volta. Cada lado abre um socket por canal, então o pacote de dados não precisa de campo dizendo o que é, o canal por onde chegou já determina a qual máquina pertence.
 
 As figuras do livro descrevem transferência num sentido só. Aqui cliente e servidor fazem os dois papéis, porque o `SAVE` manda dados e o `GET` recebe dados, e isso cria um problema. Se o lado que acabou de receber virar transmissor e parar de olhar o canal de dados, ele deixa de atender as retransmissões do parceiro, e os dois acabam retransmitindo sem ninguém do outro lado para responder.
 
@@ -87,11 +87,11 @@ O ruído é injetado num único ponto, a função `send_pkt`, que faz o papel do
 | Constante | Valor | Descrição |
 |---|---|---|
 | `LOSS_PROB` | `0.15` (15%) | Probabilidade de o canal descartar o pacote. |
-| `CORRUPT_PROB` | `0.15` (15%) | Probabilidade de o canal inverter um bit do pacote, detectado pelo checksum. |
+| `CORRUPT_PROB` | `0.15` (15%) | Probabilidade de o canal inverter um bit do pacote, que o destino detecta. |
 | `TIMEOUT` | `0.05` seg | Tempo de espera do remetente antes da retransmissão. |
 | `VERBOSE` | `True` | Imprime cada evento do protocolo em tempo de execução. |
 
-A corrupção pode cair em qualquer byte, cabeçalho incluído. O receptor confere o checksum antes de olhar qualquer outro campo, e quando ele falha a resposta vem do estado local, já que o número de sequência recebido também não é confiável.
+A corrupção pode cair em qualquer byte, cabeçalho incluído. O receptor confere o checksum antes de olhar qualquer outro campo, e quando ele falha a resposta vem do estado local, já que o número de sequência recebido também não é confiável. Numa confirmação, a corrupção pode atingir o identificador, e aí ela é descartada por não trazer mais o `ACK`, que dá no mesmo que falhar no checksum.
 
 ## Portas
 
@@ -142,7 +142,7 @@ Cada evento sai no terminal prefixado por `[RDT]`, no instante em que acontece.
 
 ```text
 [RDT]       (canal) CORROMPEU dados seq=0
-[RDT]       ACK 1 fora de ordem, ignora
+[RDT]       ACK corrompido, ignora
 [RDT]       timeout, retransmite
 [RDT]       ACK 0 recebido
 ```
@@ -150,14 +150,14 @@ Cada evento sai no terminal prefixado por `[RDT]`, no instante em que acontece.
 Do outro lado aparece o receptor recusando o pacote corrompido e aceitando a retransmissão.
 
 ```text
-[RDT]       checksum inválido, reenvia ACK 1
-[RDT]       pacote 0 íntegro, envia ACK 0
+[RDT]       pacote ilegível, reenvia ACK 0
+[RDT]       pacote 1 íntegro, envia ACK 1
 ```
 
 No fim de cada transferência uma linha consolida o esforço total.
 
 ```text
-[RDT 3.0] Resumo -> Timeouts: 88 | Retransmissões: 88 | ACKs reenviados: 1 | ACKs ignorados: 14 | Perdas no canal: 26 | Corrupções no canal: 20 | Corrompidos detectados: 28
+[RDT 3.0] Resumo -> Timeouts: 67 | Retransmissões: 67 | ACKs reenviados: 0 | ACKs ignorados: 12 | Perdas no canal: 27 | Corrupções no canal: 21 | Corrompidos detectados: 18
 ```
 
 Em arquivos grandes o volume de linhas atrapalha a leitura. Nesses casos basta definir `VERBOSE = False` em `rdt.py`, que o log por evento some e o resumo continua.

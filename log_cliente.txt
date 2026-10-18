@@ -16,56 +16,98 @@ Sessão iniciada. Comandos disponíveis:
 
 UDP> SAVE texto.txt
 [RDT]       envia pacote 0
+[RDT]       (canal) CORROMPEU dados seq=0
 [RDT]       ACK corrompido, ignora
 [RDT]       timeout, retransmite
 [RDT]       ACK 0 recebido
 [ENVIANDO] Iniciando envio de 'texto.txt' (51 bytes em 1 pacotes)
 [RDT]       envia pacote 1
 [RDT]       ACK 1 recebido
+[RDT]       pacote ilegível, reenvia ACK 1
 [RDT]       pacote 0 íntegro, envia ACK 0
 [RDT]       (canal) PERDEU ACK seq=0
 [SERVIDOR] Arquivo texto.txt salvo.
-[RDT 3.0] Resumo -> Timeouts: 1 | Retransmissões: 1 | ACKs reenviados: 0 | ACKs ignorados: 0 | Perdas no canal: 1 | Corrupções no canal: 0 | Corrompidos detectados: 1
+[RDT 3.0] Resumo -> Timeouts: 1 | Retransmissões: 1 | ACKs reenviados: 1 | ACKs ignorados: 0 | Perdas no canal: 1 | Corrupções no canal: 1 | Corrompidos detectados: 2
 
 UDP> GET texto.txt
 [RDT]       envia pacote 0
-[RDT]       (canal) CORROMPEU dados seq=0
+[RDT]       pacote ilegível, reenvia ACK 0
+[RDT]       (canal) PERDEU ACK seq=0
+[RDT]       pacote 0 duplicado, reenvia ACK 0
 [RDT]       pacote 0 duplicado, reenvia ACK 0
 [RDT]       pacote 0 duplicado, reenvia ACK 0
 [RDT]       pacote 0 duplicado, reenvia ACK 0
 [RDT]       pacote 0 duplicado, reenvia ACK 0
 [RDT]       (canal) PERDEU ACK seq=0
-[RDT]       pacote 0 duplicado, reenvia ACK 0
-[RDT]       pacote 0 duplicado, reenvia ACK 0
-[RDT]       checksum inválido, reenvia ACK 0
-[RDT]       timeout, retransmite
-[RDT]       pacote 1 íntegro, envia ACK 1
-[RDT]       pacote 0 íntegro, envia ACK 0
-[RDT]       (canal) PERDEU ACK seq=0
-[RDT]       timeout, retransmite
-[RDT]       checksum inválido, reenvia ACK 0
 [RDT]       ACK 0 recebido
 [SOLICITANDO] Requisitando 'texto.txt' do servidor...
+[RDT]       pacote 0 duplicado, reenvia ACK 0
+[RDT]       pacote ilegível, reenvia ACK 0
+[RDT]       pacote 0 duplicado, reenvia ACK 0
+[RDT]       (canal) PERDEU ACK seq=0
+[RDT]       pacote 0 duplicado, reenvia ACK 0
+[RDT]       pacote 1 íntegro, envia ACK 1
 [RECEBENDO] Arquivo terá 51 bytes. Aguardando 1 pacotes...
+[RDT]       pacote 0 íntegro, envia ACK 0
 [CONCLUÍDO] Arquivo recuperado com sucesso e salvo como './rcvd_files_client/cliente_texto.txt'
-[RDT 3.0] Resumo -> Timeouts: 2 | Retransmissões: 2 | ACKs reenviados: 8 | ACKs ignorados: 0 | Perdas no canal: 2 | Corrupções no canal: 1 | Corrompidos detectados: 2
+[RDT 3.0] Resumo -> Timeouts: 0 | Retransmissões: 0 | ACKs reenviados: 10 | ACKs ignorados: 0 | Perdas no canal: 3 | Corrupções no canal: 0 | Corrompidos detectados: 2
 
 UDP> SAVE foto_teste.jpeg
 [RDT]       envia pacote 1
+[RDT]       (canal) PERDEU dados seq=1
+[RDT]       timeout, retransmite
+[RDT]       (canal) CORROMPEU dados seq=1
+[RDT]       ACK 0 fora de ordem, ignora
+[RDT]       timeout, retransmite
+[RDT]       (canal) CORROMPEU dados seq=1
+[RDT]       ACK 0 fora de ordem, ignora
+[RDT]       timeout, retransmite
 [RDT]       ACK 1 recebido
 [ENVIANDO] Iniciando envio de 'foto_teste.jpeg' (63541 bytes em 63 pacotes)
 [RDT]       envia pacote 0
-[RDT]       ACK 0 recebido
-[RDT]       envia pacote 1
-[RDT]       ACK 1 recebido
-[RDT]       envia pacote 0
-[RDT]       (canal) CORROMPEU dados seq=0
-[RDT]       ACK 1 fora de ordem, ignora
+[RDT]       (canal) PERDEU dados seq=0
 [RDT]       timeout, retransmite
 [RDT]       ACK 0 recebido
 [RDT]       envia pacote 1
 [RDT]       (canal) PERDEU dados seq=1
 [RDT]       timeout, retransmite
+[RDT]       ACK 1 recebido
+[RDT]       envia pacote 0
+[RDT]       ACK 0 recebido
+[RDT]       envia pacote 1
+[RDT]       (canal) PERDEU dados seq=1
+[RDT]       timeout, retransmite
+[RDT]       (canal) CORROMPEU dados seq=1
+[RDT]       timeout, retransmite
+[RDT]       ACK 1 recebido
+[RDT]       envia pacote 0
+[RDT]       ACK 0 recebido
+[RDT]       envia pacote 1
+[RDT]       ACK corrompido, ignora
+[RDT]       timeout, retransmite
+[RDT]       (canal) PERDEU dados seq=1
+[RDT]       timeout, retransmite
+[RDT]       (canal) CORROMPEU dados seq=1
+[RDT]       ACK 1 recebido
+[RDT]       envia pacote 0
+[RDT]       (canal) PERDEU dados seq=0
+[RDT]       timeout, retransmite
+[RDT]       ACK 0 recebido
+[RDT]       envia pacote 1
+[RDT]       timeout, retransmite
+[RDT]       ACK 1 recebido
+[RDT]       envia pacote 0
+[RDT]       ACK 0 recebido
+[RDT]       envia pacote 1
+[RDT]       ACK 1 recebido
+[RDT]       envia pacote 0
+[RDT]       ACK corrompido, ignora
+[RDT]       timeout, retransmite
+[RDT]       (canal) PERDEU dados seq=0
+[RDT]       timeout, retransmite
+[RDT]       timeout, retransmite
+[RDT]       ACK 0 recebido
+[RDT]       envia pacote 1
 [RDT]       ACK 1 recebido
 [RDT]       envia pacote 0
 [RDT]       ACK 0 recebido
@@ -78,8 +120,6 @@ UDP> SAVE foto_teste.jpeg
 [RDT]       envia pacote 0
 [RDT]       (canal) PERDEU dados seq=0
 [RDT]       timeout, retransmite
-[RDT]       (canal) CORROMPEU dados seq=0
-[RDT]       timeout, retransmite
 [RDT]       ACK 0 recebido
 [RDT]       envia pacote 1
 [RDT]       ACK 1 recebido
@@ -90,43 +130,18 @@ UDP> SAVE foto_teste.jpeg
 [RDT]       envia pacote 0
 [RDT]       ACK 0 recebido
 [RDT]       envia pacote 1
-[RDT]       (canal) CORROMPEU dados seq=1
-[RDT]       ACK 0 fora de ordem, ignora
-[RDT]       timeout, retransmite
-[RDT]       (canal) CORROMPEU dados seq=1
 [RDT]       ACK corrompido, ignora
 [RDT]       timeout, retransmite
-[RDT]       (canal) CORROMPEU dados seq=1
-[RDT]       ACK 0 fora de ordem, ignora
-[RDT]       timeout, retransmite
-[RDT]       ACK 1 recebido
-[RDT]       envia pacote 0
-[RDT]       ACK 0 recebido
-[RDT]       envia pacote 1
-[RDT]       ACK 1 recebido
-[RDT]       envia pacote 0
-[RDT]       ACK 0 recebido
-[RDT]       envia pacote 1
-[RDT]       ACK 1 recebido
-[RDT]       envia pacote 0
-[RDT]       (canal) CORROMPEU dados seq=0
-[RDT]       ACK 1 fora de ordem, ignora
-[RDT]       timeout, retransmite
-[RDT]       ACK 0 recebido
-[RDT]       envia pacote 1
-[RDT]       ACK 1 recebido
-[RDT]       envia pacote 0
-[RDT]       (canal) CORROMPEU dados seq=0
-[RDT]       timeout, retransmite
-[RDT]       (canal) CORROMPEU dados seq=0
-[RDT]       ACK corrompido, ignora
-[RDT]       timeout, retransmite
-[RDT]       ACK 0 recebido
-[RDT]       envia pacote 1
-[RDT]       (canal) CORROMPEU dados seq=1
 [RDT]       timeout, retransmite
 [RDT]       (canal) PERDEU dados seq=1
 [RDT]       timeout, retransmite
+[RDT]       timeout, retransmite
+[RDT]       ACK 1 recebido
+[RDT]       envia pacote 0
+[RDT]       ACK corrompido, ignora
+[RDT]       timeout, retransmite
+[RDT]       ACK 0 recebido
+[RDT]       envia pacote 1
 [RDT]       ACK 1 recebido
 [RDT]       envia pacote 0
 [RDT]       (canal) CORROMPEU dados seq=0
@@ -134,29 +149,30 @@ UDP> SAVE foto_teste.jpeg
 [RDT]       timeout, retransmite
 [RDT]       ACK 0 recebido
 [RDT]       envia pacote 1
+[RDT]       ACK 1 recebido
+[RDT]       envia pacote 0
+[RDT]       ACK 0 recebido
+[RDT]       envia pacote 1
+[RDT]       ACK 1 recebido
+[RDT]       envia pacote 0
+[RDT]       ACK 0 recebido
+[RDT]       envia pacote 1
+[RDT]       (canal) CORROMPEU dados seq=1
 [RDT]       ACK corrompido, ignora
 [RDT]       timeout, retransmite
 [RDT]       ACK 1 recebido
 [RDT]       envia pacote 0
 [RDT]       (canal) CORROMPEU dados seq=0
-[RDT]       ACK 1 fora de ordem, ignora
-[RDT]       timeout, retransmite
-[RDT]       (canal) PERDEU dados seq=0
-[RDT]       timeout, retransmite
-[RDT]       (canal) CORROMPEU dados seq=0
-[RDT]       ACK 1 fora de ordem, ignora
+[RDT]       ACK corrompido, ignora
 [RDT]       timeout, retransmite
 [RDT]       ACK 0 recebido
 [RDT]       envia pacote 1
-[RDT]       (canal) CORROMPEU dados seq=1
-[RDT]       ACK 0 fora de ordem, ignora
-[RDT]       timeout, retransmite
 [RDT]       ACK 1 recebido
 [RDT]       envia pacote 0
 [RDT]       ACK 0 recebido
 [RDT]       envia pacote 1
-[RDT]       (canal) CORROMPEU dados seq=1
-[RDT]       ACK 0 fora de ordem, ignora
+[RDT]       timeout, retransmite
+[RDT]       (canal) PERDEU dados seq=1
 [RDT]       timeout, retransmite
 [RDT]       ACK 1 recebido
 [RDT]       envia pacote 0
@@ -164,87 +180,31 @@ UDP> SAVE foto_teste.jpeg
 [RDT]       timeout, retransmite
 [RDT]       ACK 0 recebido
 [RDT]       envia pacote 1
-[RDT]       ACK 1 recebido
-[RDT]       envia pacote 0
-[RDT]       ACK 0 recebido
-[RDT]       envia pacote 1
-[RDT]       timeout, retransmite
-[RDT]       ACK 1 recebido
-[RDT]       envia pacote 0
-[RDT]       ACK 0 recebido
-[RDT]       envia pacote 1
-[RDT]       (canal) PERDEU dados seq=1
-[RDT]       timeout, retransmite
-[RDT]       (canal) PERDEU dados seq=1
-[RDT]       timeout, retransmite
-[RDT]       timeout, retransmite
 [RDT]       (canal) CORROMPEU dados seq=1
+[RDT]       ACK 0 fora de ordem, ignora
+[RDT]       timeout, retransmite
+[RDT]       ACK corrompido, ignora
+[RDT]       timeout, retransmite
+[RDT]       ACK 1 recebido
+[RDT]       envia pacote 0
+[RDT]       ACK 0 recebido
+[RDT]       envia pacote 1
+[RDT]       ACK 1 recebido
+[RDT]       envia pacote 0
+[RDT]       timeout, retransmite
+[RDT]       ACK 0 recebido
+[RDT]       envia pacote 1
+[RDT]       (canal) CORROMPEU dados seq=1
+[RDT]       timeout, retransmite
+[RDT]       ACK corrompido, ignora
+[RDT]       timeout, retransmite
+[RDT]       ACK corrompido, ignora
+[RDT]       timeout, retransmite
+[RDT]       timeout, retransmite
 [RDT]       ACK 1 recebido
 [RDT]       envia pacote 0
 [RDT]       (canal) CORROMPEU dados seq=0
 [RDT]       ACK 1 fora de ordem, ignora
-[RDT]       timeout, retransmite
-[RDT]       ACK corrompido, ignora
-[RDT]       timeout, retransmite
-[RDT]       timeout, retransmite
-[RDT]       ACK 0 recebido
-[RDT]       envia pacote 1
-[RDT]       ACK 1 recebido
-[RDT]       envia pacote 0
-[RDT]       timeout, retransmite
-[RDT]       ACK 0 recebido
-[RDT]       envia pacote 1
-[RDT]       (canal) CORROMPEU dados seq=1
-[RDT]       ACK 0 fora de ordem, ignora
-[RDT]       timeout, retransmite
-[RDT]       ACK 1 recebido
-[RDT]       envia pacote 0
-[RDT]       (canal) PERDEU dados seq=0
-[RDT]       timeout, retransmite
-[RDT]       timeout, retransmite
-[RDT]       ACK 0 recebido
-[RDT]       envia pacote 1
-[RDT]       ACK corrompido, ignora
-[RDT]       timeout, retransmite
-[RDT]       (canal) CORROMPEU dados seq=1
-[RDT]       ACK 1 recebido
-[RDT]       envia pacote 0
-[RDT]       ACK 0 recebido
-[RDT]       envia pacote 1
-[RDT]       ACK corrompido, ignora
-[RDT]       timeout, retransmite
-[RDT]       ACK 1 recebido
-[RDT]       envia pacote 0
-[RDT]       timeout, retransmite
-[RDT]       ACK 0 recebido
-[RDT]       envia pacote 1
-[RDT]       ACK 1 recebido
-[RDT]       envia pacote 0
-[RDT]       ACK 0 recebido
-[RDT]       envia pacote 1
-[RDT]       ACK 1 recebido
-[RDT]       envia pacote 0
-[RDT]       ACK 0 recebido
-[RDT]       envia pacote 1
-[RDT]       ACK 1 recebido
-[RDT]       envia pacote 0
-[RDT]       ACK corrompido, ignora
-[RDT]       timeout, retransmite
-[RDT]       ACK 0 recebido
-[RDT]       envia pacote 1
-[RDT]       (canal) CORROMPEU dados seq=1
-[RDT]       ACK 0 fora de ordem, ignora
-[RDT]       timeout, retransmite
-[RDT]       ACK corrompido, ignora
-[RDT]       timeout, retransmite
-[RDT]       (canal) PERDEU dados seq=1
-[RDT]       timeout, retransmite
-[RDT]       ACK 1 recebido
-[RDT]       envia pacote 0
-[RDT]       ACK 0 recebido
-[RDT]       envia pacote 1
-[RDT]       ACK 1 recebido
-[RDT]       envia pacote 0
 [RDT]       timeout, retransmite
 [RDT]       ACK 0 recebido
 [RDT]       envia pacote 1
@@ -253,14 +213,11 @@ UDP> SAVE foto_teste.jpeg
 [RDT]       (canal) CORROMPEU dados seq=0
 [RDT]       ACK 1 fora de ordem, ignora
 [RDT]       timeout, retransmite
-[RDT]       (canal) PERDEU dados seq=0
+[RDT]       (canal) CORROMPEU dados seq=0
+[RDT]       ACK 1 fora de ordem, ignora
 [RDT]       timeout, retransmite
 [RDT]       ACK 0 recebido
 [RDT]       envia pacote 1
-[RDT]       (canal) PERDEU dados seq=1
-[RDT]       timeout, retransmite
-[RDT]       ACK corrompido, ignora
-[RDT]       timeout, retransmite
 [RDT]       ACK corrompido, ignora
 [RDT]       timeout, retransmite
 [RDT]       ACK 1 recebido
@@ -269,6 +226,49 @@ UDP> SAVE foto_teste.jpeg
 [RDT]       envia pacote 1
 [RDT]       (canal) PERDEU dados seq=1
 [RDT]       timeout, retransmite
+[RDT]       timeout, retransmite
+[RDT]       ACK 1 recebido
+[RDT]       envia pacote 0
+[RDT]       ACK 0 recebido
+[RDT]       envia pacote 1
+[RDT]       (canal) PERDEU dados seq=1
+[RDT]       timeout, retransmite
+[RDT]       ACK 1 recebido
+[RDT]       envia pacote 0
+[RDT]       ACK 0 recebido
+[RDT]       envia pacote 1
+[RDT]       ACK corrompido, ignora
+[RDT]       timeout, retransmite
+[RDT]       (canal) CORROMPEU dados seq=1
+[RDT]       ACK 1 recebido
+[RDT]       envia pacote 0
+[RDT]       ACK corrompido, ignora
+[RDT]       timeout, retransmite
+[RDT]       ACK 0 recebido
+[RDT]       envia pacote 1
+[RDT]       ACK 1 recebido
+[RDT]       envia pacote 0
+[RDT]       ACK corrompido, ignora
+[RDT]       timeout, retransmite
+[RDT]       ACK 0 recebido
+[RDT]       envia pacote 1
+[RDT]       ACK 1 recebido
+[RDT]       envia pacote 0
+[RDT]       ACK 0 recebido
+[RDT]       envia pacote 1
+[RDT]       ACK 1 recebido
+[RDT]       envia pacote 0
+[RDT]       (canal) PERDEU dados seq=0
+[RDT]       timeout, retransmite
+[RDT]       ACK 0 recebido
+[RDT]       envia pacote 1
+[RDT]       ACK 1 recebido
+[RDT]       envia pacote 0
+[RDT]       ACK 0 recebido
+[RDT]       envia pacote 1
+[RDT]       ACK corrompido, ignora
+[RDT]       timeout, retransmite
+[RDT]       ACK corrompido, ignora
 [RDT]       timeout, retransmite
 [RDT]       ACK 1 recebido
 [RDT]       envia pacote 0
@@ -277,238 +277,179 @@ UDP> SAVE foto_teste.jpeg
 [RDT]       (canal) CORROMPEU dados seq=1
 [RDT]       ACK 0 fora de ordem, ignora
 [RDT]       timeout, retransmite
-[RDT]       (canal) CORROMPEU dados seq=1
-[RDT]       timeout, retransmite
 [RDT]       ACK 1 recebido
 [RDT]       envia pacote 0
-[RDT]       ACK 0 recebido
-[RDT]       envia pacote 1
-[RDT]       timeout, retransmite
-[RDT]       (canal) PERDEU dados seq=1
-[RDT]       timeout, retransmite
-[RDT]       ACK 1 recebido
-[RDT]       envia pacote 0
-[RDT]       checksum inválido, reenvia ACK 0
-[RDT]       timeout, retransmite
 [RDT]       ACK 0 recebido
 [RDT]       pacote 1 íntegro, envia ACK 1
-[RDT]       (canal) PERDEU ACK seq=1
 [SERVIDOR] Arquivo foto_teste.jpeg salvo.
-[RDT 3.0] Resumo -> Timeouts: 51 | Retransmissões: 51 | ACKs reenviados: 1 | ACKs ignorados: 14 | Perdas no canal: 14 | Corrupções no canal: 22 | Corrompidos detectados: 11
+[RDT 3.0] Resumo -> Timeouts: 47 | Retransmissões: 47 | ACKs reenviados: 0 | ACKs ignorados: 8 | Perdas no canal: 14 | Corrupções no canal: 14 | Corrompidos detectados: 15
 
 UDP> GET foto_teste.jpeg
 [RDT]       envia pacote 1
-[RDT]       checksum inválido, reenvia ACK 1
-[RDT]       pacote 1 duplicado, reenvia ACK 1
-[RDT]       pacote 1 duplicado, reenvia ACK 1
-[RDT]       pacote 1 duplicado, reenvia ACK 1
 [RDT]       ACK 1 recebido
 [SOLICITANDO] Requisitando 'foto_teste.jpeg' do servidor...
-[RDT]       checksum inválido, reenvia ACK 1
-[RDT]       (canal) PERDEU ACK seq=1
-[RDT]       pacote 1 duplicado, reenvia ACK 1
-[RDT]       pacote 1 duplicado, reenvia ACK 1
-[RDT]       pacote 1 duplicado, reenvia ACK 1
 [RDT]       pacote 0 íntegro, envia ACK 0
 [RECEBENDO] Arquivo terá 63541 bytes. Aguardando 63 pacotes...
 [RDT]       pacote 1 íntegro, envia ACK 1
-[RDT]       pacote 0 íntegro, envia ACK 0
-[RDT]       pacote 1 íntegro, envia ACK 1
-[RDT]       pacote 0 íntegro, envia ACK 0
-[RDT]       (canal) CORROMPEU ACK seq=0
-[RDT]       checksum inválido, reenvia ACK 0
-[RDT]       pacote 1 íntegro, envia ACK 1
 [RDT]       (canal) CORROMPEU ACK seq=1
 [RDT]       pacote 1 duplicado, reenvia ACK 1
-[RDT]       (canal) CORROMPEU ACK seq=1
-[RDT]       pacote 1 duplicado, reenvia ACK 1
+[RDT]       pacote 0 íntegro, envia ACK 0
+[RDT]       pacote 1 íntegro, envia ACK 1
 [RDT]       (canal) PERDEU ACK seq=1
-[RDT]       pacote 1 duplicado, reenvia ACK 1
-[RDT]       checksum inválido, reenvia ACK 1
-[RDT]       pacote 0 íntegro, envia ACK 0
-[RDT]       (canal) CORROMPEU ACK seq=0
-[RDT]       checksum inválido, reenvia ACK 0
-[RDT]       checksum inválido, reenvia ACK 0
-[RDT]       pacote 1 íntegro, envia ACK 1
-[RDT]       pacote 0 íntegro, envia ACK 0
-[RDT]       (canal) PERDEU ACK seq=0
-[RDT]       pacote 0 duplicado, reenvia ACK 0
-[RDT]       pacote 1 íntegro, envia ACK 1
+[RDT]       pacote ilegível, reenvia ACK 1
 [RDT]       pacote 0 íntegro, envia ACK 0
 [RDT]       (canal) CORROMPEU ACK seq=0
 [RDT]       pacote 0 duplicado, reenvia ACK 0
-[RDT]       pacote 1 íntegro, envia ACK 1
-[RDT]       pacote 0 íntegro, envia ACK 0
-[RDT]       pacote 1 íntegro, envia ACK 1
-[RDT]       (canal) CORROMPEU ACK seq=1
-[RDT]       pacote 1 duplicado, reenvia ACK 1
-[RDT]       pacote 0 íntegro, envia ACK 0
-[RDT]       pacote 1 íntegro, envia ACK 1
-[RDT]       pacote 0 íntegro, envia ACK 0
 [RDT]       (canal) CORROMPEU ACK seq=0
 [RDT]       pacote 0 duplicado, reenvia ACK 0
-[RDT]       (canal) PERDEU ACK seq=0
-[RDT]       pacote 0 duplicado, reenvia ACK 0
-[RDT]       (canal) CORROMPEU ACK seq=0
-[RDT]       pacote 0 duplicado, reenvia ACK 0
+[RDT]       pacote ilegível, reenvia ACK 0
 [RDT]       pacote 1 íntegro, envia ACK 1
-[RDT]       pacote 0 íntegro, envia ACK 0
-[RDT]       pacote 1 íntegro, envia ACK 1
+[RDT]       pacote ilegível, reenvia ACK 1
 [RDT]       pacote 0 íntegro, envia ACK 0
 [RDT]       (canal) CORROMPEU ACK seq=0
-[RDT]       pacote 0 duplicado, reenvia ACK 0
-[RDT]       (canal) PERDEU ACK seq=0
-[RDT]       checksum inválido, reenvia ACK 0
-[RDT]       pacote 1 íntegro, envia ACK 1
-[RDT]       pacote 0 íntegro, envia ACK 0
+[RDT]       pacote ilegível, reenvia ACK 0
 [RDT]       (canal) PERDEU ACK seq=0
 [RDT]       pacote 0 duplicado, reenvia ACK 0
 [RDT]       pacote 1 íntegro, envia ACK 1
 [RDT]       pacote 0 íntegro, envia ACK 0
 [RDT]       pacote 1 íntegro, envia ACK 1
-[RDT]       checksum inválido, reenvia ACK 1
-[RDT]       (canal) PERDEU ACK seq=1
+[RDT]       pacote ilegível, reenvia ACK 1
 [RDT]       pacote 0 íntegro, envia ACK 0
+[RDT]       (canal) PERDEU ACK seq=0
+[RDT]       pacote ilegível, reenvia ACK 0
 [RDT]       pacote 1 íntegro, envia ACK 1
+[RDT]       pacote ilegível, reenvia ACK 1
 [RDT]       pacote 0 íntegro, envia ACK 0
 [RDT]       pacote 1 íntegro, envia ACK 1
 [RDT]       (canal) PERDEU ACK seq=1
 [RDT]       pacote 1 duplicado, reenvia ACK 1
-[RDT]       pacote 0 íntegro, envia ACK 0
-[RDT]       pacote 1 íntegro, envia ACK 1
-[RDT]       checksum inválido, reenvia ACK 1
-[RDT]       pacote 0 íntegro, envia ACK 0
-[RDT]       (canal) CORROMPEU ACK seq=0
-[RDT]       pacote 0 duplicado, reenvia ACK 0
-[RDT]       checksum inválido, reenvia ACK 0
-[RDT]       pacote 1 íntegro, envia ACK 1
-[RDT]       (canal) CORROMPEU ACK seq=1
-[RDT]       pacote 1 duplicado, reenvia ACK 1
 [RDT]       (canal) PERDEU ACK seq=1
-[RDT]       pacote 1 duplicado, reenvia ACK 1
-[RDT]       (canal) CORROMPEU ACK seq=1
-[RDT]       checksum inválido, reenvia ACK 1
-[RDT]       pacote 0 íntegro, envia ACK 0
-[RDT]       (canal) PERDEU ACK seq=0
-[RDT]       pacote 0 duplicado, reenvia ACK 0
-[RDT]       pacote 1 íntegro, envia ACK 1
-[RDT]       pacote 0 íntegro, envia ACK 0
-[RDT]       pacote 1 íntegro, envia ACK 1
-[RDT]       pacote 0 íntegro, envia ACK 0
-[RDT]       pacote 1 íntegro, envia ACK 1
-[RDT]       pacote 0 íntegro, envia ACK 0
-[RDT]       checksum inválido, reenvia ACK 0
-[RDT]       (canal) PERDEU ACK seq=0
-[RDT]       pacote 1 íntegro, envia ACK 1
-[RDT]       pacote 0 íntegro, envia ACK 0
-[RDT]       (canal) CORROMPEU ACK seq=0
-[RDT]       pacote 0 duplicado, reenvia ACK 0
-[RDT]       pacote 1 íntegro, envia ACK 1
-[RDT]       pacote 0 íntegro, envia ACK 0
-[RDT]       (canal) PERDEU ACK seq=0
-[RDT]       pacote 0 duplicado, reenvia ACK 0
-[RDT]       (canal) CORROMPEU ACK seq=0
-[RDT]       pacote 0 duplicado, reenvia ACK 0
-[RDT]       pacote 1 íntegro, envia ACK 1
-[RDT]       pacote 0 íntegro, envia ACK 0
-[RDT]       checksum inválido, reenvia ACK 0
-[RDT]       checksum inválido, reenvia ACK 0
-[RDT]       pacote 1 íntegro, envia ACK 1
+[RDT]       pacote ilegível, reenvia ACK 1
 [RDT]       (canal) CORROMPEU ACK seq=1
 [RDT]       pacote 1 duplicado, reenvia ACK 1
 [RDT]       pacote 0 íntegro, envia ACK 0
+[RDT]       pacote 1 íntegro, envia ACK 1
+[RDT]       (canal) CORROMPEU ACK seq=1
+[RDT]       pacote 1 duplicado, reenvia ACK 1
+[RDT]       (canal) CORROMPEU ACK seq=1
+[RDT]       pacote 1 duplicado, reenvia ACK 1
+[RDT]       pacote ilegível, reenvia ACK 1
+[RDT]       pacote 0 íntegro, envia ACK 0
 [RDT]       (canal) PERDEU ACK seq=0
 [RDT]       pacote 0 duplicado, reenvia ACK 0
-[RDT]       (canal) CORROMPEU ACK seq=0
-[RDT]       pacote 0 duplicado, reenvia ACK 0
-[RDT]       (canal) CORROMPEU ACK seq=0
-[RDT]       pacote 0 duplicado, reenvia ACK 0
-[RDT]       (canal) CORROMPEU ACK seq=0
-[RDT]       pacote 0 duplicado, reenvia ACK 0
 [RDT]       pacote 1 íntegro, envia ACK 1
+[RDT]       pacote 0 íntegro, envia ACK 0
+[RDT]       pacote 1 íntegro, envia ACK 1
+[RDT]       pacote ilegível, reenvia ACK 1
 [RDT]       (canal) PERDEU ACK seq=1
-[RDT]       pacote 1 duplicado, reenvia ACK 1
+[RDT]       pacote ilegível, reenvia ACK 1
+[RDT]       pacote 0 íntegro, envia ACK 0
+[RDT]       pacote 1 íntegro, envia ACK 1
+[RDT]       pacote ilegível, reenvia ACK 1
+[RDT]       pacote 0 íntegro, envia ACK 0
+[RDT]       pacote 1 íntegro, envia ACK 1
+[RDT]       pacote 0 íntegro, envia ACK 0
+[RDT]       pacote 1 íntegro, envia ACK 1
+[RDT]       pacote 0 íntegro, envia ACK 0
+[RDT]       pacote 1 íntegro, envia ACK 1
+[RDT]       pacote 0 íntegro, envia ACK 0
+[RDT]       (canal) CORROMPEU ACK seq=0
+[RDT]       pacote 0 duplicado, reenvia ACK 0
+[RDT]       pacote 1 íntegro, envia ACK 1
+[RDT]       pacote ilegível, reenvia ACK 1
 [RDT]       pacote 0 íntegro, envia ACK 0
 [RDT]       (canal) PERDEU ACK seq=0
 [RDT]       pacote 0 duplicado, reenvia ACK 0
-[RDT]       (canal) CORROMPEU ACK seq=0
-[RDT]       pacote 0 duplicado, reenvia ACK 0
-[RDT]       (canal) CORROMPEU ACK seq=0
-[RDT]       pacote 0 duplicado, reenvia ACK 0
-[RDT]       checksum inválido, reenvia ACK 0
 [RDT]       pacote 1 íntegro, envia ACK 1
-[RDT]       (canal) CORROMPEU ACK seq=1
-[RDT]       checksum inválido, reenvia ACK 1
-[RDT]       (canal) CORROMPEU ACK seq=1
-[RDT]       pacote 1 duplicado, reenvia ACK 1
-[RDT]       (canal) CORROMPEU ACK seq=1
-[RDT]       pacote 1 duplicado, reenvia ACK 1
-[RDT]       (canal) PERDEU ACK seq=1
-[RDT]       pacote 1 duplicado, reenvia ACK 1
 [RDT]       pacote 0 íntegro, envia ACK 0
 [RDT]       pacote 1 íntegro, envia ACK 1
 [RDT]       (canal) CORROMPEU ACK seq=1
 [RDT]       pacote 1 duplicado, reenvia ACK 1
+[RDT]       pacote ilegível, reenvia ACK 1
+[RDT]       pacote 0 íntegro, envia ACK 0
+[RDT]       pacote 1 íntegro, envia ACK 1
+[RDT]       pacote 0 íntegro, envia ACK 0
+[RDT]       pacote 1 íntegro, envia ACK 1
+[RDT]       pacote 0 íntegro, envia ACK 0
+[RDT]       pacote 1 íntegro, envia ACK 1
+[RDT]       (canal) CORROMPEU ACK seq=1
+[RDT]       pacote 1 duplicado, reenvia ACK 1
+[RDT]       pacote 0 íntegro, envia ACK 0
+[RDT]       (canal) CORROMPEU ACK seq=0
+[RDT]       pacote 0 duplicado, reenvia ACK 0
+[RDT]       pacote ilegível, reenvia ACK 0
+[RDT]       pacote 1 íntegro, envia ACK 1
+[RDT]       pacote 0 íntegro, envia ACK 0
+[RDT]       pacote 1 íntegro, envia ACK 1
+[RDT]       pacote 0 íntegro, envia ACK 0
+[RDT]       pacote 1 íntegro, envia ACK 1
+[RDT]       pacote 0 íntegro, envia ACK 0
+[RDT]       (canal) CORROMPEU ACK seq=0
+[RDT]       pacote ilegível, reenvia ACK 0
+[RDT]       pacote 1 íntegro, envia ACK 1
 [RDT]       pacote 0 íntegro, envia ACK 0
 [RDT]       (canal) PERDEU ACK seq=0
-[RDT]       checksum inválido, reenvia ACK 0
+[RDT]       pacote ilegível, reenvia ACK 0
+[RDT]       pacote ilegível, reenvia ACK 0
+[RDT]       pacote 1 íntegro, envia ACK 1
+[RDT]       pacote 0 íntegro, envia ACK 0
 [RDT]       (canal) CORROMPEU ACK seq=0
 [RDT]       pacote 0 duplicado, reenvia ACK 0
+[RDT]       (canal) CORROMPEU ACK seq=0
+[RDT]       pacote 0 duplicado, reenvia ACK 0
+[RDT]       (canal) CORROMPEU ACK seq=0
+[RDT]       pacote ilegível, reenvia ACK 0
+[RDT]       pacote 1 íntegro, envia ACK 1
+[RDT]       pacote 0 íntegro, envia ACK 0
+[RDT]       pacote 1 íntegro, envia ACK 1
+[RDT]       pacote 0 íntegro, envia ACK 0
+[RDT]       pacote 1 íntegro, envia ACK 1
+[RDT]       pacote 0 íntegro, envia ACK 0
+[RDT]       pacote 1 íntegro, envia ACK 1
+[RDT]       pacote 0 íntegro, envia ACK 0
 [RDT]       (canal) PERDEU ACK seq=0
 [RDT]       pacote 0 duplicado, reenvia ACK 0
+[RDT]       pacote 1 íntegro, envia ACK 1
+[RDT]       pacote ilegível, reenvia ACK 1
+[RDT]       pacote 0 íntegro, envia ACK 0
 [RDT]       (canal) CORROMPEU ACK seq=0
-[RDT]       checksum inválido, reenvia ACK 0
-[RDT]       pacote 1 íntegro, envia ACK 1
-[RDT]       (canal) PERDEU ACK seq=1
-[RDT]       pacote 1 duplicado, reenvia ACK 1
-[RDT]       pacote 0 íntegro, envia ACK 0
-[RDT]       pacote 1 íntegro, envia ACK 1
-[RDT]       (canal) CORROMPEU ACK seq=1
-[RDT]       pacote 1 duplicado, reenvia ACK 1
-[RDT]       (canal) CORROMPEU ACK seq=1
-[RDT]       checksum inválido, reenvia ACK 1
-[RDT]       pacote 0 íntegro, envia ACK 0
+[RDT]       pacote 0 duplicado, reenvia ACK 0
+[RDT]       (canal) CORROMPEU ACK seq=0
+[RDT]       pacote ilegível, reenvia ACK 0
 [RDT]       pacote 1 íntegro, envia ACK 1
 [RDT]       pacote 0 íntegro, envia ACK 0
-[RDT]       pacote 1 íntegro, envia ACK 1
-[RDT]       pacote 0 íntegro, envia ACK 0
+[RDT]       (canal) CORROMPEU ACK seq=0
+[RDT]       pacote 0 duplicado, reenvia ACK 0
 [RDT]       pacote 1 íntegro, envia ACK 1
 [CONCLUÍDO] Arquivo recuperado com sucesso e salvo como './rcvd_files_client/cliente_foto_teste.jpeg'
-[RDT 3.0] Resumo -> Timeouts: 0 | Retransmissões: 0 | ACKs reenviados: 61 | ACKs ignorados: 0 | Perdas no canal: 19 | Corrupções no canal: 28 | Corrompidos detectados: 19
+[RDT 3.0] Resumo -> Timeouts: 0 | Retransmissões: 0 | ACKs reenviados: 40 | ACKs ignorados: 0 | Perdas no canal: 10 | Corrupções no canal: 18 | Corrompidos detectados: 21
 
 UDP> SAVE teste50k.bin
 [RDT]       envia pacote 0
-[RDT]       ACK corrompido, ignora
-[RDT]       timeout, retransmite
 [RDT]       ACK 0 recebido
 [ENVIANDO] Iniciando envio de 'teste50k.bin' (51200 bytes em 50 pacotes)
 [RDT]       envia pacote 1
-[RDT]       ACK corrompido, ignora
+[RDT]       (canal) PERDEU dados seq=1
 [RDT]       timeout, retransmite
-[RDT]       ACK corrompido, ignora
-[RDT]       timeout, retransmite
-[RDT]       (canal) CORROMPEU dados seq=1
 [RDT]       ACK 1 recebido
 [RDT]       envia pacote 0
 [RDT]       ACK 0 recebido
 [RDT]       envia pacote 1
+[RDT]       (canal) PERDEU dados seq=1
+[RDT]       timeout, retransmite
 [RDT]       (canal) PERDEU dados seq=1
 [RDT]       timeout, retransmite
 [RDT]       ACK 1 recebido
 [RDT]       envia pacote 0
 [RDT]       (canal) CORROMPEU dados seq=0
+[RDT]       ACK 1 fora de ordem, ignora
 [RDT]       timeout, retransmite
 [RDT]       ACK 0 recebido
 [RDT]       envia pacote 1
-[RDT]       (canal) PERDEU dados seq=1
-[RDT]       timeout, retransmite
-[RDT]       timeout, retransmite
-[RDT]       timeout, retransmite
-[RDT]       (canal) PERDEU dados seq=1
-[RDT]       timeout, retransmite
-[RDT]       timeout, retransmite
-[RDT]       ACK corrompido, ignora
-[RDT]       timeout, retransmite
+[RDT]       ACK 1 recebido
+[RDT]       envia pacote 0
+[RDT]       ACK 0 recebido
+[RDT]       envia pacote 1
 [RDT]       ACK 1 recebido
 [RDT]       envia pacote 0
 [RDT]       ACK 0 recebido
@@ -518,33 +459,49 @@ UDP> SAVE teste50k.bin
 [RDT]       timeout, retransmite
 [RDT]       ACK 1 recebido
 [RDT]       envia pacote 0
+[RDT]       (canal) PERDEU dados seq=0
+[RDT]       timeout, retransmite
 [RDT]       ACK 0 recebido
 [RDT]       envia pacote 1
 [RDT]       ACK 1 recebido
 [RDT]       envia pacote 0
 [RDT]       ACK 0 recebido
 [RDT]       envia pacote 1
-[RDT]       ACK corrompido, ignora
-[RDT]       timeout, retransmite
-[RDT]       (canal) CORROMPEU dados seq=1
 [RDT]       ACK 1 recebido
 [RDT]       envia pacote 0
-[RDT]       (canal) CORROMPEU dados seq=0
-[RDT]       timeout, retransmite
-[RDT]       (canal) CORROMPEU dados seq=0
-[RDT]       ACK 1 fora de ordem, ignora
 [RDT]       timeout, retransmite
 [RDT]       ACK 0 recebido
 [RDT]       envia pacote 1
 [RDT]       (canal) PERDEU dados seq=1
 [RDT]       timeout, retransmite
+[RDT]       (canal) PERDEU dados seq=1
+[RDT]       timeout, retransmite
+[RDT]       (canal) PERDEU dados seq=1
+[RDT]       timeout, retransmite
 [RDT]       ACK 1 recebido
 [RDT]       envia pacote 0
-[RDT]       (canal) PERDEU dados seq=0
 [RDT]       timeout, retransmite
+[RDT]       ACK 0 recebido
+[RDT]       envia pacote 1
+[RDT]       ACK 1 recebido
+[RDT]       envia pacote 0
 [RDT]       (canal) CORROMPEU dados seq=0
-[RDT]       ACK 1 fora de ordem, ignora
 [RDT]       timeout, retransmite
+[RDT]       ACK 0 recebido
+[RDT]       envia pacote 1
+[RDT]       timeout, retransmite
+[RDT]       (canal) PERDEU dados seq=1
+[RDT]       timeout, retransmite
+[RDT]       timeout, retransmite
+[RDT]       ACK corrompido, ignora
+[RDT]       timeout, retransmite
+[RDT]       (canal) PERDEU dados seq=1
+[RDT]       timeout, retransmite
+[RDT]       (canal) CORROMPEU dados seq=1
+[RDT]       ACK corrompido, ignora
+[RDT]       timeout, retransmite
+[RDT]       ACK 1 recebido
+[RDT]       envia pacote 0
 [RDT]       ACK 0 recebido
 [RDT]       envia pacote 1
 [RDT]       (canal) PERDEU dados seq=1
@@ -552,91 +509,45 @@ UDP> SAVE teste50k.bin
 [RDT]       (canal) CORROMPEU dados seq=1
 [RDT]       ACK 0 fora de ordem, ignora
 [RDT]       timeout, retransmite
+[RDT]       (canal) CORROMPEU dados seq=1
+[RDT]       ACK 0 fora de ordem, ignora
+[RDT]       timeout, retransmite
+[RDT]       timeout, retransmite
 [RDT]       timeout, retransmite
 [RDT]       ACK 1 recebido
 [RDT]       envia pacote 0
+[RDT]       ACK 0 recebido
+[RDT]       envia pacote 1
+[RDT]       ACK 1 recebido
+[RDT]       envia pacote 0
+[RDT]       ACK 0 recebido
+[RDT]       envia pacote 1
+[RDT]       ACK 1 recebido
+[RDT]       envia pacote 0
+[RDT]       (canal) CORROMPEU dados seq=0
+[RDT]       ACK 1 fora de ordem, ignora
+[RDT]       timeout, retransmite
+[RDT]       ACK 0 recebido
+[RDT]       envia pacote 1
+[RDT]       ACK 1 recebido
+[RDT]       envia pacote 0
+[RDT]       (canal) CORROMPEU dados seq=0
+[RDT]       ACK 1 fora de ordem, ignora
+[RDT]       timeout, retransmite
+[RDT]       ACK 0 recebido
+[RDT]       envia pacote 1
+[RDT]       ACK 1 recebido
+[RDT]       envia pacote 0
+[RDT]       (canal) CORROMPEU dados seq=0
+[RDT]       ACK 1 fora de ordem, ignora
+[RDT]       timeout, retransmite
 [RDT]       (canal) CORROMPEU dados seq=0
 [RDT]       ACK 1 fora de ordem, ignora
 [RDT]       timeout, retransmite
 [RDT]       (canal) PERDEU dados seq=0
 [RDT]       timeout, retransmite
 [RDT]       (canal) CORROMPEU dados seq=0
-[RDT]       timeout, retransmite
-[RDT]       ACK corrompido, ignora
-[RDT]       timeout, retransmite
-[RDT]       ACK corrompido, ignora
-[RDT]       timeout, retransmite
-[RDT]       ACK 0 recebido
-[RDT]       envia pacote 1
-[RDT]       timeout, retransmite
-[RDT]       ACK 1 recebido
-[RDT]       envia pacote 0
-[RDT]       ACK 0 recebido
-[RDT]       envia pacote 1
-[RDT]       timeout, retransmite
-[RDT]       timeout, retransmite
-[RDT]       ACK corrompido, ignora
-[RDT]       timeout, retransmite
-[RDT]       ACK 1 recebido
-[RDT]       envia pacote 0
-[RDT]       (canal) CORROMPEU dados seq=0
-[RDT]       ACK corrompido, ignora
-[RDT]       timeout, retransmite
-[RDT]       (canal) CORROMPEU dados seq=0
 [RDT]       ACK 1 fora de ordem, ignora
-[RDT]       timeout, retransmite
-[RDT]       (canal) PERDEU dados seq=0
-[RDT]       timeout, retransmite
-[RDT]       (canal) CORROMPEU dados seq=0
-[RDT]       ACK 1 fora de ordem, ignora
-[RDT]       timeout, retransmite
-[RDT]       ACK corrompido, ignora
-[RDT]       timeout, retransmite
-[RDT]       ACK 0 recebido
-[RDT]       envia pacote 1
-[RDT]       ACK corrompido, ignora
-[RDT]       timeout, retransmite
-[RDT]       ACK 1 recebido
-[RDT]       envia pacote 0
-[RDT]       ACK corrompido, ignora
-[RDT]       timeout, retransmite
-[RDT]       timeout, retransmite
-[RDT]       ACK corrompido, ignora
-[RDT]       timeout, retransmite
-[RDT]       timeout, retransmite
-[RDT]       ACK 0 recebido
-[RDT]       envia pacote 1
-[RDT]       ACK 1 recebido
-[RDT]       envia pacote 0
-[RDT]       ACK 0 recebido
-[RDT]       envia pacote 1
-[RDT]       (canal) PERDEU dados seq=1
-[RDT]       timeout, retransmite
-[RDT]       ACK corrompido, ignora
-[RDT]       timeout, retransmite
-[RDT]       ACK 1 recebido
-[RDT]       envia pacote 0
-[RDT]       ACK 0 recebido
-[RDT]       envia pacote 1
-[RDT]       ACK 1 recebido
-[RDT]       envia pacote 0
-[RDT]       timeout, retransmite
-[RDT]       ACK 0 recebido
-[RDT]       envia pacote 1
-[RDT]       ACK 1 recebido
-[RDT]       envia pacote 0
-[RDT]       ACK 0 recebido
-[RDT]       envia pacote 1
-[RDT]       ACK 1 recebido
-[RDT]       envia pacote 0
-[RDT]       ACK 0 recebido
-[RDT]       envia pacote 1
-[RDT]       ACK 1 recebido
-[RDT]       envia pacote 0
-[RDT]       (canal) CORROMPEU dados seq=0
-[RDT]       ACK 1 fora de ordem, ignora
-[RDT]       timeout, retransmite
-[RDT]       ACK corrompido, ignora
 [RDT]       timeout, retransmite
 [RDT]       ACK 0 recebido
 [RDT]       envia pacote 1
@@ -644,11 +555,48 @@ UDP> SAVE teste50k.bin
 [RDT]       timeout, retransmite
 [RDT]       ACK 1 recebido
 [RDT]       envia pacote 0
+[RDT]       (canal) PERDEU dados seq=0
+[RDT]       timeout, retransmite
+[RDT]       ACK corrompido, ignora
+[RDT]       timeout, retransmite
+[RDT]       (canal) CORROMPEU dados seq=0
+[RDT]       ACK 0 recebido
+[RDT]       envia pacote 1
+[RDT]       ACK corrompido, ignora
+[RDT]       timeout, retransmite
+[RDT]       timeout, retransmite
+[RDT]       ACK 1 recebido
+[RDT]       envia pacote 0
 [RDT]       ACK 0 recebido
 [RDT]       envia pacote 1
 [RDT]       ACK 1 recebido
 [RDT]       envia pacote 0
 [RDT]       (canal) CORROMPEU dados seq=0
+[RDT]       ACK 1 fora de ordem, ignora
+[RDT]       timeout, retransmite
+[RDT]       ACK 0 recebido
+[RDT]       envia pacote 1
+[RDT]       timeout, retransmite
+[RDT]       ACK 1 recebido
+[RDT]       envia pacote 0
+[RDT]       ACK 0 recebido
+[RDT]       envia pacote 1
+[RDT]       ACK 1 recebido
+[RDT]       envia pacote 0
+[RDT]       ACK 0 recebido
+[RDT]       envia pacote 1
+[RDT]       ACK corrompido, ignora
+[RDT]       timeout, retransmite
+[RDT]       ACK 1 recebido
+[RDT]       envia pacote 0
+[RDT]       ACK 0 recebido
+[RDT]       envia pacote 1
+[RDT]       ACK corrompido, ignora
+[RDT]       timeout, retransmite
+[RDT]       ACK 1 recebido
+[RDT]       envia pacote 0
+[RDT]       (canal) CORROMPEU dados seq=0
+[RDT]       timeout, retransmite
 [RDT]       timeout, retransmite
 [RDT]       ACK 0 recebido
 [RDT]       envia pacote 1
@@ -656,29 +604,7 @@ UDP> SAVE teste50k.bin
 [RDT]       envia pacote 0
 [RDT]       (canal) PERDEU dados seq=0
 [RDT]       timeout, retransmite
-[RDT]       (canal) CORROMPEU dados seq=0
-[RDT]       ACK 1 fora de ordem, ignora
-[RDT]       timeout, retransmite
-[RDT]       (canal) CORROMPEU dados seq=0
-[RDT]       ACK 1 fora de ordem, ignora
-[RDT]       timeout, retransmite
-[RDT]       (canal) CORROMPEU dados seq=0
-[RDT]       ACK 1 fora de ordem, ignora
-[RDT]       timeout, retransmite
-[RDT]       (canal) CORROMPEU dados seq=0
-[RDT]       ACK 1 fora de ordem, ignora
-[RDT]       timeout, retransmite
-[RDT]       ACK 0 recebido
-[RDT]       envia pacote 1
-[RDT]       ACK 1 recebido
-[RDT]       envia pacote 0
-[RDT]       ACK 0 recebido
-[RDT]       envia pacote 1
-[RDT]       ACK 1 recebido
-[RDT]       envia pacote 0
-[RDT]       timeout, retransmite
 [RDT]       (canal) PERDEU dados seq=0
-[RDT]       timeout, retransmite
 [RDT]       timeout, retransmite
 [RDT]       ACK 0 recebido
 [RDT]       envia pacote 1
@@ -687,137 +613,136 @@ UDP> SAVE teste50k.bin
 [RDT]       timeout, retransmite
 [RDT]       ACK 1 recebido
 [RDT]       envia pacote 0
-[RDT]       ACK 0 recebido
-[RDT]       envia pacote 1
-[RDT]       ACK 1 recebido
-[RDT]       envia pacote 0
-[RDT]       ACK corrompido, ignora
-[RDT]       timeout, retransmite
 [RDT]       (canal) CORROMPEU dados seq=0
-[RDT]       ACK 0 recebido
-[RDT]       envia pacote 1
-[RDT]       ACK 1 recebido
-[RDT]       envia pacote 0
-[RDT]       ACK corrompido, ignora
 [RDT]       timeout, retransmite
 [RDT]       ACK 0 recebido
-[RDT]       checksum inválido, reenvia ACK 1
+[RDT]       envia pacote 1
+[RDT]       timeout, retransmite
+[RDT]       (canal) CORROMPEU dados seq=1
+[RDT]       timeout, retransmite
+[RDT]       (canal) CORROMPEU dados seq=1
+[RDT]       ACK 1 recebido
+[RDT]       envia pacote 0
+[RDT]       ACK 0 recebido
 [RDT]       pacote 0 íntegro, envia ACK 0
 [SERVIDOR] Arquivo teste50k.bin salvo.
-[RDT 3.0] Resumo -> Timeouts: 58 | Retransmissões: 58 | ACKs reenviados: 1 | ACKs ignorados: 13 | Perdas no canal: 12 | Corrupções no canal: 21 | Corrompidos detectados: 18
+[RDT 3.0] Resumo -> Timeouts: 46 | Retransmissões: 46 | ACKs reenviados: 0 | ACKs ignorados: 11 | Perdas no canal: 15 | Corrupções no canal: 18 | Corrompidos detectados: 6
 
 UDP> GET teste50k.bin
 [RDT]       envia pacote 1
+[RDT]       pacote 1 íntegro, envia ACK 1
+[RDT]       pacote 0 íntegro, envia ACK 0
+[RDT]       pacote 1 íntegro, envia ACK 1
+[RDT]       pacote 0 íntegro, envia ACK 0
+[RDT]       (canal) CORROMPEU ACK seq=0
+[RDT]       timeout, retransmite
+[RDT]       pacote 0 duplicado, reenvia ACK 0
+[RDT]       pacote 1 íntegro, envia ACK 1
+[RDT]       pacote 0 íntegro, envia ACK 0
+[RDT]       pacote 1 íntegro, envia ACK 1
+[RDT]       pacote ilegível, reenvia ACK 1
+[RDT]       timeout, retransmite
+[RDT]       (canal) PERDEU dados seq=1
+[RDT]       pacote 0 íntegro, envia ACK 0
+[RDT]       pacote 1 íntegro, envia ACK 1
+[RDT]       pacote 0 íntegro, envia ACK 0
+[RDT]       (canal) CORROMPEU ACK seq=0
+[RDT]       timeout, retransmite
+[RDT]       (canal) PERDEU dados seq=1
+[RDT]       pacote 0 duplicado, reenvia ACK 0
+[RDT]       (canal) CORROMPEU ACK seq=0
+[RDT]       timeout, retransmite
 [RDT]       ACK 1 recebido
 [SOLICITANDO] Requisitando 'teste50k.bin' do servidor...
-[RDT]       checksum inválido, reenvia ACK 0
-[RDT]       (canal) PERDEU ACK seq=0
-[RDT]       pacote 1 íntegro, envia ACK 1
 [RECEBENDO] Arquivo terá 51200 bytes. Aguardando 50 pacotes...
-[RDT]       pacote 0 íntegro, envia ACK 0
-[RDT]       checksum inválido, reenvia ACK 0
-[RDT]       (canal) PERDEU ACK seq=0
-[RDT]       pacote 1 íntegro, envia ACK 1
-[RDT]       pacote 0 íntegro, envia ACK 0
-[RDT]       pacote 1 íntegro, envia ACK 1
-[RDT]       (canal) PERDEU ACK seq=1
-[RDT]       pacote 1 duplicado, reenvia ACK 1
-[RDT]       checksum inválido, reenvia ACK 1
-[RDT]       pacote 0 íntegro, envia ACK 0
-[RDT]       pacote 1 íntegro, envia ACK 1
-[RDT]       pacote 0 íntegro, envia ACK 0
-[RDT]       pacote 1 íntegro, envia ACK 1
-[RDT]       pacote 0 íntegro, envia ACK 0
-[RDT]       pacote 1 íntegro, envia ACK 1
-[RDT]       pacote 0 íntegro, envia ACK 0
-[RDT]       pacote 1 íntegro, envia ACK 1
-[RDT]       pacote 0 íntegro, envia ACK 0
-[RDT]       pacote 1 íntegro, envia ACK 1
-[RDT]       pacote 0 íntegro, envia ACK 0
-[RDT]       pacote 1 íntegro, envia ACK 1
-[RDT]       pacote 0 íntegro, envia ACK 0
-[RDT]       pacote 1 íntegro, envia ACK 1
-[RDT]       (canal) CORROMPEU ACK seq=1
-[RDT]       pacote 1 duplicado, reenvia ACK 1
-[RDT]       pacote 0 íntegro, envia ACK 0
-[RDT]       pacote 1 íntegro, envia ACK 1
-[RDT]       checksum inválido, reenvia ACK 1
-[RDT]       pacote 0 íntegro, envia ACK 0
-[RDT]       (canal) CORROMPEU ACK seq=0
-[RDT]       pacote 0 duplicado, reenvia ACK 0
-[RDT]       pacote 1 íntegro, envia ACK 1
-[RDT]       checksum inválido, reenvia ACK 1
-[RDT]       (canal) PERDEU ACK seq=1
-[RDT]       pacote 0 íntegro, envia ACK 0
-[RDT]       pacote 1 íntegro, envia ACK 1
-[RDT]       pacote 0 íntegro, envia ACK 0
-[RDT]       pacote 1 íntegro, envia ACK 1
-[RDT]       (canal) CORROMPEU ACK seq=1
-[RDT]       pacote 1 duplicado, reenvia ACK 1
-[RDT]       pacote 0 íntegro, envia ACK 0
-[RDT]       checksum inválido, reenvia ACK 0
-[RDT]       (canal) PERDEU ACK seq=0
-[RDT]       checksum inválido, reenvia ACK 0
-[RDT]       checksum inválido, reenvia ACK 0
-[RDT]       (canal) PERDEU ACK seq=0
+[RDT]       pacote ilegível, reenvia ACK 0
 [RDT]       pacote 1 íntegro, envia ACK 1
 [RDT]       (canal) PERDEU ACK seq=1
 [RDT]       pacote 1 duplicado, reenvia ACK 1
 [RDT]       pacote 0 íntegro, envia ACK 0
-[RDT]       pacote 1 íntegro, envia ACK 1
-[RDT]       (canal) CORROMPEU ACK seq=1
-[RDT]       pacote 1 duplicado, reenvia ACK 1
-[RDT]       checksum inválido, reenvia ACK 1
-[RDT]       checksum inválido, reenvia ACK 1
-[RDT]       pacote 0 íntegro, envia ACK 0
-[RDT]       (canal) PERDEU ACK seq=0
-[RDT]       pacote 0 duplicado, reenvia ACK 0
-[RDT]       (canal) PERDEU ACK seq=0
-[RDT]       pacote 0 duplicado, reenvia ACK 0
-[RDT]       (canal) PERDEU ACK seq=0
-[RDT]       pacote 0 duplicado, reenvia ACK 0
-[RDT]       pacote 1 íntegro, envia ACK 1
-[RDT]       pacote 0 íntegro, envia ACK 0
-[RDT]       pacote 1 íntegro, envia ACK 1
-[RDT]       checksum inválido, reenvia ACK 1
-[RDT]       checksum inválido, reenvia ACK 1
-[RDT]       pacote 0 íntegro, envia ACK 0
-[RDT]       checksum inválido, reenvia ACK 0
-[RDT]       pacote 1 íntegro, envia ACK 1
-[RDT]       pacote 0 íntegro, envia ACK 0
-[RDT]       pacote 1 íntegro, envia ACK 1
-[RDT]       pacote 0 íntegro, envia ACK 0
-[RDT]       pacote 1 íntegro, envia ACK 1
-[RDT]       pacote 0 íntegro, envia ACK 0
-[RDT]       pacote 1 íntegro, envia ACK 1
-[RDT]       pacote 0 íntegro, envia ACK 0
-[RDT]       (canal) PERDEU ACK seq=0
-[RDT]       pacote 0 duplicado, reenvia ACK 0
-[RDT]       pacote 1 íntegro, envia ACK 1
-[RDT]       pacote 0 íntegro, envia ACK 0
-[RDT]       pacote 1 íntegro, envia ACK 1
-[RDT]       pacote 0 íntegro, envia ACK 0
-[RDT]       checksum inválido, reenvia ACK 0
-[RDT]       checksum inválido, reenvia ACK 0
 [RDT]       pacote 1 íntegro, envia ACK 1
 [RDT]       pacote 0 íntegro, envia ACK 0
 [RDT]       (canal) CORROMPEU ACK seq=0
 [RDT]       pacote 0 duplicado, reenvia ACK 0
-[RDT]       checksum inválido, reenvia ACK 0
 [RDT]       (canal) PERDEU ACK seq=0
+[RDT]       pacote 0 duplicado, reenvia ACK 0
+[RDT]       pacote 1 íntegro, envia ACK 1
+[RDT]       pacote 0 íntegro, envia ACK 0
+[RDT]       pacote 1 íntegro, envia ACK 1
+[RDT]       pacote 0 íntegro, envia ACK 0
+[RDT]       pacote 1 íntegro, envia ACK 1
+[RDT]       pacote 0 íntegro, envia ACK 0
+[RDT]       pacote 1 íntegro, envia ACK 1
+[RDT]       pacote 0 íntegro, envia ACK 0
+[RDT]       pacote ilegível, reenvia ACK 0
+[RDT]       (canal) CORROMPEU ACK seq=0
+[RDT]       pacote 1 íntegro, envia ACK 1
+[RDT]       pacote 0 íntegro, envia ACK 0
+[RDT]       pacote 1 íntegro, envia ACK 1
+[RDT]       pacote 0 íntegro, envia ACK 0
+[RDT]       (canal) CORROMPEU ACK seq=0
+[RDT]       pacote ilegível, reenvia ACK 0
+[RDT]       pacote 1 íntegro, envia ACK 1
+[RDT]       (canal) PERDEU ACK seq=1
+[RDT]       pacote 1 duplicado, reenvia ACK 1
+[RDT]       pacote 0 íntegro, envia ACK 0
+[RDT]       pacote 1 íntegro, envia ACK 1
+[RDT]       pacote 0 íntegro, envia ACK 0
+[RDT]       pacote 1 íntegro, envia ACK 1
+[RDT]       pacote ilegível, reenvia ACK 1
+[RDT]       pacote 0 íntegro, envia ACK 0
+[RDT]       pacote 1 íntegro, envia ACK 1
+[RDT]       (canal) PERDEU ACK seq=1
+[RDT]       pacote 1 duplicado, reenvia ACK 1
+[RDT]       pacote 0 íntegro, envia ACK 0
+[RDT]       pacote 1 íntegro, envia ACK 1
+[RDT]       pacote 0 íntegro, envia ACK 0
+[RDT]       (canal) CORROMPEU ACK seq=0
+[RDT]       pacote 0 duplicado, reenvia ACK 0
+[RDT]       (canal) CORROMPEU ACK seq=0
+[RDT]       pacote 0 duplicado, reenvia ACK 0
+[RDT]       pacote 1 íntegro, envia ACK 1
+[RDT]       pacote ilegível, reenvia ACK 1
+[RDT]       pacote ilegível, reenvia ACK 1
+[RDT]       pacote 0 íntegro, envia ACK 0
+[RDT]       (canal) CORROMPEU ACK seq=0
+[RDT]       pacote 0 duplicado, reenvia ACK 0
+[RDT]       pacote 1 íntegro, envia ACK 1
+[RDT]       pacote 0 íntegro, envia ACK 0
+[RDT]       pacote ilegível, reenvia ACK 0
+[RDT]       pacote 1 íntegro, envia ACK 1
+[RDT]       pacote ilegível, reenvia ACK 1
+[RDT]       pacote 0 íntegro, envia ACK 0
+[RDT]       (canal) CORROMPEU ACK seq=0
+[RDT]       pacote 0 duplicado, reenvia ACK 0
+[RDT]       pacote 1 íntegro, envia ACK 1
+[RDT]       pacote ilegível, reenvia ACK 1
+[RDT]       pacote 0 íntegro, envia ACK 0
+[RDT]       pacote 1 íntegro, envia ACK 1
+[RDT]       (canal) CORROMPEU ACK seq=1
+[RDT]       pacote 1 duplicado, reenvia ACK 1
+[RDT]       pacote 0 íntegro, envia ACK 0
+[RDT]       pacote 1 íntegro, envia ACK 1
+[RDT]       (canal) PERDEU ACK seq=1
+[RDT]       pacote ilegível, reenvia ACK 1
+[RDT]       pacote 0 íntegro, envia ACK 0
+[RDT]       (canal) PERDEU ACK seq=0
+[RDT]       pacote ilegível, reenvia ACK 0
+[RDT]       (canal) CORROMPEU ACK seq=0
+[RDT]       pacote 0 duplicado, reenvia ACK 0
+[RDT]       (canal) PERDEU ACK seq=0
+[RDT]       pacote ilegível, reenvia ACK 0
+[RDT]       pacote 1 íntegro, envia ACK 1
+[RDT]       pacote 0 íntegro, envia ACK 0
 [RDT]       pacote 1 íntegro, envia ACK 1
 [CONCLUÍDO] Arquivo recuperado com sucesso e salvo como './rcvd_files_client/cliente_teste50k.bin'
-[RDT 3.0] Resumo -> Timeouts: 0 | Retransmissões: 0 | ACKs reenviados: 27 | ACKs ignorados: 0 | Perdas no canal: 12 | Corrupções no canal: 5 | Corrompidos detectados: 16
+[RDT 3.0] Resumo -> Timeouts: 4 | Retransmissões: 4 | ACKs reenviados: 26 | ACKs ignorados: 0 | Perdas no canal: 9 | Corrupções no canal: 12 | Corrompidos detectados: 13
 
 UDP> GET nao_existe.txt
 [RDT]       envia pacote 0
-[RDT]       pacote 0 íntegro, envia ACK 0
-[RDT]       (canal) CORROMPEU ACK seq=0
-[RDT]       timeout, retransmite
-[RDT]       pacote 0 duplicado, reenvia ACK 0
-[RDT]       timeout, retransmite
 [RDT]       ACK 0 recebido
 [SOLICITANDO] Requisitando 'nao_existe.txt' do servidor...
+[RDT]       pacote 0 íntegro, envia ACK 0
 [ERRO DO SERVIDOR] ERRO: Arquivo não encontrado.
 
 UDP> SAIR

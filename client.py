@@ -1,5 +1,5 @@
 import socket
-from rdt import RDTSocket
+from rdt import RDTSocket, PAYLOAD_MAX
 import os
 import sys
 import math
@@ -9,7 +9,7 @@ SERVER_IP = "127.0.0.1"
 SERVER_PORT = 6767     # o servidor escuta aqui (cliente -> servidor)
 CLIENT_IP = "127.0.0.1"
 CLIENT_PORT = 7676     # o cliente escuta aqui  (servidor -> cliente)
-BUFFER_SIZE = 1024     # Limite do tamanho do datagrama
+BUFFER_SIZE = PAYLOAD_MAX   # a fragmentação segue o limite de payload do RDT
 
 STORAGE_DIR = "./rcvd_files_client/"
 PREFIX = "cliente_"

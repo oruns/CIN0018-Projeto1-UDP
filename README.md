@@ -40,7 +40,7 @@ Os diretórios `rcvd_files_server/` e `rcvd_files_client/` são criados automati
 
 ## Protocolo e Confiabilidade (RDT 3.0)
 
-Todo datagrama leva um cabeçalho de 3 bytes antes do payload.
+Todo datagrama leva um cabeçalho de 3 bytes antes do payload, que vai até 1024 bytes.
 
 ```text
 [NÚMERO DE SEQUÊNCIA (1 byte)] + [CHECKSUM (2 bytes)] + [DADOS]
@@ -146,7 +146,7 @@ Do outro lado aparece o receptor recusando o pacote corrompido e aceitando a ret
 No fim de cada transferência uma linha consolida o esforço total.
 
 ```text
-[RDT 3.0] Resumo -> Timeouts: 94 | Retransmissões: 94 | ACKs reenviados: 1 | ACKs ignorados: 10 | Perdas no canal: 33 | Corrupções no canal: 24 | Corrompidos detectados: 28
+[RDT 3.0] Resumo -> Timeouts: 72 | Retransmissões: 72 | ACKs reenviados: 3 | ACKs ignorados: 17 | Perdas no canal: 15 | Corrupções no canal: 14 | Corrompidos detectados: 17
 ```
 
 Em arquivos grandes o volume de linhas atrapalha a leitura. Nesses casos basta definir `VERBOSE = False` em `rdt.py`, que o log por evento some e o resumo continua.

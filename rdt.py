@@ -19,7 +19,6 @@ ter um bit trocado antes de chegar ao destino.
 
 import random
 import select
-import socket
 import time
 
 # Configurações do RDT
@@ -29,6 +28,8 @@ TIMEOUT = 0.05        # 50ms de timeout
 VERBOSE = True        # Registra cada evento do protocolo em tempo de execução
 
 HEADER_SIZE = 3
+PAYLOAD_MAX = 2**10   # maior payload que a camada de cima entrega de uma vez
+RECV_SIZE = HEADER_SIZE + PAYLOAD_MAX
 ESPERA_CURTA = 0.05   # quanto esperar nos canais quando nenhum prazo corre
 
 
@@ -65,9 +66,9 @@ def parse_pkt(pkt):
 
 
 class RDTSocket:
-    def __init__(self, sock_dados, sock_acks):
-        self.sock_dados = sock_dados   # canal de dados, onde o receptor escuta
-        self.sock_acks = sock_acks     # canal de confirmação, onde o transmissor escuta
+    def __init__(self, sock_receptor, sock_transmissor):
+        self.sock_receptor = sock_receptor        # escuta o canal de dados, responde os ACKs
+        self.sock_transmissor = sock_transmissor  # emite no canal de dados, escuta os ACKs
         self.seq_send = 0              # estado da máquina do transmissor
         self.seq_recv = 0              # estado da máquina do receptor
         self.entregues = []
@@ -146,16 +147,16 @@ class RDTSocket:
         if restante <= 0:
             return None
 
-        pronto, _, _ = select.select([self.sock_dados, self.sock_acks], [], [], restante)
+        pronto, _, _ = select.select([self.sock_receptor, self.sock_transmissor], [], [], restante)
 
         ack = None
         for canal in pronto:
-            if canal is self.sock_acks:
-                rcvpkt, _ = canal.recvfrom(65535)
+            if canal is self.sock_transmissor:
+                rcvpkt, _ = canal.recvfrom(RECV_SIZE)
                 seq, _, integro = parse_pkt(rcvpkt)
                 ack = (seq, integro)
             else:
-                rcvpkt, addr = canal.recvfrom(65535)
+                rcvpkt, addr = canal.recvfrom(RECV_SIZE)
                 seq, data, integro = parse_pkt(rcvpkt)
                 self._receptor(seq, data, integro, addr)
 
@@ -180,7 +181,7 @@ class RDTSocket:
             else:
                 self.log(f"pacote {seq} duplicado, reenvia ACK {anterior}")
             self.stats["acks_repetidos"] += 1
-            self.send_pkt(make_pkt(anterior), self.sock_dados, addr, "ACK")
+            self.send_pkt(make_pkt(anterior), self.sock_receptor, addr, "ACK")
             return
 
         # ------------------------------------------------------------------
@@ -195,7 +196,7 @@ class RDTSocket:
         self.seq_recv = 1 - esperado
         self.log(f"pacote {esperado} íntegro, envia ACK {esperado}")
         self.entregues.append((data, addr))
-        self.send_pkt(make_pkt(esperado), self.sock_dados, addr, "ACK")
+        self.send_pkt(make_pkt(esperado), self.sock_receptor, addr, "ACK")
 
     def rdt_send(self, data, addr):
         """Máquina do transmissor."""
@@ -211,7 +212,7 @@ class RDTSocket:
         #     start_timer
         # ------------------------------------------------------------------
         self.log(f"envia pacote {seq}")
-        self.send_pkt(sndpkt, self.sock_acks, addr, "dados")
+        self.send_pkt(sndpkt, self.sock_transmissor, addr, "dados")
         prazo = time.monotonic() + TIMEOUT
 
         # ------------------------------------------------------------------
@@ -233,7 +234,7 @@ class RDTSocket:
                     self.stats["timeouts"] += 1
                     self.stats["retransmissoes"] += 1
                     self.log("timeout, retransmite")
-                    self.send_pkt(sndpkt, self.sock_acks, addr, "dados")
+                    self.send_pkt(sndpkt, self.sock_transmissor, addr, "dados")
                     prazo = time.monotonic() + TIMEOUT
                 continue
 

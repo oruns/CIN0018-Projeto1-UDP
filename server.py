@@ -22,7 +22,7 @@ Protocolo (cada comando é um datagrama próprio):
 """
 
 import socket
-from rdt import RDTSocket
+from rdt import RDTSocket, PAYLOAD_MAX
 import os
 
 
@@ -32,7 +32,7 @@ CLIENT_PORT =       7676      # o cliente escuta ali   (servidor -> cliente)
 
 DATA_SIZE_LIM   =   2**27     # 128 MB. Tamanho máximo aceito por arquivo
 CHUNK_SIZE      =   2**16     # 64 KB.  Acumulado em memória antes de gravar
-BUFFER_SIZE     =   2**10     # 1  KB.  Tamanho máximo de cada datagrama
+BUFFER_SIZE     =   PAYLOAD_MAX  # a fragmentação segue o limite de payload do RDT
 
 STORAGE_DIR     =   "./rcvd_files_server/"
 PREFIX          =   "servidor_"  # só no disco; o protocolo usa o nome original

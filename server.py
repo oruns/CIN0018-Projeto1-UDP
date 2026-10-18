@@ -102,9 +102,14 @@ def send(name_and_extension, addr, rdt_server):
 
 os.makedirs(STORAGE_DIR, exist_ok=True)
 
+# Um socket por canal. O de dados fica na porta anunciada e é onde o receptor
+# escuta; o de confirmação leva os dados que saem e recolhe os ACKs deles.
 server = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 server.bind((LOCAL_HOST_IPV4, ENTRY_PORT))
-rdt_server = RDTSocket(server)
+
+server_acks = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+
+rdt_server = RDTSocket(server, server_acks)
 
 print(f"[SERVIDOR]  Escutando em {LOCAL_HOST_IPV4}:{ENTRY_PORT} - respondendo na porta {CLIENT_PORT}")
 print(f"[SERVIDOR]  Armazenando em {STORAGE_DIR}")

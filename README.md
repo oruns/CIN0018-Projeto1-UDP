@@ -40,18 +40,15 @@ Os diretórios `rcvd_files_server/` e `rcvd_files_client/` são criados automati
 
 ## Protocolo e Confiabilidade (RDT 3.0)
 
-Todo datagrama leva um cabeçalho de 4 bytes antes do payload.
+Todo datagrama leva um cabeçalho de 3 bytes antes do payload.
 
 ```text
-[TIPO (1 byte)] + [NÚMERO DE SEQUÊNCIA (1 byte)] + [CHECKSUM (2 bytes)] + [DADOS]
+[NÚMERO DE SEQUÊNCIA (1 byte)] + [CHECKSUM (2 bytes)] + [DADOS]
 ```
 
-| Tipos de Pacote | Descrição |
-|---|---|
-| `b'D'` (Data) | Pacote contendo dados ou comandos. Requer confirmação. |
-| `b'A'` (ACK) | Confirmação do último pacote recebido corretamente. |
+Não há campo dizendo se o datagrama é dado ou confirmação, porque o canal por onde ele chega já define isso.
 
-O checksum é uma soma de verificação de 16 bits em complemento de um, calculada sobre o tipo, o número de sequência e os dados. É ele que permite ao receptor **detectar** que um pacote chegou corrompido, em vez de supor.
+O checksum é uma soma de verificação de 16 bits em complemento de um, calculada sobre o número de sequência e os dados. É ele que permite ao receptor **detectar** que um pacote chegou corrompido, em vez de supor.
 
 ### Máquinas de estado
 
@@ -74,13 +71,13 @@ Quando o checksum falha, o número de sequência também não é confiável, já
 
 O transmissor retransmite enquanto não receber a confirmação, sem limite de tentativas. Um canal mais ruim deixa a transferência mais lenta, mas não faz o protocolo desistir de um pacote.
 
-### Como as duas máquinas convivem
+### Os dois canais
 
-As figuras do livro descrevem transferência num sentido só, com o transmissor e o receptor sendo máquinas separadas. Aqui cliente e servidor fazem os dois papéis, porque o `SAVE` manda dados e o `GET` recebe dados, e isso cria um problema. Se o lado que acabou de receber virar transmissor, ele deixa de atender as retransmissões do parceiro, e os dois acabam retransmitindo sem ninguém do outro lado para responder.
+O transmissor e o receptor são máquinas separadas e cada uma tem o seu canal, como no modelo. O canal de dados leva os pacotes do transmissor de um lado até o receptor do outro, e o canal de confirmação traz os ACKs de volta. Cada lado abre um socket por canal, então nenhum pacote precisa dizer o que é, o canal por onde chegou já determina a qual máquina pertence.
 
-A saída foi concentrar a leitura do socket num único ponto, a função `_despacha`. Ela olha o tipo do pacote e encaminha o ACK para o transmissor e os dados para o receptor, que trata o pacote na hora e manda a confirmação. Tanto o `rdt_send` quanto o `rdt_recv` passam por ela, então o lado que está transmitindo continua atendendo o que chega.
+As figuras do livro descrevem transferência num sentido só. Aqui cliente e servidor fazem os dois papéis, porque o `SAVE` manda dados e o `GET` recebe dados, e isso cria um problema. Se o lado que acabou de receber virar transmissor e parar de olhar o canal de dados, ele deixa de atender as retransmissões do parceiro, e os dois acabam retransmitindo sem ninguém do outro lado para responder.
 
-As duas máquinas ficam iguais às do livro, cada uma enxergando só os pacotes que lhe dizem respeito, e não há concorrência, já que só um ponto do código lê o socket.
+Por isso a espera é feita com `select` nos dois canais ao mesmo tempo, tanto no `rdt_send` quanto no `rdt_recv`. O que chega pelo canal de confirmação vai para a máquina do transmissor, o que chega pelo canal de dados vai para a do receptor, e o lado que está transmitindo continua atendendo o que lhe mandam.
 
 ### Simulação de ambiente hostil
 
@@ -99,8 +96,10 @@ A corrupção pode cair em qualquer byte, cabeçalho incluído. O receptor confe
 
 | Porta | Quem escuta | Quem envia | Tráfego |
 |---|---|---|---|
-| `6767` | Servidor | Cliente | Comandos `SAVE`/`GET`, os pacotes do arquivo enviado e os ACKs do sentido contrário |
-| `7676` | Cliente | Servidor | Resposta do servidor, os pacotes do arquivo devolvido e os ACKs do sentido contrário |
+| `6767` | Servidor | Cliente | Comandos `SAVE`/`GET` e os pacotes do arquivo enviado |
+| `7676` | Cliente | Servidor | Resposta do servidor e os pacotes do arquivo devolvido |
+
+As duas portas acima são o canal de dados de cada lado. O canal de confirmação usa um socket em porta efêmera, e o ACK volta sempre para a origem do datagrama que o provocou.
 
 ## Instruções de Execução
 
@@ -147,7 +146,7 @@ Do outro lado aparece o receptor recusando o pacote corrompido e aceitando a ret
 No fim de cada transferência uma linha consolida o esforço total.
 
 ```text
-[RDT 3.0] Resumo -> Timeouts: 67 | Retransmissões: 67 | ACKs reenviados: 5 | ACKs ignorados: 13 | Perdas no canal: 22 | Corrupções no canal: 27 | Corrompidos detectados: 16
+[RDT 3.0] Resumo -> Timeouts: 94 | Retransmissões: 94 | ACKs reenviados: 1 | ACKs ignorados: 10 | Perdas no canal: 33 | Corrupções no canal: 24 | Corrompidos detectados: 28
 ```
 
 Em arquivos grandes o volume de linhas atrapalha a leitura. Nesses casos basta definir `VERBOSE = False` em `rdt.py`, que o log por evento some e o resumo continua.

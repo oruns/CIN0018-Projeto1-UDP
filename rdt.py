@@ -1,18 +1,24 @@
 """
 Canal de transferência confiável RDT 3.0 (Stop-and-Wait) sobre sockets UDP.
 
-Cabeçalho de 4 bytes: [TIPO (1)] [SEQ (1)] [CHECKSUM (2)] [DADOS]
+Cabeçalho de 3 bytes: [SEQ (1)] [CHECKSUM (2)] [DADOS]
 
-O transmissor e o receptor são máquinas separadas, como no modelo, e cada uma
-só enxerga os pacotes que lhe dizem respeito. Quem faz essa divisão é o
-despacho em _despacha, o único ponto do código que lê o socket. Ele olha o
-tipo do pacote e manda o ACK para o transmissor e os dados para o receptor.
+O transmissor e o receptor são máquinas separadas, e cada uma tem o seu canal,
+como no modelo. O canal de dados leva os pacotes do transmissor de um lado até
+o receptor do outro, e o canal de confirmação leva os ACKs de volta. Nenhum
+pacote precisa dizer o que é, porque o canal por onde ele chegou já determina
+a qual máquina pertence.
+
+Cada lado abre um socket por canal e usa select para esperar nos dois ao mesmo
+tempo. É o que permite ao lado que está transmitindo continuar atendendo os
+pacotes que chegam para o seu receptor.
 
 A simulação do canal está em send_pkt, um pacote entregue a ela pode sumir ou
 ter um bit trocado antes de chegar ao destino.
 """
 
 import random
+import select
 import socket
 import time
 
@@ -22,8 +28,8 @@ CORRUPT_PROB = 0.15   # 15% de probabilidade de corrupção no canal
 TIMEOUT = 0.05        # 50ms de timeout
 VERBOSE = True        # Registra cada evento do protocolo em tempo de execução
 
-HEADER_SIZE = 4
-ESPERA_CURTA = 0.05   # quanto o despacho fica parado quando não há prazo correndo
+HEADER_SIZE = 3
+ESPERA_CURTA = 0.05   # quanto esperar nos canais quando nenhum prazo corre
 
 
 def checksum(data):
@@ -38,33 +44,32 @@ def checksum(data):
     return ~total & 0xFFFF
 
 
-def make_pkt(pkt_type, seq, data=b""):
-    """Monta o pacote com o checksum de tipo, seq e dados."""
-    protegido = pkt_type + bytes([seq]) + data
-    return pkt_type + bytes([seq]) + checksum(protegido).to_bytes(2, "big") + data
+def make_pkt(seq, data=b""):
+    """Monta o pacote com o checksum do número de sequência e dos dados."""
+    return bytes([seq]) + checksum(bytes([seq]) + data).to_bytes(2, "big") + data
 
 
 def parse_pkt(pkt):
     """Desmonta o pacote e confere o checksum.
 
-    Devolve (tipo, seq, dados, integro); tipo é None se vier menor que o cabeçalho.
+    Devolve (seq, dados, integro); seq é None se vier menor que o cabeçalho.
     """
     if len(pkt) < HEADER_SIZE:
-        return None, None, b"", False
+        return None, b"", False
 
-    pkt_type = pkt[0:1]
-    seq = pkt[1]
-    recebido = int.from_bytes(pkt[2:4], "big")
+    seq = pkt[0]
+    recebido = int.from_bytes(pkt[1:3], "big")
     data = pkt[HEADER_SIZE:]
 
-    return pkt_type, seq, data, checksum(pkt_type + bytes([seq]) + data) == recebido
+    return seq, data, checksum(bytes([seq]) + data) == recebido
 
 
 class RDTSocket:
-    def __init__(self, sock):
-        self.sock = sock
-        self.seq_send = 0   # estado da máquina do transmissor
-        self.seq_recv = 0   # estado da máquina do receptor
+    def __init__(self, sock_dados, sock_acks):
+        self.sock_dados = sock_dados   # canal de dados, onde o receptor escuta
+        self.sock_acks = sock_acks     # canal de confirmação, onde o transmissor escuta
+        self.seq_send = 0              # estado da máquina do transmissor
+        self.seq_recv = 0              # estado da máquina do receptor
         self.entregues = []
         self.stats = self._zerar_stats()
 
@@ -100,7 +105,7 @@ class RDTSocket:
         )
         self.stats = self._zerar_stats()
 
-    def send_pkt(self, pkt, addr):
+    def send_pkt(self, pkt, sock, addr, rotulo):
         """Entrega o pacote ao canal, que pode perdê-lo ou corrompê-lo.
 
         O mesmo sorteio decide as duas coisas, então elas são exclusivas e cada
@@ -110,20 +115,15 @@ class RDTSocket:
 
         if sorteio < LOSS_PROB:
             self.stats["perdas"] += 1
-            self.log_canal(f"PERDEU {self._descrever(pkt)}")
+            self.log_canal(f"PERDEU {rotulo} seq={pkt[0]}")
             return
 
         if sorteio < LOSS_PROB + CORRUPT_PROB:
             self.stats["corrupcoes"] += 1
-            self.log_canal(f"CORROMPEU {self._descrever(pkt)}")
+            self.log_canal(f"CORROMPEU {rotulo} seq={pkt[0]}")
             pkt = self._corromper(pkt)
 
-        self.sock.sendto(pkt, addr)
-
-    @staticmethod
-    def _descrever(pkt):
-        rotulo = {b"D": "dados", b"A": "ACK"}.get(pkt[0:1], "pacote")
-        return f"{rotulo} seq={pkt[1]}"
+        sock.sendto(pkt, addr)
 
     @staticmethod
     def _corromper(pkt):
@@ -133,34 +133,36 @@ class RDTSocket:
         corrompido[posicao] ^= 1 << random.randrange(8)
         return bytes(corrompido)
 
-    def _despacha(self, prazo):
-        """Lê um pacote do socket e o encaminha à máquina a que ele pertence.
+    def _espera(self, prazo):
+        """Espera chegar algo em qualquer um dos dois canais.
 
-        Devolve (seq, integro) quando o pacote é um ACK, que só interessa ao
-        transmissor, e None quando é dado ou quando a espera acabou sem nada.
-        O prazo é o instante em que o temporizador do transmissor dispara, ou
-        None quando nenhum envio está em curso.
+        Devolve (seq, integro) quando veio um ACK pelo canal de confirmação, que
+        é o que interessa ao transmissor. Um pacote que chegue pelo canal de
+        dados é tratado na hora pelo receptor, e aí o retorno é None, assim como
+        quando nada chega. O prazo é o instante em que o temporizador dispara,
+        ou None quando nenhum envio está em curso.
         """
         restante = (prazo - time.monotonic()) if prazo else ESPERA_CURTA
         if restante <= 0:
             return None
 
-        try:
-            self.sock.settimeout(restante)
-            rcvpkt, addr = self.sock.recvfrom(65535)
-        except socket.timeout:
-            return None
+        pronto, _, _ = select.select([self.sock_dados, self.sock_acks], [], [], restante)
 
-        pkt_type, seq, data, integro = parse_pkt(rcvpkt)
+        ack = None
+        for canal in pronto:
+            if canal is self.sock_acks:
+                rcvpkt, _ = canal.recvfrom(65535)
+                seq, _, integro = parse_pkt(rcvpkt)
+                ack = (seq, integro)
+            else:
+                rcvpkt, addr = canal.recvfrom(65535)
+                seq, data, integro = parse_pkt(rcvpkt)
+                self._receptor(seq, data, integro, addr)
 
-        if pkt_type == b"A":
-            return seq, integro
+        return ack
 
-        self._receptor(pkt_type, seq, data, integro, addr)
-        return None
-
-    def _receptor(self, pkt_type, seq, data, integro, addr):
-        """Máquina do receptor, que o despacho aciona a cada dado que chega."""
+    def _receptor(self, seq, data, integro, addr):
+        """Máquina do receptor, acionada a cada pacote do canal de dados."""
         esperado = self.seq_recv
 
         # ------------------------------------------------------------------
@@ -170,7 +172,7 @@ class RDTSocket:
         #     sndpkt = make_pkt(ACK, 1-N, checksum)
         #     udt_send(sndpkt)
         # ------------------------------------------------------------------
-        if not integro or pkt_type != b"D" or seq != esperado:
+        if not integro or seq != esperado:
             anterior = 1 - esperado
             if not integro:
                 self.stats["corrompidos_detectados"] += 1
@@ -178,7 +180,7 @@ class RDTSocket:
             else:
                 self.log(f"pacote {seq} duplicado, reenvia ACK {anterior}")
             self.stats["acks_repetidos"] += 1
-            self.send_pkt(make_pkt(b"A", anterior), addr)
+            self.send_pkt(make_pkt(anterior), self.sock_dados, addr, "ACK")
             return
 
         # ------------------------------------------------------------------
@@ -193,12 +195,12 @@ class RDTSocket:
         self.seq_recv = 1 - esperado
         self.log(f"pacote {esperado} íntegro, envia ACK {esperado}")
         self.entregues.append((data, addr))
-        self.send_pkt(make_pkt(b"A", esperado), addr)
+        self.send_pkt(make_pkt(esperado), self.sock_dados, addr, "ACK")
 
     def rdt_send(self, data, addr):
         """Máquina do transmissor."""
         seq = self.seq_send
-        sndpkt = make_pkt(b"D", seq, data)
+        sndpkt = make_pkt(seq, data)
 
         # ------------------------------------------------------------------
         # Estado "Esperar chamada N de cima"
@@ -209,7 +211,7 @@ class RDTSocket:
         #     start_timer
         # ------------------------------------------------------------------
         self.log(f"envia pacote {seq}")
-        self.send_pkt(sndpkt, addr)
+        self.send_pkt(sndpkt, self.sock_acks, addr, "dados")
         prazo = time.monotonic() + TIMEOUT
 
         # ------------------------------------------------------------------
@@ -219,7 +221,7 @@ class RDTSocket:
         # nada que chegue no meio do caminho estica o prazo.
         # ------------------------------------------------------------------
         while True:
-            ack = self._despacha(prazo)
+            ack = self._espera(prazo)
 
             if ack is None:
                 if time.monotonic() >= prazo:
@@ -231,7 +233,7 @@ class RDTSocket:
                     self.stats["timeouts"] += 1
                     self.stats["retransmissoes"] += 1
                     self.log("timeout, retransmite")
-                    self.send_pkt(sndpkt, addr)
+                    self.send_pkt(sndpkt, self.sock_acks, addr, "dados")
                     prazo = time.monotonic() + TIMEOUT
                 continue
 
@@ -269,10 +271,10 @@ class RDTSocket:
             #   rdt_rcv(rcvpkt)
             #     Λ
             #
-            # Nenhum envio está em curso, então o ACK atrasado que o despacho
-            # devolver aqui é descartado.
+            # Nenhum envio está em curso, então um ACK atrasado que chegue
+            # pelo canal de confirmação é descartado.
             # ------------------------------------------------------------
-            if self._despacha(None) is not None:
+            if self._espera(None) is not None:
                 self.stats["acks_ignorados"] += 1
                 self.log("ACK atrasado fora de envio, ignora")
 

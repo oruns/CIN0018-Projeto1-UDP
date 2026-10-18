@@ -59,18 +59,26 @@ O código segue as FSMs do rdt3.0. Os estados estão nomeados em `rdt.py`, e cad
 
 | Lado | Estados |
 |---|---|
-| Transmissor (`rdt_send`) | `Espera chamada 0 de cima`, `Espera por ACK0`, `Espera chamada 1 de cima`, `Espera por ACK1` |
-| Receptor (`rdt_recv`) | `Esperar 0 de baixo`, `Esperar 1 de baixo` |
+| Transmissor (`rdt_send`) | `Esperar chamada 0 de cima`, `Esperar ACK 0`, `Esperar chamada 1 de cima`, `Esperar ACK 1` |
+| Receptor (`_maquina_receptor`) | `Esperar 0 de baixo`, `Esperar 1 de baixo` |
 
 O número de sequência alterna entre 0 e 1 para que uma retransmissão atrasada não seja confundida com um pacote novo. O transmissor manda um pacote de cada vez e só avança depois do ACK correspondente, o que também segura o ritmo do envio no que o receptor dá conta de processar.
 
 ### Confirmações e retransmissões
 
-O receptor confirma sempre o último pacote que aceitou. Se o checksum falha, ou se o número de sequência não é o esperado, ele repete o ACK anterior, e o transmissor entende que precisa reenviar. Quando o pacote some por completo não chega confirmação nenhuma, e aí o temporizador de 50ms é quem dispara a retransmissão.
+O receptor confirma sempre o último pacote que aceitou. Se o checksum falha, ou se o número de sequência não é o esperado, ele repete o ACK anterior.
+
+Do lado do transmissor, quem retransmite é o temporizador de 50ms, e só ele. Um ACK ilegível ou que confirme o pacote anterior não provoca reação nenhuma, o transmissor segue esperando o prazo acabar. O temporizador é armado no envio e rearmado a cada disparo, então um pacote que chegue no meio do caminho não estica o prazo.
 
 Quando o checksum falha, o número de sequência também não é confiável, já que está dentro da área protegida. Por isso o receptor responde a partir do próprio estado, reenviando o `ACK` do último pacote que aceitou.
 
 O transmissor retransmite enquanto não receber a confirmação, sem limite de tentativas. Um canal mais ruim deixa a transferência mais lenta, mas não faz o protocolo desistir de um pacote.
+
+### Duas máquinas ativas ao mesmo tempo
+
+O transmissor e o receptor são máquinas independentes, então cada lado abre dois sockets, um para cada papel. O socket que espera ACK nunca recebe dados e o que espera dados nunca recebe ACK, de modo que nenhuma das duas máquinas precisa de um ramo a mais para lidar com pacote que não é dela.
+
+A máquina do receptor roda numa thread própria e fica sempre escutando, mesmo enquanto a aplicação está transmitindo. Sem isso o lado que estivesse no meio de um envio deixaria de atender as retransmissões do parceiro, e os dois ficariam retransmitindo sem ninguém do outro lado para responder.
 
 ### Simulação de ambiente hostil
 
@@ -83,14 +91,16 @@ O ruído é injetado num único ponto, a função `send_pkt`, que faz o papel do
 | `TIMEOUT` | `0.05` seg | Tempo de espera do remetente antes da retransmissão. |
 | `VERBOSE` | `True` | Imprime cada evento do protocolo em tempo de execução. |
 
-A corrupção atinge o número de sequência, o checksum e o payload, preservando apenas o byte de tipo. O receptor não precisa confiar no número de sequência de um pacote corrompido, porque a resposta vem do estado local.
+A corrupção pode cair em qualquer byte, cabeçalho incluído. O receptor confere o checksum antes de olhar qualquer outro campo, e quando ele falha a resposta vem do estado local, já que o número de sequência recebido também não é confiável.
 
 ## Portas
 
 | Porta | Quem escuta | Quem envia | Tráfego |
 |---|---|---|---|
 | `6767` | Servidor | Cliente | Comandos `SAVE`/`GET` e os pacotes do arquivo enviado |
-| `7676` | Cliente | Servidor | Confirmações, erros e os pacotes do arquivo devolvido |
+| `7676` | Cliente | Servidor | Resposta do servidor e os pacotes do arquivo devolvido |
+
+As duas portas acima recebem os pacotes de dados. Cada lado abre também um socket de transmissão, em porta efêmera, que leva os dados para fora e recolhe os ACKs deles. O ACK volta sempre para a origem do datagrama que o provocou.
 
 ## Instruções de Execução
 
@@ -118,26 +128,26 @@ Valem os mesmos comandos da primeira entrega, `SAVE <arquivo>`, `GET <arquivo>` 
 
 ### 3. Acompanhar o protocolo
 
-Cada evento sai no terminal prefixado por `[RDT]`, com o estado em que aconteceu, dá para ver a máquina de estados girando.
+Cada evento sai no terminal prefixado por `[RDT]`, no instante em que acontece.
 
 ```text
-[RDT]       [Espera chamada 0 de cima] envia pacote 0
-[RDT]       (canal) PERDEU dados seq=0
-[RDT]       [Espera por ACK0] timeout, retransmite
-[RDT]       [Espera por ACK0] ACK 0 recebido
+[RDT]       pacote 0 íntegro, envia ACK 0
+[RDT]       (canal) CORROMPEU ACK seq=0
+[RDT]       timeout, retransmite
+[RDT]       ACK 1 recebido
 ```
 
 Do outro lado aparece o receptor recusando o pacote corrompido e aceitando a retransmissão.
 
 ```text
-[RDT]       [Esperar 0 de baixo] checksum inválido, reenvia ACK 1
-[RDT]       [Esperar 0 de baixo] pacote 0 íntegro, envia ACK 0
+[RDT]       checksum inválido, reenvia ACK 1
+[RDT]       pacote 0 íntegro, envia ACK 0
 ```
 
 No fim de cada transferência uma linha consolida o esforço total.
 
 ```text
-[RDT 3.0] Resumo -> Timeouts: 49 | Retransmissões: 60 | ACKs reenviados: 1 | ACKs duplicados recebidos: 11 | Perdas no canal: 26 | Corrupções no canal: 18 | Corrompidos detectados: 12
+[RDT 3.0] Resumo -> Timeouts: 64 | Retransmissões: 64 | ACKs reenviados: 1 | ACKs ignorados: 11 | Perdas no canal: 25 | Corrupções no canal: 21 | Corrompidos detectados: 13
 ```
 
 Em arquivos grandes o volume de linhas atrapalha a leitura. Nesses casos basta definir `VERBOSE = False` em `rdt.py`, que o log por evento some e o resumo continua.

@@ -32,7 +32,7 @@ def send_file(client_sock, filepath):
         for i in range(n_packets):
             chunk = f.read(BUFFER_SIZE)
             client_sock.rdt_send(chunk, (SERVER_IP, SERVER_PORT))
-            
+
     # Aguarda a string de confirmação ou erro do servidor
     response, _ = client_sock.rdt_recv()
     resp_text = response.decode("utf-8")
@@ -75,8 +75,8 @@ def get_file(client_sock, filename):
     client_sock.print_and_clear_stats()
 
 if __name__ == "__main__":
-    os.makedirs(SRC_DIR, exist_ok=True)       
-    os.makedirs(STORAGE_DIR, exist_ok=True)   
+    os.makedirs(SRC_DIR, exist_ok=True)
+    os.makedirs(STORAGE_DIR, exist_ok=True)
 
     # Criação do socket UDP (fixa CLIENT_PORT)
     client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -84,13 +84,13 @@ if __name__ == "__main__":
     client_rdt = RDTSocket(client_socket, client_acks)
 
     try:
-        client_socket.bind((CLIENT_IP, CLIENT_PORT)) 
+        client_socket.bind((CLIENT_IP, CLIENT_PORT))
     except OSError as e:
-        print(f"[ERRO] Não foi possível escutar em {CLIENT_IP}:{CLIENT_PORT} ({e}).") 
-        print("       Outro cliente já está em execução?") 
+        print(f"[ERRO] Não foi possível escutar em {CLIENT_IP}:{CLIENT_PORT} ({e}).")
+        print("       Outro cliente já está em execução?")
         sys.exit(1)
 
-    print(f"[CLIENTE] Enviando para {SERVER_IP}:{SERVER_PORT} - escutando em {CLIENT_IP}:{CLIENT_PORT}") 
+    print(f"[CLIENTE] Enviando para {SERVER_IP}:{SERVER_PORT} - escutando em {CLIENT_IP}:{CLIENT_PORT}")
     print("=" * 60)
     print("Sessão iniciada. Comandos disponíveis:")
     print("  SAVE <nome_do_arquivo>  (Envia um arquivo da pasta ./src/)")
@@ -102,7 +102,7 @@ if __name__ == "__main__":
         while True:
             # Captura a entrada do usuário na sessão interativa
             user_input = input("\nUDP> ").strip().split()
-            
+
             if not user_input:
                 continue
 

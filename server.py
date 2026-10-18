@@ -8,7 +8,7 @@ em pacotes de até 1024 bytes.
 A comunicação usa duas portas: ENTRY_PORT e CLIENT_PORT. O cliente envia para ENTRY_PORT,
 onde o servidor escuta, e o servidor devolve para CLIENT_PORT, onde o cliente escuta.
 
-Protocolo (cada comando é um datagrama próprio):
+Protocolo (cada comando é uma mensagem própria):
 
     SAVE -> b"SAVE" + tamanho (32 bytes, big-endian) + nome.extensão
             seguido de ceil(tamanho / 1024) datagramas com o conteúdo.

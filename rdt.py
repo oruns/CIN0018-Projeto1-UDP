@@ -6,8 +6,8 @@ Os dois formatos de pacote seguem a notação do livro.
     dados        [SEQ (1)] [CHECKSUM (2)] [DADOS]
     confirmação  [ACK (1)] [SEQ (1)] [CHECKSUM (2)]
 
-O transmissor e o receptor são máquinas separadas, e cada uma tem o seu canal,
-como no modelo. O canal de dados leva os pacotes do transmissor de um lado até
+O transmissor e o receptor são máquinas separadas, e cada uma tem o seu canal.
+O canal de dados leva os pacotes do transmissor de um lado até
 o receptor do outro, e o canal de confirmação leva os ACKs de volta. O pacote
 de dados não precisa de campo dizendo o que é, porque o canal por onde ele
 chegou já determina a qual máquina pertence.
@@ -25,18 +25,18 @@ import select
 import time
 
 # Configurações do RDT
-LOSS_PROB = 0.15      # 15% de probabilidade de perda no canal
-CORRUPT_PROB = 0.15   # 15% de probabilidade de corrupção no canal
-TIMEOUT = 0.05        # 50ms de timeout
-VERBOSE = True        # Registra cada evento do protocolo em tempo de execução
+LOSS_PROB = 0.15      # probabilidade de perda no canal
+CORRUPT_PROB = 0.15   # probabilidade de corrupção no canal
+TIMEOUT = 0.05        # tempo do timeout
+VERBOSE = True        # registra cada evento do protocolo em tempo de execução
 
-ACK = b"A"            # identificador que o livro escreve em make_pkt(ACK, seq, checksum)
+ACK = b"A"            # identificador de ACK que o livro escreve em make_pkt(ACK, seq, checksum)
 
-HEADER_SIZE = 3       # cabeçalho do pacote de dados
-ACK_SIZE = 4          # a confirmação inteira, que não leva payload
-PAYLOAD_MAX = 2**10   # maior payload que a camada de cima entrega de uma vez
-RECV_SIZE = HEADER_SIZE + PAYLOAD_MAX   # maior datagrama que chega pelos canais
-ESPERA_CURTA = 0.05   # quanto esperar nos canais quando nenhum prazo corre
+HEADER_SIZE = 3       # tamanho do cabeçalho do pacote de dados
+ACK_SIZE = 4          # tamanho do pacote de confirmação inteira, que não leva payload
+PAYLOAD_MAX = 2**10   # maior tamanho de payload que a camada de cima entrega de uma vez
+RECV_SIZE = HEADER_SIZE + PAYLOAD_MAX   # maior tamanho de segmento que chega pelos canais
+ESPERA_CURTA = 0.05   # tempo de espera nos canais quando nenhum prazo corre
 
 
 def checksum(data):

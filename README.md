@@ -60,7 +60,7 @@ O código segue as FSMs do rdt3.0. Os estados estão nomeados em `rdt.py`, e cad
 | Lado | Estados |
 |---|---|
 | Transmissor (`rdt_send`) | `Esperar chamada 0 de cima`, `Esperar ACK 0`, `Esperar chamada 1 de cima`, `Esperar ACK 1` |
-| Receptor (`_maquina_receptor`) | `Esperar 0 de baixo`, `Esperar 1 de baixo` |
+| Receptor (`_receptor`) | `Esperar 0 de baixo`, `Esperar 1 de baixo` |
 
 O número de sequência alterna entre 0 e 1 para que uma retransmissão atrasada não seja confundida com um pacote novo. O transmissor manda um pacote de cada vez e só avança depois do ACK correspondente, o que também segura o ritmo do envio no que o receptor dá conta de processar.
 
@@ -74,11 +74,13 @@ Quando o checksum falha, o número de sequência também não é confiável, já
 
 O transmissor retransmite enquanto não receber a confirmação, sem limite de tentativas. Um canal mais ruim deixa a transferência mais lenta, mas não faz o protocolo desistir de um pacote.
 
-### Duas máquinas ativas ao mesmo tempo
+### Como as duas máquinas convivem
 
-O transmissor e o receptor são máquinas independentes, então cada lado abre dois sockets, um para cada papel. O socket que espera ACK nunca recebe dados e o que espera dados nunca recebe ACK, de modo que nenhuma das duas máquinas precisa de um ramo a mais para lidar com pacote que não é dela.
+As figuras do livro descrevem transferência num sentido só, com o transmissor e o receptor sendo máquinas separadas. Aqui cliente e servidor fazem os dois papéis, porque o `SAVE` manda dados e o `GET` recebe dados, e isso cria um problema. Se o lado que acabou de receber virar transmissor, ele deixa de atender as retransmissões do parceiro, e os dois acabam retransmitindo sem ninguém do outro lado para responder.
 
-A máquina do receptor roda numa thread própria e fica sempre escutando, mesmo enquanto a aplicação está transmitindo. Sem isso o lado que estivesse no meio de um envio deixaria de atender as retransmissões do parceiro, e os dois ficariam retransmitindo sem ninguém do outro lado para responder.
+A saída foi concentrar a leitura do socket num único ponto, a função `_despacha`. Ela olha o tipo do pacote e encaminha o ACK para o transmissor e os dados para o receptor, que trata o pacote na hora e manda a confirmação. Tanto o `rdt_send` quanto o `rdt_recv` passam por ela, então o lado que está transmitindo continua atendendo o que chega.
+
+As duas máquinas ficam iguais às do livro, cada uma enxergando só os pacotes que lhe dizem respeito, e não há concorrência, já que só um ponto do código lê o socket.
 
 ### Simulação de ambiente hostil
 
@@ -97,10 +99,8 @@ A corrupção pode cair em qualquer byte, cabeçalho incluído. O receptor confe
 
 | Porta | Quem escuta | Quem envia | Tráfego |
 |---|---|---|---|
-| `6767` | Servidor | Cliente | Comandos `SAVE`/`GET` e os pacotes do arquivo enviado |
-| `7676` | Cliente | Servidor | Resposta do servidor e os pacotes do arquivo devolvido |
-
-As duas portas acima recebem os pacotes de dados. Cada lado abre também um socket de transmissão, em porta efêmera, que leva os dados para fora e recolhe os ACKs deles. O ACK volta sempre para a origem do datagrama que o provocou.
+| `6767` | Servidor | Cliente | Comandos `SAVE`/`GET`, os pacotes do arquivo enviado e os ACKs do sentido contrário |
+| `7676` | Cliente | Servidor | Resposta do servidor, os pacotes do arquivo devolvido e os ACKs do sentido contrário |
 
 ## Instruções de Execução
 
@@ -147,7 +147,7 @@ Do outro lado aparece o receptor recusando o pacote corrompido e aceitando a ret
 No fim de cada transferência uma linha consolida o esforço total.
 
 ```text
-[RDT 3.0] Resumo -> Timeouts: 64 | Retransmissões: 64 | ACKs reenviados: 1 | ACKs ignorados: 11 | Perdas no canal: 25 | Corrupções no canal: 21 | Corrompidos detectados: 13
+[RDT 3.0] Resumo -> Timeouts: 67 | Retransmissões: 67 | ACKs reenviados: 5 | ACKs ignorados: 13 | Perdas no canal: 22 | Corrupções no canal: 27 | Corrompidos detectados: 16
 ```
 
 Em arquivos grandes o volume de linhas atrapalha a leitura. Nesses casos basta definir `VERBOSE = False` em `rdt.py`, que o log por evento some e o resumo continua.

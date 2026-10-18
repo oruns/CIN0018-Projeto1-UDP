@@ -80,8 +80,7 @@ if __name__ == "__main__":
 
     # Criação do socket UDP (fixa CLIENT_PORT)
     client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    client_envio = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    client_rdt = RDTSocket(client_envio, client_socket)
+    client_rdt = RDTSocket(client_socket)
 
     try:
         client_socket.bind((CLIENT_IP, CLIENT_PORT)) 

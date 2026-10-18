@@ -3,23 +3,17 @@ Canal de transferência confiável RDT 3.0 (Stop-and-Wait) sobre sockets UDP.
 
 Cabeçalho de 4 bytes: [TIPO (1)] [SEQ (1)] [CHECKSUM (2)] [DADOS]
 
-As duas máquinas de estado do protocolo são independentes e ficam ativas ao
-mesmo tempo, como no modelo. Cada lado abre um socket para o papel de
-transmissor e outro para o de receptor, então o socket que espera ACK nunca
-recebe dados e o que espera dados nunca recebe ACK.
-
-A máquina do receptor roda na própria thread, sempre escutando, e põe numa
-fila o que entrega para a camada de cima. É o que permite ao lado que está
-transmitindo continuar atendendo as retransmissões do parceiro.
+O transmissor e o receptor são máquinas separadas, como no modelo, e cada uma
+só enxerga os pacotes que lhe dizem respeito. Quem faz essa divisão é o
+despacho em _despacha, o único ponto do código que lê o socket. Ele olha o
+tipo do pacote e manda o ACK para o transmissor e os dados para o receptor.
 
 A simulação do canal está em send_pkt, um pacote entregue a ela pode sumir ou
 ter um bit trocado antes de chegar ao destino.
 """
 
-import queue
 import random
 import socket
-import threading
 import time
 
 # Configurações do RDT
@@ -29,6 +23,7 @@ TIMEOUT = 0.05        # 50ms de timeout
 VERBOSE = True        # Registra cada evento do protocolo em tempo de execução
 
 HEADER_SIZE = 4
+ESPERA_CURTA = 0.05   # quanto o despacho fica parado quando não há prazo correndo
 
 
 def checksum(data):
@@ -66,19 +61,12 @@ def parse_pkt(pkt):
 
 
 class RDTSocket:
-    def __init__(self, sock_envio, sock_recepcao):
-        self.sock_envio = sock_envio
-        self.sock_recepcao = sock_recepcao
-        self.sock_recepcao.settimeout(TIMEOUT)
-
+    def __init__(self, sock):
+        self.sock = sock
         self.seq_send = 0   # estado da máquina do transmissor
         self.seq_recv = 0   # estado da máquina do receptor
-
-        self.trava = threading.Lock()
+        self.entregues = []
         self.stats = self._zerar_stats()
-        self.entregues = queue.Queue()
-
-        threading.Thread(target=self._maquina_receptor, daemon=True).start()
 
     @staticmethod
     def _zerar_stats():
@@ -92,11 +80,6 @@ class RDTSocket:
             "corrompidos_detectados": 0,
         }
 
-    def conta(self, chave):
-        """Incrementa um contador, que as duas máquinas compartilham."""
-        with self.trava:
-            self.stats[chave] += 1
-
     def log(self, mensagem):
         if VERBOSE:
             print(f"[RDT]       {mensagem}", flush=True)
@@ -106,8 +89,7 @@ class RDTSocket:
             print(f"[RDT]       (canal) {mensagem}", flush=True)
 
     def print_and_clear_stats(self):
-        with self.trava:
-            s, self.stats = self.stats, self._zerar_stats()
+        s = self.stats
         print(
             f"[RDT 3.0] Resumo -> Timeouts: {s['timeouts']} | "
             f"Retransmissões: {s['retransmissoes']} | "
@@ -116,8 +98,9 @@ class RDTSocket:
             f"Perdas no canal: {s['perdas']} | Corrupções no canal: {s['corrupcoes']} | "
             f"Corrompidos detectados: {s['corrompidos_detectados']}"
         )
+        self.stats = self._zerar_stats()
 
-    def send_pkt(self, pkt, sock, addr):
+    def send_pkt(self, pkt, addr):
         """Entrega o pacote ao canal, que pode perdê-lo ou corrompê-lo.
 
         O mesmo sorteio decide as duas coisas, então elas são exclusivas e cada
@@ -126,16 +109,16 @@ class RDTSocket:
         sorteio = random.random()
 
         if sorteio < LOSS_PROB:
-            self.conta("perdas")
+            self.stats["perdas"] += 1
             self.log_canal(f"PERDEU {self._descrever(pkt)}")
             return
 
         if sorteio < LOSS_PROB + CORRUPT_PROB:
-            self.conta("corrupcoes")
+            self.stats["corrupcoes"] += 1
             self.log_canal(f"CORROMPEU {self._descrever(pkt)}")
             pkt = self._corromper(pkt)
 
-        sock.sendto(pkt, addr)
+        self.sock.sendto(pkt, addr)
 
     @staticmethod
     def _descrever(pkt):
@@ -150,8 +133,70 @@ class RDTSocket:
         corrompido[posicao] ^= 1 << random.randrange(8)
         return bytes(corrompido)
 
+    def _despacha(self, prazo):
+        """Lê um pacote do socket e o encaminha à máquina a que ele pertence.
+
+        Devolve (seq, integro) quando o pacote é um ACK, que só interessa ao
+        transmissor, e None quando é dado ou quando a espera acabou sem nada.
+        O prazo é o instante em que o temporizador do transmissor dispara, ou
+        None quando nenhum envio está em curso.
+        """
+        restante = (prazo - time.monotonic()) if prazo else ESPERA_CURTA
+        if restante <= 0:
+            return None
+
+        try:
+            self.sock.settimeout(restante)
+            rcvpkt, addr = self.sock.recvfrom(65535)
+        except socket.timeout:
+            return None
+
+        pkt_type, seq, data, integro = parse_pkt(rcvpkt)
+
+        if pkt_type == b"A":
+            return seq, integro
+
+        self._receptor(pkt_type, seq, data, integro, addr)
+        return None
+
+    def _receptor(self, pkt_type, seq, data, integro, addr):
+        """Máquina do receptor, que o despacho aciona a cada dado que chega."""
+        esperado = self.seq_recv
+
+        # ------------------------------------------------------------------
+        # Estado "Esperar N de baixo"
+        #
+        #   rdt_rcv(rcvpkt) && (corrupt(rcvpkt) || has_seq(1-N)(rcvpkt))
+        #     sndpkt = make_pkt(ACK, 1-N, checksum)
+        #     udt_send(sndpkt)
+        # ------------------------------------------------------------------
+        if not integro or pkt_type != b"D" or seq != esperado:
+            anterior = 1 - esperado
+            if not integro:
+                self.stats["corrompidos_detectados"] += 1
+                self.log(f"checksum inválido, reenvia ACK {anterior}")
+            else:
+                self.log(f"pacote {seq} duplicado, reenvia ACK {anterior}")
+            self.stats["acks_repetidos"] += 1
+            self.send_pkt(make_pkt(b"A", anterior), addr)
+            return
+
+        # ------------------------------------------------------------------
+        #   rdt_rcv(rcvpkt) && notcorrupt(rcvpkt) && has_seqN(rcvpkt)
+        #     extract(rcvpkt, data)
+        #     deliver_data(data)
+        #     sndpkt = make_pkt(ACK, N, checksum)
+        #     udt_send(sndpkt)
+        #
+        # Vai para "Esperar 1-N de baixo".
+        # ------------------------------------------------------------------
+        self.seq_recv = 1 - esperado
+        self.log(f"pacote {esperado} íntegro, envia ACK {esperado}")
+        self.entregues.append((data, addr))
+        self.send_pkt(make_pkt(b"A", esperado), addr)
+
     def rdt_send(self, data, addr):
-        """Máquina do transmissor, que vai do envio até a confirmação."""
+        """Máquina do transmissor."""
         seq = self.seq_send
         sndpkt = make_pkt(b"D", seq, data)
 
@@ -164,100 +209,71 @@ class RDTSocket:
         #     start_timer
         # ------------------------------------------------------------------
         self.log(f"envia pacote {seq}")
-        self.send_pkt(sndpkt, self.sock_envio, addr)
+        self.send_pkt(sndpkt, addr)
         prazo = time.monotonic() + TIMEOUT
 
         # ------------------------------------------------------------------
         # Estado "Esperar ACK N"
         #
-        #   rdt_rcv(rcvpkt) && (corrupt(rcvpkt) || isACK(rcvpkt, 1-N))
-        #     Λ
-        #
-        #   timeout
-        #     udt_send(sndpkt)
-        #     start_timer
-        #
-        #   rdt_rcv(rcvpkt) && notcorrupt(rcvpkt) && isACK(rcvpkt, N)
-        #     stop_timer
-        #
-        # O temporizador é armado no envio e só é rearmado quando dispara, de
-        # modo que um pacote qualquer que chegue no meio não estica o prazo.
+        # O temporizador é armado no envio e rearmado só quando dispara, então
+        # nada que chegue no meio do caminho estica o prazo.
         # ------------------------------------------------------------------
         while True:
-            restante = prazo - time.monotonic()
-            try:
-                if restante <= 0:
-                    raise socket.timeout
-                self.sock_envio.settimeout(restante)
-                rcvpkt, _ = self.sock_envio.recvfrom(65535)
-            except socket.timeout:
-                self.conta("timeouts")
-                self.conta("retransmissoes")
-                self.log("timeout, retransmite")
-                self.send_pkt(sndpkt, self.sock_envio, addr)
-                prazo = time.monotonic() + TIMEOUT
+            ack = self._despacha(prazo)
+
+            if ack is None:
+                if time.monotonic() >= prazo:
+                    # ----------------------------------------------------
+                    #   timeout
+                    #     udt_send(sndpkt)
+                    #     start_timer
+                    # ----------------------------------------------------
+                    self.stats["timeouts"] += 1
+                    self.stats["retransmissoes"] += 1
+                    self.log("timeout, retransmite")
+                    self.send_pkt(sndpkt, addr)
+                    prazo = time.monotonic() + TIMEOUT
                 continue
 
-            pkt_type, rcv_seq, _, integro = parse_pkt(rcvpkt)
+            ack_seq, integro = ack
 
-            if not integro:
-                self.conta("corrompidos_detectados")
-                self.log("ACK corrompido, ignora")
+            if not integro or ack_seq != seq:
+                # --------------------------------------------------------
+                #   rdt_rcv(rcvpkt) && (corrupt(rcvpkt) || isACK(rcvpkt, 1-N))
+                #     Λ
+                # --------------------------------------------------------
+                if not integro:
+                    self.stats["corrompidos_detectados"] += 1
+                    self.log("ACK corrompido, ignora")
+                else:
+                    self.stats["acks_ignorados"] += 1
+                    self.log(f"ACK {ack_seq} fora de ordem, ignora")
                 continue
 
-            if pkt_type != b"A" or rcv_seq != seq:
-                self.conta("acks_ignorados")
-                self.log(f"ACK {rcv_seq} fora de ordem, ignora")
-                continue
-
+            # ------------------------------------------------------------
+            #   rdt_rcv(rcvpkt) && notcorrupt(rcvpkt) && isACK(rcvpkt, N)
+            #     stop_timer
+            #
+            # Vai para "Esperar chamada 1-N de cima".
+            # ------------------------------------------------------------
             self.seq_send = 1 - seq
             self.log(f"ACK {seq} recebido")
             return
 
     def rdt_recv(self):
-        """Entrega à camada de cima o próximo dado que a máquina do receptor aceitou."""
-        return self.entregues.get()
-
-    def _maquina_receptor(self):
-        """Máquina do receptor, que fica ativa enquanto o programa roda."""
-        while True:
-            esperado = self.seq_recv
-
-            try:
-                rcvpkt, addr = self.sock_recepcao.recvfrom(65535)
-            except socket.timeout:
-                continue
-            except OSError:
-                return
-
-            pkt_type, seq, data, integro = parse_pkt(rcvpkt)
-
-            # --------------------------------------------------------------
-            # Estado "Esperar N de baixo"
+        """Entrega à camada de cima o próximo dado que o receptor aceitou."""
+        while not self.entregues:
+            # ------------------------------------------------------------
+            # Estado "Esperar chamada N de cima", do lado do transmissor
             #
-            #   rdt_rcv(rcvpkt) && (corrupt(rcvpkt) || has_seq(1-N)(rcvpkt))
-            #     sndpkt = make_pkt(ACK, 1-N, checksum)
-            #     udt_send(sndpkt)
-            # --------------------------------------------------------------
-            if not integro or pkt_type != b"D" or seq != esperado:
-                anterior = 1 - esperado
-                if not integro:
-                    self.conta("corrompidos_detectados")
-                    self.log(f"checksum inválido, reenvia ACK {anterior}")
-                else:
-                    self.log(f"pacote {seq} duplicado, reenvia ACK {anterior}")
-                self.conta("acks_repetidos")
-                self.send_pkt(make_pkt(b"A", anterior), self.sock_recepcao, addr)
-                continue
+            #   rdt_rcv(rcvpkt)
+            #     Λ
+            #
+            # Nenhum envio está em curso, então o ACK atrasado que o despacho
+            # devolver aqui é descartado.
+            # ------------------------------------------------------------
+            if self._despacha(None) is not None:
+                self.stats["acks_ignorados"] += 1
+                self.log("ACK atrasado fora de envio, ignora")
 
-            # --------------------------------------------------------------
-            #   rdt_rcv(rcvpkt) && notcorrupt(rcvpkt) && has_seqN(rcvpkt)
-            #     extract(rcvpkt, data)
-            #     deliver_data(data)
-            #     sndpkt = make_pkt(ACK, N, checksum)
-            #     udt_send(sndpkt)
-            # --------------------------------------------------------------
-            self.seq_recv = 1 - esperado
-            self.log(f"pacote {esperado} íntegro, envia ACK {esperado}")
-            self.entregues.put((data, addr))
-            self.send_pkt(make_pkt(b"A", esperado), self.sock_recepcao, addr)
+        return self.entregues.pop(0)
